@@ -10,11 +10,13 @@ const connectDB = new DataSource({
   url: process.env.DATABASE_URL,
   logging: false,
   synchronize: true,
-  ssl:
-    process.env.NODE_ENV === "production"
-      ? { rejectUnauthorized: false }
-      : false,
   entities: [User, Trip, Like, Comment],
+  extra: {
+    ssl:
+      process.env.NODE_ENV === "production"
+        ? { rejectUnauthorized: false }
+        : false,
+  },
 });
 
 export default connectDB;
