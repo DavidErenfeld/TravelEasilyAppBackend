@@ -1,0 +1,141 @@
+###
+GET http://127.0.0.1:3000/trips
+
+###
+GET http://127.0.0.1:3000/315711334
+
+###
+POST http://127.0.0.1:3000/
+Content-Type: application/json
+
+{
+ "email": "Dfds",
+  "password": "315711332"
+}
+
+###
+POST http://127.0.0.1:90/auth/register
+Content-Type: application/json
+
+{
+ "email": "test1@gmil.com",
+  "password": "315711440",
+  "userName": "test2"
+}
+
+
+###
+POST http://127.0.0.1:90/auth/login
+Content-Type: application/json
+
+{
+ "email": "test1@gmil.com",
+  "password": "315711440"
+}
+###
+POST http://127.0.0.1:90/auth/login
+Content-Type: application/json
+
+{
+ "email": "1020dudu@gmail.com",
+  "password": "du10du20"
+}
+
+###
+POST http://127.0.0.1:90/trips
+Content-Type: application/json
+Authorization: jwt eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiJlNjk0NDlmOS05NzAyLTQ1N2MtOTg3YS1kODAxYzE4YTE3N2EiLCJpYXQiOjE3MjU0Njk0OTgsImV4cCI6MTcyNTQ2OTc5OH0.ypJycAVr3QVfRmA6ExOec6nQFcCiVGcIdgbJY8dHUAM
+
+{
+ "userName": "test4",
+  "typeTraveler": "friends",
+  "country": "Netherlands",
+  "typeTrip": "integrated",
+  "numOfDays": 3,
+   "tripDescription": 
+    ["We took a day trip to the", "hdbu s iachaue rw34r w3t 3w4t 34tui 34tui 34t", "Zaanse Schans","a picturesque village just outside Amsterdam known for its historic windmills and traditional Dutch houses. We spent the morning exploring the village, visiting the windmills, and learning about Dutch crafts like cheese-making and wooden clog carving. We had lunch at a quaint little café in the village enjoying some fresh cheese and bread. In the afternoon, we headed to the town of Volendam, where we walked along the charming harbor and visited the Volendam Museum. We enjoyed some fresh seafood at a waterfront restaurant. Returning to Amsterdam in the evening, we took a stroll through the lively Red Light District, experiencing its unique atmosphere."]
+  
+}
+
+###
+GET http://127.0.0.1:90/trips
+
+###
+GET http://127.0.0.1:90/trips/FullTrip/0810a0f1-b101-4850-863d-6abad6ae3e8b
+Content-Type: application/json
+Authorization: jwt eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI4NmMxMjk1ZC0zMjdhLTRkN2MtODZkZS05YzhhNDg1NTU5MTMiLCJpYXQiOjE3MjQ3NjM2NjMsImV4cCI6MTcyNDc2Mzk2M30.zvtJDaN2qWgXvlSUMhASkKgVdQv0J10tgTpX58Bsb4s
+
+###
+PUT   http://127.0.0.1:3000/65908f9d1ac13a259b7ad218
+Content-Type: application/json
+
+{
+ "email": "mavid",
+  "password": "65908f9d1ac13a259b7ad218"
+}
+
+###
+DELETE http://127.0.0.1:90/bab1ac06-50e6-48a6-8e48-1de9313838f9
+Content-Type: application/json
+Authorization: jwt eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiIxYzA2MTJiMC1lNTUwLTQ2M2QtOTk1ZC0zMTUyM2EwMjE4NzkiLCJpYXQiOjE3MjI4OTk0MzEsImV4cCI6MTcyMjg5OTQ2MX0.hRmIJgiD9WBr2mWYva6CdwpRyLWO514sUHSuzzykabg
+
+
+
+/////////////////////////////
+
+###
+POST http://127.0.0.1:90/auth/login
+Content-Type: application/json
+
+{
+ "email": "yair323aaaaaaaaaaa@gmail.com",
+  "password": "315711440"
+  
+}
+
+###
+POST http://127.0.0.1:90/auth/register
+Content-Type: application/json
+
+{
+ "email": "yair323aaaaaaaaaaa@gmail.com",
+  "password": "315711440",
+  "userName": "david"
+}
+
+
+###
+POST http://127.0.0.1:90/auth/login
+Content-Type: application/json
+
+{
+ "email": "yair323aaaaaaaaaaa@gmail.com",
+  "password": "315711440"
+}
+
+
+///////////////////////////////////////////////
+###
+POST http://127.0.0.1:3000/trips/65a8607f6071a65e10f8e509/comments
+Content-Type: application/json
+Authorization: jwt eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NWFkOTI5N2ViMWU3MjJlMGMzZmEyMTEiLCJpYXQiOjE3MDU4NzQyODIsImV4cCI6MTcwNTg4NTA4Mn0.06lsCucD4HUbptlL_E_ENYcyOx2FAl0En_oQG0EsS3s
+
+{
+  "comment": "niuegcuicsxa"
+}
+
+###
+POST http://127.0.0.1:3000/trips/65a8607f6071a65e10f8e509/likes
+Content-Type: application/json
+Authorization: jwt eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NWFkOTg2NWMxMGJkMjA2YmEyOTllMTkiLCJpYXQiOjE3MDU4NzU1NTksImV4cCI6MTcwNTg4NjM1OX0.ewEMz_9o4T1drnBk3rVwvcl0u8L3jTh_B2wPMWxGM2Y
+
+
+###
+DELETE http://127.0.0.1:3000/trips/65a8607f6071a65e10f8e509/likes
+Content-Type: application/json
+Authorization: jwt eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NWFkOTg2NWMxMGJkMjA2YmEyOTllMTkiLCJpYXQiOjE3MDU4NzU1NTksImV4cCI6MTcwNTg4NjM1OX0.ewEMz_9o4T1drnBk3rVwvcl0u8L3jTh_B2wPMWxGM2Y
+
+# ###
+# DELETE http://127.0.0.1:3000/trips/65a8607f6071a65e10f8e509/comments
+# Content-Type: application/json
+# Authorization: jwt eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NWFkOTg2NWMxMGJkMjA2YmEyOTllMTkiLCJpYXQiOjE3MDU4NzU1NTksImV4cCI6MTcwNTg4NjM1OX0.ewEMz_9o4T1drnBk3rVwvcl0u8L3jTh_B2wPMWxGM2Y
