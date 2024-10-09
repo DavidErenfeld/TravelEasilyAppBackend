@@ -17,13 +17,13 @@ const connectDB = new DataSource({
   synchronize: true,
   entities: [User, Trip, Like, Comment],
   extra: {
-    ssl:
-      process.env.NODE_ENV === "production"
-        ? {
-            rejectUnauthorized: true,
-            ca: readFileSync(process.env.SSL_CERT_PATH_POSTGRES).toString(),
-          }
-        : false,
+    ssl: false,
+    // process.env.NODE_ENV === "production"
+    // ? {
+    //     rejectUnauthorized: true,
+    //     ca: readFileSync(process.env.SSL_CERT_PATH_POSTGRES).toString(),
+    //   }
+    // : false,
   },
 });
 
