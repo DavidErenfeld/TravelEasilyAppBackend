@@ -12,10 +12,9 @@ const connectDB = new DataSource({
   synchronize: true,
   entities: [User, Trip, Like, Comment],
   extra: {
-    ssl:
-      process.env.NODE_ENV === "production"
-        ? { rejectUnauthorized: false }
-        : false,
+    ssl: {
+      rejectUnauthorized: false,
+    },
   },
 });
 
