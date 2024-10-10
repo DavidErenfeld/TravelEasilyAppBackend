@@ -247,49 +247,76 @@ const logout = async (req: Request, res: Response) => {
 const refresh = async (req: Request, res: Response) => {
   const authHeader = req.headers["authorization"];
   const refreshToken = authHeader && authHeader.split(" ")[1]; // Bearer <token>
-  if (refreshToken == null) return res.sendStatus(401);
+
+  if (refreshToken == null) {
+    console.log("Missing refresh token");
+    return res.sendStatus(401);
+  }
+
   jwt.verify(
     refreshToken,
     process.env.JWT_REFRESH_SECRET,
     async (err, user: { _id: string }) => {
       if (err) {
-        console.log(err);
+        console.log("Invalid refresh token", err);
         return res.sendStatus(401);
       }
+
       try {
+        // בדיקת המשתמש במערכת
         const userDb = await UserRepository.findOneBy({ _id: user._id });
+
+        if (!userDb) {
+          console.log("User not found:", user._id);
+          return res.sendStatus(401);
+        }
+
+        // בדיקה אם ה-refresh token קיים אצל המשתמש
         if (
           !userDb.refreshTokens ||
           !userDb.refreshTokens.includes(refreshToken)
         ) {
+          console.log("Invalid refresh token, removing all refresh tokens");
           userDb.refreshTokens = [];
           await UserRepository.save(userDb);
           return res.sendStatus(401);
         }
+
+        // יצירת access token חדש
         const accessToken = jwt.sign(
           { _id: user._id },
           process.env.JWT_SECRET,
-          { expiresIn: process.env.JWT_EXPIRATION }
+          { expiresIn: process.env.JWT_EXPIRATION || "1h" } // בדיקה אם משתנה הסביבה קיים
         );
+
+        // יצירת refresh token חדש
         const newRefreshToken = jwt.sign(
           { _id: user._id },
           process.env.JWT_REFRESH_SECRET
         );
+
+        // מחיקת ה-refresh token הישן והוספת החדש
         userDb.refreshTokens = userDb.refreshTokens.filter(
           (t) => t !== refreshToken
         );
         userDb.refreshTokens.push(newRefreshToken);
+
+        console.log("Saving new refresh token for user:", user._id);
         await UserRepository.save(userDb);
+
+        // שליחת ה-access וה-refresh החדשים למשתמש
         return res.status(200).send({
           accessToken: accessToken,
           refreshToken: newRefreshToken,
         });
       } catch (err) {
-        res.status(401).send(err.message);
+        console.error("Error during token refresh:", err.message);
+        return res.status(401).send("Failed to refresh token");
       }
     }
   );
 };
+
 export default {
   googleSignin,
   register,
