@@ -116,7 +116,7 @@ const generateTokens = async (user: IUser) => {
   });
   const refreshToken = jwt.sign(
     { _id: user._id },
-    process.env.JWT_REFRESH_SECRET
+    process.env.JWT_REFRESH_SECRET || "1h"
   );
   if (user.refreshTokens == null) {
     user.refreshTokens = [refreshToken];
