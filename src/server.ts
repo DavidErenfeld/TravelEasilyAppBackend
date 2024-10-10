@@ -19,35 +19,46 @@ InitApp().then((app) => {
     apis: ["./src/routes/*.ts"],
   };
 
-  let sslOptions = {};
+  // הגדרת sslOptions כעצם ריק עם אפשרות להוסיף key ו-cert
+  let sslOptions: { key?: Buffer; cert?: Buffer } = {};
 
   if (process.env.NODE_ENV === "production") {
     options.definition.servers = [{ url: `https://your-production-url.com` }];
-
+    // בדיקה אם קיימים נתיבים לקבצי SSL
     if (process.env.SSL_KEY_PATH && process.env.SSL_CERT_PATH) {
-      sslOptions = {
-        key: fs.readFileSync(process.env.SSL_KEY_PATH),
-        cert: fs.readFileSync(process.env.SSL_CERT_PATH),
-      };
+      try {
+        sslOptions = {
+          key: fs.readFileSync(process.env.SSL_KEY_PATH),
+          cert: fs.readFileSync(process.env.SSL_CERT_PATH),
+        };
+      } catch (error) {
+        console.error("Error loading SSL certificates", error);
+      }
     }
   }
 
   const specs = swaggerJsDoc(options);
   app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(specs));
 
+  // בדיקת סביבת הפיתוח לעומת ייצור
   if (process.env.NODE_ENV !== "production") {
     console.log("Running in development mode");
-    http.createServer(app).listen(process.env.PORT || 3000, () => {
-      console.log(
-        `Server listening on http://localhost:${process.env.PORT || 3000}`
-      );
+    const port = process.env.PORT || 3000;
+    http.createServer(app).listen(port, () => {
+      console.log(`Server listening on http://localhost:${port}`);
     });
   } else {
     console.log("Running in production mode");
-    https.createServer(sslOptions, app).listen(process.env.HTTPS_PORT, () => {
-      console.log(
-        `Server listening on https://localhost:${process.env.HTTPS_PORT}`
-      );
-    });
+    const port = process.env.HTTPS_PORT || process.env.PORT;
+    if (sslOptions.key && sslOptions.cert) {
+      https.createServer(sslOptions, app).listen(port, () => {
+        console.log(`Server listening on https://localhost:${port}`);
+      });
+    } else {
+      // fallback ל-HTTP אם אין SSL
+      http.createServer(app).listen(port, () => {
+        console.log(`Server listening on http://localhost:${port}`);
+      });
+    }
   }
 });
