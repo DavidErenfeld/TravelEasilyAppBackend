@@ -111,23 +111,27 @@ const register = async (req: Request, res: Response) => {
 };
 
 const generateTokens = async (user: IUser) => {
+  const jwtExpiration = process.env.JWT_EXPIRATION || "1h"; // ערך ברירת מחדל במקרה שאין משתנה סביבה מוגדר
   const accessToken = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRATION,
+    expiresIn: jwtExpiration, // להשתמש בערך מוגדר או ברירת מחדל
   });
+
   const refreshToken = jwt.sign(
     { _id: user._id },
-    process.env.JWT_REFRESH_SECRET || "1h"
+    process.env.JWT_REFRESH_SECRET
   );
-  if (user.refreshTokens == null) {
+
+  if (!user.refreshTokens) {
     user.refreshTokens = [refreshToken];
   } else {
     user.refreshTokens.push(refreshToken);
   }
+
   await UserRepository.save(user);
 
   return {
-    accessToken: accessToken,
-    refreshToken: refreshToken,
+    accessToken,
+    refreshToken,
   };
 };
 
