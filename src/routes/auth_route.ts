@@ -155,8 +155,11 @@ router.post("/refresh", authController.refresh);
  *                 isValid:
  *                   type: boolean
  */
-router.post("/verify-password/:id", authMiddleware, authController.verifyPassword);
-
+router.post(
+  "/verify-password/:id",
+  authMiddleware,
+  authController.verifyPassword
+);
 
 /**
  * @swagger
@@ -186,7 +189,5 @@ router.post("/verify-password/:id", authMiddleware, authController.verifyPasswor
  *         description: Internal server error
  */
 router.post("/google", authController.googleSignin);
-
-
 
 export default router;

@@ -213,7 +213,7 @@ const login = async (req: Request, res: Response) => {
 const logout = async (req: Request, res: Response) => {
   const authHeader = req.headers["authorization"];
   const refreshToken = authHeader && authHeader.split(" ")[1]; // Bearer <token>
-  if (refreshToken == null) return res.sendStatus(401);
+  if (refreshToken === null) return res.sendStatus(401);
   jwt.verify(
     refreshToken,
     process.env.JWT_REFRESH_SECRET,

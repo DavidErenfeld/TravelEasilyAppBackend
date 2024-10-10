@@ -64,7 +64,7 @@ const upload = multer({ storage: storage });
 
 router.post("/", upload.single("file"), function (req, res) {
   const base =
-    "https://evening-bayou-77034-176dc93fb1e1.herokuapp.com/%20deployed%20to%20Heroku:" +
+    "https://evening-bayou-77034-176dc93fb1e1.herokuapp.com:" +
     process.env.port +
     "/";
   console.log("router.post(/file: " + base + req.file.path);
