@@ -52,38 +52,60 @@ const googleSignin = async (req: Request, res: Response) => {
     return res.status(400).send(err.message);
   }
 };
-
 const register = async (req: Request, res: Response) => {
   const email = req.body.email;
   const password = req.body.password;
   const imgUrl = req.body.imgUrl;
   const userName = req.body.userName;
+
+  console.log("Register request received:", {
+    email,
+    password,
+    imgUrl,
+    userName,
+  });
+
   if (!email || !password) {
+    console.log("Missing email or password");
     return res.status(400).send("missing email or password");
   }
+
   try {
     const rs = await UserRepository.findOneBy({ email: email });
     if (rs != null) {
+      console.log("Email already exists:", email);
       return res.status(406).send("email already exists");
     }
+
+    console.log("Creating new user:", { email, imgUrl, userName });
     const salt = await bcrypt.genSalt(10);
     const encryptedPassword = await bcrypt.hash(password, salt);
-    const rs2 = await UserRepository.create({
+    const newUser = UserRepository.create({
       email: email,
       password: encryptedPassword,
       imgUrl: imgUrl,
       userName: userName,
     });
-    const tokens = await generateTokens(rs2);
-    console.log(rs2);
+
+    console.log("Saving new user to database");
+    await UserRepository.save(newUser);
+
+    console.log("Generating tokens for new user");
+    const tokens = await generateTokens(newUser);
+
+    console.log("User registered successfully:", {
+      userName: newUser.userName,
+      email: newUser.email,
+    });
     res.status(201).send({
-      userName: rs2.userName,
-      email: rs2.email,
-      _id: rs2._id,
-      imgUrl: rs2.imgUrl,
+      userName: newUser.userName,
+      email: newUser.email,
+      _id: newUser._id,
+      imgUrl: newUser.imgUrl,
       ...tokens,
     });
   } catch (err) {
+    console.error("Error during user registration:", err.message);
     return res.status(400).send("error missing email or password");
   }
 };
