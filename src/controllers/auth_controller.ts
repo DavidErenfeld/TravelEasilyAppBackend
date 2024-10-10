@@ -113,7 +113,7 @@ const register = async (req: Request, res: Response) => {
 const generateTokens = async (user: IUser) => {
   const jwtExpiration = process.env.JWT_EXPIRATION || "1h"; // ערך ברירת מחדל במקרה שאין משתנה סביבה מוגדר
   const accessToken = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
-    expiresIn: jwtExpiration, // להשתמש בערך מוגדר או ברירת מחדל
+    expiresIn: "1h", // להשתמש בערך מוגדר או ברירת מחדל
   });
 
   const refreshToken = jwt.sign(
