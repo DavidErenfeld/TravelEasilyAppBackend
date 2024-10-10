@@ -157,26 +157,40 @@ const verifyPassword = async (req: Request, res: Response) => {
 };
 
 const login = async (req: Request, res: Response) => {
-  // const _id = req.body._id;
+  // לוג ראשוני להדפסת הבקשה שמתקבלת
+  console.log("Login request received:", req.body.email, req.body.password);
+
   const password = req.body.password;
   const email = req.body.email;
+
+  // בדיקה אם חסר אימייל או סיסמה
   if (!email || !password) {
-    return res.status(400).send("missing email or password");
+    console.log("Missing email or password");
+    return res.status(400).send("Missing email or password");
   }
+
   try {
+    // בדיקה אם המשתמש קיים במערכת
     const user = await UserRepository.findOneBy({ email: email });
+
     if (user == null) {
-      return res.status(401).send("email or password incorrect");
-    }
-    const match = await bcrypt.compare(password, user.password);
-    console.log(match);
-    if (!match) {
-      console.log(password);
-      return res.status(401).send("email or password incorrect");
+      console.log("User not found:", email);
+      return res.status(401).send("Email or password incorrect");
     }
 
+    // השוואת הסיסמאות
+    const match = await bcrypt.compare(password, user.password);
+    console.log("Password match result:", match);
+
+    if (!match) {
+      console.log("Password mismatch:", password);
+      return res.status(401).send("Email or password incorrect");
+    }
+
+    // אם הכל בסדר, יוצרים את ה-tokens
     const tokens = await generateTokens(user);
-    console.log(user);
+    console.log("Login successful, generating tokens for:", user.email);
+
     return res.status(200).send({
       userName: user.userName,
       email: user.email,
@@ -186,7 +200,8 @@ const login = async (req: Request, res: Response) => {
       refreshToken: tokens.refreshToken,
     });
   } catch (err) {
-    return res.status(400).send("error missing email or password");
+    console.error("Error during login:", err.message);
+    return res.status(400).send("Error during login");
   }
 };
 
