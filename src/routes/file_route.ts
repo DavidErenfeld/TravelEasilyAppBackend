@@ -1,65 +1,37 @@
 import express from "express";
-const router = express.Router();
+import { v2 as cloudinary } from "cloudinary";
+import { CloudinaryStorage } from "multer-storage-cloudinary";
 import multer from "multer";
 
-const base = "https://evening-bayou-77034-176dc93fb1e1.herokuapp.com";
+const router = express.Router();
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "public/");
-  },
-  filename: function (req, file, cb) {
-    const ext = file.originalname.split(".").pop();
-    const date = new Date();
-    const formattedDate = date
-      .toISOString()
-      .replace(/:/g, "-")
-      .replace(/\..+$/, "");
-    cb(null, formattedDate + "." + ext);
+// הגדרת Cloudinary עם משתני סביבה
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+// הגדרת Multer עם Cloudinary
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: "uploads", // התיקיה שבה יאוחסנו התמונות ב-Cloudinary
+    format: async (req, file) => file.mimetype.split("/")[1], // שומר את הפורמט המקורי של הקובץ
+    public_id: (req, file) => file.originalname.split(".")[0], // שם הקובץ ללא הסיומת
   },
 });
 
-// Initialize multer with the configured storage
-const upload = multer({ storage: storage });
+const upload = multer({ storage });
 
-/**
- * @swagger
- * /file/:
- *   post:
- *     summary: Upload a file
- *     tags: [File]
- *     description: Uploads a file to the server and returns its URL.
- *     requestBody:
- *       content:
- *         multipart/form-data:
- *           schema:
- *             type: object
- *             properties:
- *               file:
- *                 type: string
- *                 format: binary
- *                 description: File to upload.
- *     responses:
- *       '200':
- *         description: File successfully uploaded.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 url:
- *                   type: string
- *                   description: URL of the uploaded file.
- *                   example: http://localhost:3000/public/uploads/file-12345.png
- *       '400':
- *         description: Bad request - Error during the file upload process.
- *       '500':
- *         description: Internal server error - Something went wrong on the server.
- */
+// נקודת הקצה להעלאת קבצים
 router.post("/", upload.single("file"), function (req, res) {
-  const filePath = req.file.path.replace(/\\/g, "/");
-  console.log("router.post(/file: " + base + "/" + filePath);
-  res.status(200).send({ url: base + "/" + filePath });
+  if (req.file && req.file.path) {
+    console.log("Uploaded file URL: ", req.file.path);
+    res.status(200).send({ url: req.file.path });
+  } else {
+    res.status(400).send("Error uploading file.");
+  }
 });
 
 export = router;
