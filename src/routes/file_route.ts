@@ -1,7 +1,7 @@
 import express from "express";
-import { v2 as cloudinary } from "cloudinary";
-import { CloudinaryStorage } from "multer-storage-cloudinary";
 import multer from "multer";
+import { CloudinaryStorage } from "multer-storage-cloudinary";
+import { v2 as cloudinary } from "cloudinary"; // Cloudinary v2
 
 const router = express.Router();
 
@@ -12,26 +12,37 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// הגדרת Multer עם Cloudinary
+// הרחבת ה-`Params` כדי לתמוך ב-folder
+interface CustomParams {
+  folder?: string;
+  format?: (req: Express.Request, file: Express.Multer.File) => string; // פונקציה מחזירה string, לא Promise
+  public_id?: (req: Express.Request, file: Express.Multer.File) => string;
+}
+
+// הגדרת אחסון עבור Multer עם תמיכה בתיקיות ב-Cloudinary
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    folder: "uploads", // התיקיה שבה יאוחסנו התמונות ב-Cloudinary
-    format: async (req, file) => file.mimetype.split("/")[1], // שומר את הפורמט המקורי של הקובץ
-    public_id: (req, file) => file.originalname.split(".")[0], // שם הקובץ ללא הסיומת
-  },
+    folder: "your-folder-name", // שם התיקייה לשמירת הקבצים ב-Cloudinary
+    format: (req, file) => "png", // פורמט של הקובץ (png, jpg וכו')
+    public_id: (req, file) => "custom-filename",
+  } as CustomParams, // הוספת הטיפוס מותאם אישית עבור folder ו-public_id
 });
 
+// הגדרת Multer לשימוש באחסון שהוגדר עם Cloudinary
 const upload = multer({ storage });
 
-// נקודת הקצה להעלאת קבצים
-router.post("/", upload.single("file"), function (req, res) {
-  if (req.file && req.file.path) {
-    console.log("Uploaded file URL: ", req.file.path);
-    res.status(200).send({ url: req.file.path });
-  } else {
-    res.status(400).send("Error uploading file.");
+// נתיב להעלאת תמונות
+router.post("/upload", upload.single("file"), (req, res) => {
+  // מוודאים שקובץ קיים בבקשה
+  if (!req.file) {
+    return res.status(400).send("No file uploaded.");
   }
+
+  // שליחה חזרה של כתובת התמונה שהועלתה
+  res.status(200).json({
+    url: req.file.path, // הכתובת ב-Cloudinary
+  });
 });
 
-export = router;
+export default router;
