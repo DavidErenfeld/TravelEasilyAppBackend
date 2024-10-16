@@ -2,7 +2,7 @@ import express from "express";
 import multer from "multer";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
 import { v2 as cloudinary } from "cloudinary"; // Cloudinary v2
-
+import { deleteImageFromCloudinary } from "../controllers/fileController";
 const router = express.Router();
 
 // הגדרת Cloudinary עם משתני סביבה
@@ -44,5 +44,7 @@ router.post("/upload", upload.single("file"), (req, res) => {
     url: req.file.path, // הכתובת ב-Cloudinary
   });
 });
+
+router.delete("/delete-image", deleteImageFromCloudinary);
 
 export default router;
