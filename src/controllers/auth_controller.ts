@@ -248,10 +248,12 @@ const refresh = async (req: Request, res: Response) => {
   const authHeader = req.headers["authorization"];
   const refreshToken = authHeader && authHeader.split(" ")[1]; // Bearer <token>
 
-  if (refreshToken == null) {
+  if (!refreshToken) {
     console.log("Missing refresh token");
     return res.sendStatus(401);
   }
+
+  console.log("Received refresh token: ", refreshToken);
 
   jwt.verify(
     refreshToken,
@@ -267,7 +269,7 @@ const refresh = async (req: Request, res: Response) => {
         const userDb = await UserRepository.findOneBy({ _id: user._id });
 
         if (!userDb) {
-          console.log("User not found:", user._id);
+          console.log("User not found for refresh token:", user._id);
           return res.sendStatus(401);
         }
 
@@ -276,7 +278,7 @@ const refresh = async (req: Request, res: Response) => {
           !userDb.refreshTokens ||
           !userDb.refreshTokens.includes(refreshToken)
         ) {
-          console.log("Invalid refresh token, removing all refresh tokens");
+          console.log("Invalid refresh token, clearing tokens");
           userDb.refreshTokens = [];
           await UserRepository.save(userDb);
           return res.sendStatus(401);
@@ -286,7 +288,7 @@ const refresh = async (req: Request, res: Response) => {
         const accessToken = jwt.sign(
           { _id: user._id },
           process.env.JWT_SECRET,
-          { expiresIn: process.env.JWT_EXPIRATION || "1h" } // בדיקה אם משתנה הסביבה קיים
+          { expiresIn: process.env.JWT_EXPIRATION || "1h" }
         );
 
         // יצירת refresh token חדש
@@ -301,7 +303,11 @@ const refresh = async (req: Request, res: Response) => {
         );
         userDb.refreshTokens.push(newRefreshToken);
 
-        console.log("Saving new refresh token for user:", user._id);
+        console.log(
+          "Generated new access and refresh tokens for user: ",
+          user._id
+        );
+
         await UserRepository.save(userDb);
 
         // שליחת ה-access וה-refresh החדשים למשתמש
