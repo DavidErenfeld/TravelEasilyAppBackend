@@ -1,20 +1,3 @@
-export interface ITrips {
-  _id?: string;
-  owner?: string;
-  userName?: string;
-  imgUrl?: string;
-  typeTraveler: string;
-  country: string;
-  typeTrip: string;
-  numOfDays: number;
-  tripDescription: string[];
-  numOfComments: number;
-  numOfLikes: number;
-  tripPhotos?: string[];
-  comments?: IComment[];
-  likes?: ILike[];
-}
-
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -22,8 +5,8 @@ import {
   OneToMany,
   ManyToOne,
 } from "typeorm";
-import { Comment, IComment } from "./comment_model";
-import { ILike, Like } from "./like_model";
+import { Comment } from "./comment_model";
+import { Like } from "./like_model";
 import { User } from "./users_model";
 
 @Entity()
@@ -49,15 +32,11 @@ export class Trip {
   @Column({ type: "varchar" })
   typeTrip: string;
 
-  @Column({ type: "int" })
-  numOfDays: number;
+  @Column("json")
+  tripDescription: string[];
 
   @Column("json", { nullable: true })
   tripPhotos: string[];
-
-  @Column("simple-json")
-  @Column("json")
-  tripDescription: string[];
 
   @OneToMany(() => Comment, (comment) => comment.trip, { cascade: true })
   comments: Comment[];
@@ -70,4 +49,8 @@ export class Trip {
 
   @Column({ type: "int", default: 0 })
   numOfLikes: number;
+
+  get numOfDays(): number {
+    return this.tripDescription.length;
+  }
 }

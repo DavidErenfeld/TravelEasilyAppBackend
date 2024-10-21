@@ -111,7 +111,7 @@ const register = async (req: Request, res: Response) => {
 };
 
 const generateTokens = async (user: IUser) => {
-  const jwtExpiration = process.env.JWT_EXPIRATION || "1h"; // ערך ברירת מחדל במקרה שאין משתנה סביבה מוגדר
+  const jwtExpiration = process.env.JWT_EXPIRATION || "2m"; // ערך ברירת מחדל במקרה שאין משתנה סביבה מוגדר
   const accessToken = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
     expiresIn: "1h", // להשתמש בערך מוגדר או ברירת מחדל
   });
