@@ -5,9 +5,26 @@ import {
   OneToMany,
   ManyToOne,
 } from "typeorm";
-import { Comment } from "./comment_model";
-import { Like } from "./like_model";
+import { Comment, IComment } from "./comment_model";
+import { ILike, Like } from "./like_model";
 import { User } from "./users_model";
+
+export interface ITrips {
+  _id?: string;
+  owner?: string;
+  userName?: string;
+  imgUrl?: string;
+  typeTraveler: string;
+  country: string;
+  typeTrip: string;
+  tripDescription: string[];
+  numOfComments: number;
+  numOfLikes: number;
+  tripPhotos?: string[];
+  comments?: IComment[];
+  likes?: ILike[];
+  // הסרת numOfDays מהממשק כי הוא מחושב על ידי המודל
+}
 
 @Entity()
 export class Trip {
@@ -32,11 +49,14 @@ export class Trip {
   @Column({ type: "varchar" })
   typeTrip: string;
 
-  @Column("json")
-  tripDescription: string[];
+  // מחיקת השדה numOfDays כי הוא מחושב דינמית
 
   @Column("json", { nullable: true })
   tripPhotos: string[];
+
+  @Column("simple-json")
+  @Column("json")
+  tripDescription: string[];
 
   @OneToMany(() => Comment, (comment) => comment.trip, { cascade: true })
   comments: Comment[];
@@ -50,6 +70,7 @@ export class Trip {
   @Column({ type: "int", default: 0 })
   numOfLikes: number;
 
+  // Get numOfDays dynamically based on the length of tripDescription
   get numOfDays(): number {
     return this.tripDescription.length;
   }
