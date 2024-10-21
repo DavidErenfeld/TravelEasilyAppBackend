@@ -39,7 +39,6 @@ describe("--Trips Tests--", () => {
     typeTraveler: "type Traveler",
     country: "Country",
     typeTrip: "type Trip",
-    numOfDays: 2,
     tripDescription: ["aa", "bb"],
     numOfComments: 0,
     numOfLikes: 0,
@@ -51,7 +50,6 @@ describe("--Trips Tests--", () => {
     typeTraveler: "type Traveler 2",
     country: "Country 2",
     typeTrip: "type Trip 2",
-    numOfDays: 1,
     tripDescription: ["tripDescription 2"],
     numOfComments: 0,
     numOfLikes: 0,
@@ -274,7 +272,7 @@ describe("--Trips Tests--", () => {
           owner: user.userName,
           comment: "This is a test comment",
           date: new Date(),
-        }
+        },
       });
 
     expect(res.statusCode).toBe(200);
@@ -291,9 +289,8 @@ describe("--Trips Tests--", () => {
         comment: {
           owner: "David",
           comment: "This is a test comment",
-        }
+        },
       });
-
 
     expect(res.statusCode).toBe(404);
   });
@@ -306,10 +303,10 @@ describe("--Trips Tests--", () => {
       .set("Authorization", "JWT " + accessToken)
       .send({
         comment: {
-        owner: "David",
-        comment: "This is a test comment",
-        date: new Date(),
-        }
+          owner: "David",
+          comment: "This is a test comment",
+          date: new Date(),
+        },
       });
 
     expect(res.statusCode).toBe(500);
@@ -398,47 +395,47 @@ describe("--Trips Tests--", () => {
     expect(res.statusCode).toBe(404);
   });
 
-test("Test search trips by parameter", async () => {
-  try {
-    // Search for the trip
+  test("Test search trips by parameter", async () => {
+    try {
+      // Search for the trip
 
-    const searchResponse = await request(app)
-    .get(`/trips//search/parameters`)
-    .set("Authorization", "JWT " + accessToken)
-    .query({ country: "update country",tripDescription: "update tripDescription" }); // Adjust the query parameter as needed
-    
+      const searchResponse = await request(app)
+        .get(`/trips//search/parameters`)
+        .set("Authorization", "JWT " + accessToken)
+        .query({
+          country: "update country",
+          tripDescription: "update tripDescription",
+        }); // Adjust the query parameter as needed
 
-    // Validate the search response
-    expect(searchResponse.statusCode).toBe(200);
-    const searchData = searchResponse.body;
-    expect(searchData.data.length).toBeGreaterThan(0); // Ensure that results are returned
-    expect(searchData.data[0].country).toEqual("update country");
+      // Validate the search response
+      expect(searchResponse.statusCode).toBe(200);
+      const searchData = searchResponse.body;
+      expect(searchData.data.length).toBeGreaterThan(0); // Ensure that results are returned
+      expect(searchData.data[0].country).toEqual("update country");
+    } catch (error) {
+      console.error("Test failed with error: ", error);
+      throw error; // Ensure test fails on error
+    }
+  });
 
-  } catch (error) {
-    console.error("Test failed with error: ", error);
-    throw error;  // Ensure test fails on error
-  }
-});
+  test("Test 10 Add like to a trip", async () => {
+    try {
+      console.log("Add like to a trip");
+      const response = await request(app)
+        .get("/trips")
+        .set("Authorization", "JWT " + accessToken);
+      const data = response.body;
+      const trip = data[0];
 
+      const res = await request(app)
+        .post(`/trips/${trip._id}/likes/`)
+        .set("Authorization", "JWT " + accessToken)
+        .send({ owner: "David" });
 
-test("Test 10 Add like to a trip", async () => {
-  try {
-    console.log("Add like to a trip");
-    const response = await request(app)
-      .get("/trips")
-      .set("Authorization", "JWT " + accessToken);
-    const data = response.body;
-    const trip = data[0];
-
-    const res = await request(app)
-      .post(`/trips/${trip._id}/likes/`)
-      .set("Authorization", "JWT " + accessToken)
-      .send({ owner: "David" });
-
-    expect(res.statusCode).toBe(200);
-  } catch (error) {
-    console.error("Test failed with error: ", error);
-    throw error;  // Ensure test fails on error
-  }
-});
+      expect(res.statusCode).toBe(200);
+    } catch (error) {
+      console.error("Test failed with error: ", error);
+      throw error; // Ensure test fails on error
+    }
+  });
 });
