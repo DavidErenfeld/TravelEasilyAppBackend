@@ -12,6 +12,15 @@ export default function initializeSocket(server: http.Server) {
   io.on("connection", (socket) => {
     console.log("Client connected:", socket.id);
 
+    // חדש - אירוע לטיפול בהוספת טיול חדש
+    socket.on("newTrip", (newTripData) => {
+      try {
+        io.emit("tripPosted", newTripData); // שולח לכל המשתמשים מחוברים
+      } catch (error) {
+        console.error("Error posting new trip:", error);
+      }
+    });
+
     // אירועים עבור עדכון טיול
     socket.on("updateTrip", (tripData) => {
       try {
