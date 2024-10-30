@@ -1,8 +1,9 @@
 import { Server as SocketIOServer } from "socket.io";
 import http from "http";
 
+export let io: SocketIOServer;
 export default function initializeSocket(server: http.Server) {
-  const io = new SocketIOServer(server, {
+  io = new SocketIOServer(server, {
     cors: {
       origin: "*", // עדיף להגדיר origin מדויק לפרודקשן
       methods: ["GET", "POST"],
