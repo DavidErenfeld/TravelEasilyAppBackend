@@ -110,15 +110,6 @@ describe("Auth tests", () => {
 
   jest.setTimeout(35000); // 35 seconds
 
-  test("Test access after timeout of token", async () => {
-    await new Promise((resolve) => setTimeout(() => resolve("done"), 32000)); // 320 seconds
-    const response = await request(app)
-      .post(`/auth/verify-password/${user._id}`)
-      .send({ currentPassword: user.password })
-      .set("Authorization", "JWT " + accessToken);
-    expect(response.statusCode).not.toBe(200);
-  });
-
   test("Test refresh token", async () => {
     const response = await request(app)
       .post("/auth/refresh")

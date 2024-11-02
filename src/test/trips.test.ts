@@ -152,7 +152,6 @@ describe("--Trips Tests--", () => {
       .send({
         _id: updateTrip._id,
         country: "update country",
-        numOfDays: 1,
         tripDescription: "update tripDescription",
       });
     expect(res.status).toBe(200);
@@ -264,17 +263,20 @@ describe("--Trips Tests--", () => {
       .set("Authorization", "JWT " + accessToken);
     const data = response.body;
     const trip = data[0];
+
+    const commentToAdd = {
+      owner: user.userName, // ודא שהשם מועבר כראוי
+      comment: "This is a test comment",
+      date: new Date().toISOString(),
+      imgUrl: "",
+    };
+
     const res = await request(app)
       .post(`/trips/${trip._id}/comments`)
       .set("Authorization", "JWT " + accessToken)
-      .send({
-        comment: {
-          owner: user.userName,
-          comment: "This is a test comment",
-          date: new Date(),
-        },
-      });
+      .send(commentToAdd);
 
+    console.log(res.error);
     expect(res.statusCode).toBe(200);
   });
 
@@ -400,7 +402,7 @@ describe("--Trips Tests--", () => {
       // Search for the trip
 
       const searchResponse = await request(app)
-        .get(`/trips//search/parameters`)
+        .get(`/trips/search/parameters`)
         .set("Authorization", "JWT " + accessToken)
         .query({
           country: "update country",
