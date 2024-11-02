@@ -54,15 +54,7 @@ export class BaseController<Entity extends { _id?: string }> {
 
       // Replace the entire user object with the new data
       Object.assign(userToUpdate, req.body);
-
-      // Save the updated user back to the database
       const updatedObject = await this.entity.save(userToUpdate);
-
-      //Shorter Way but not returning updatedOjbect for test
-      // const updatedObject = await this.entity.update(req.params.id, req.body);
-      //  if (!updatedObject) {
-      //     return res.status(404).json({ message: 'User not found' });
-      // }
       res.status(200).send(updatedObject);
       console.log(updatedObject);
     } catch (err) {
