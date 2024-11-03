@@ -47,32 +47,53 @@ class TripController extends BaseController<ITrips> {
       "typeTraveler",
       "country",
       "typeTrip",
-      "numOfDays",
       "numOfComments",
       "numOfLikes",
+      "numOfDays",
     ];
     console.log("get by params:", req.query);
+
     try {
       const queryParams: ParsedQs = req.query;
       const whereCondition: Record<string, string | number | boolean> = {};
+      let numOfDaysCondition: number | null = null;
 
+      // מעבר על הפרמטרים ויצירת תנאים לשאילתה
       Object.entries(queryParams).forEach(([key, value]) => {
         if (allowedFields.includes(key) && typeof value === "string") {
-          whereCondition[key] = value;
+          if (key === "numOfDays") {
+            numOfDaysCondition = parseInt(value, 10);
+          } else {
+            whereCondition[key] = value;
+          }
         }
       });
 
-      if (Object.keys(whereCondition).length === 0) {
+      if (
+        Object.keys(whereCondition).length === 0 &&
+        numOfDaysCondition === null
+      ) {
         return res
           .status(400)
           .json({ message: "No valid query parameters provided" });
       }
 
-      const trips = await this.entity.find({
-        where: whereCondition,
-        relations: ["owner", "comments", "likes"],
-      });
+      // בניית השאילתה עם תנאים
+      const query = this.entity
+        .createQueryBuilder("trip")
+        .leftJoinAndSelect("trip.owner", "owner")
+        .leftJoinAndSelect("trip.likes", "likes")
+        .leftJoinAndSelect("trip.comments", "comments")
+        .where(whereCondition);
 
+      // הוספת תנאי עבור אורך מערך התיאורים אם הוא קיים
+      if (numOfDaysCondition !== null) {
+        query.andWhere("array_length(trip.tripDescription, 1) = :numOfDays", {
+          numOfDays: numOfDaysCondition,
+        });
+      }
+
+      const trips = await query.getMany();
       res.status(trips.length > 0 ? 200 : 404).json({ data: trips });
     } catch (err) {
       console.error("Error fetching trips:", err);
