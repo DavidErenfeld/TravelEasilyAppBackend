@@ -37,7 +37,6 @@ class TripController extends BaseController<ITrips> {
       res.status(500).json({ message: err.message });
     }
   }
-
   async getByParamId(req: Request, res: Response) {
     const allowedFields = [
       "_id",
@@ -90,7 +89,7 @@ class TripController extends BaseController<ITrips> {
       // אם יש תנאי למספר הימים, מוסיף את התנאי לשאילתה
       if (numOfDaysCondition !== null) {
         query.andWhere(
-          'array_length(trip."tripDescription"::json[], 1) = :numOfDays', // שינוי
+          'json_array_length(trip."tripDescription") = :numOfDays',
           {
             numOfDays: numOfDaysCondition,
           }
