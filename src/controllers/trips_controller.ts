@@ -38,8 +38,6 @@ class TripController extends BaseController<ITrips> {
       res.status(500).json({ message: err.message });
     }
   }
-
-  // שליפת טיולים לפי פרמטרים מותאמים כולל חיפוש לפי אורך מערך התיאורים
   async getByParamId(req: Request, res: Response) {
     const allowedFields = [
       "_id",
@@ -88,9 +86,12 @@ class TripController extends BaseController<ITrips> {
 
       // הוספת תנאי לפי אורך מערך התיאורים
       if (numOfDaysCondition !== null) {
-        query.andWhere("array_length(trip.tripDescription, 1) = :numOfDays", {
-          numOfDays: numOfDaysCondition,
-        });
+        query.andWhere(
+          "jsonb_array_length(trip.tripDescription) = :numOfDays",
+          {
+            numOfDays: numOfDaysCondition,
+          }
+        );
       }
 
       const trips = await query.getMany();
