@@ -58,16 +58,18 @@ class TripController extends BaseController<ITrips> {
       const whereCondition: Record<string, string | number | boolean> = {};
       let numOfDaysCondition: number | null = null;
 
+      // עובר על הפרמטרים שנשלחו ושומר רק את המותרים
       Object.entries(queryParams).forEach(([key, value]) => {
         if (allowedFields.includes(key) && typeof value === "string") {
           if (key === "numOfDays") {
-            numOfDaysCondition = parseInt(value, 10);
+            numOfDaysCondition = parseInt(value, 10); // ממיר את הפרמטר למספר
           } else {
             whereCondition[key] = value;
           }
         }
       });
 
+      // מוודא שהתקבלו פרמטרים חוקיים לשאילתה
       if (
         Object.keys(whereCondition).length === 0 &&
         numOfDaysCondition === null
@@ -77,6 +79,7 @@ class TripController extends BaseController<ITrips> {
           .json({ message: "No valid query parameters provided" });
       }
 
+      // בונה את השאילתה עם התנאים
       const query = this.entity
         .createQueryBuilder("trip")
         .leftJoinAndSelect("trip.owner", "owner")
@@ -84,12 +87,19 @@ class TripController extends BaseController<ITrips> {
         .leftJoinAndSelect("trip.comments", "comments")
         .where(whereCondition);
 
+      // אם יש תנאי למספר הימים, מוסיף את התנאי לשאילתה
       if (numOfDaysCondition !== null) {
-        query.andWhere("array_length(trip.tripDescription, 1) = :numOfDays", {
-          numOfDays: numOfDaysCondition,
-        });
+        query.andWhere(
+          (qb) => {
+            return `array_length(CASE WHEN jsonb_typeof(trip.tripDescription) = 'array' THEN trip.tripDescription ELSE ARRAY[trip.tripDescription] END, 1) = :numOfDays`;
+          },
+          {
+            numOfDays: numOfDaysCondition,
+          }
+        );
       }
 
+      // מבצע את השאילתה ומחזיר את התוצאות
       const trips = await query.getMany();
       res.status(trips.length > 0 ? 200 : 404).json({ data: trips });
     } catch (err) {
