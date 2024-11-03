@@ -51,7 +51,6 @@ export class Trip {
   @Column("json", { nullable: true })
   tripPhotos: string[];
 
-  @Column("simple-json")
   @Column("json")
   tripDescription: string[];
 
