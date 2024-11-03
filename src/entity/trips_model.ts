@@ -52,7 +52,7 @@ export class Trip {
   tripPhotos: string[];
 
   @Column("simple-json")
-  @Column("jsonb")
+  @Column("json")
   tripDescription: string[];
 
   @OneToMany(() => Comment, (comment) => comment.trip, { cascade: true })
