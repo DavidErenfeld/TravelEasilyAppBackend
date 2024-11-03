@@ -90,7 +90,7 @@ class TripController extends BaseController<ITrips> {
       // אם יש תנאי למספר הימים, מוסיף את התנאי לשאילתה
       if (numOfDaysCondition !== null) {
         query.andWhere(
-          "array_length(trip.tripDescription::json[], 1) = :numOfDays",
+          'array_length(trip."tripDescription"::json[], 1) = :numOfDays', // שינוי
           {
             numOfDays: numOfDaysCondition,
           }
