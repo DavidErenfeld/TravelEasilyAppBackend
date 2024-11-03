@@ -11,6 +11,7 @@ class TripController extends BaseController<ITrips> {
     super(entity);
   }
 
+  // Create a new trip with the authenticated user as owner
   async post(req: AuthRequest, res: Response): Promise<void> {
     req.body.owner = req.user._id;
     try {
@@ -20,8 +21,8 @@ class TripController extends BaseController<ITrips> {
     }
   }
 
+  // Retrieve trips by owner ID
   async getByOwnerId(req: Request, res: Response) {
-    console.log(`get by id: ${req.params.id}`);
     try {
       const ownerId = req.params.id;
       const trips = await this.entity
@@ -38,6 +39,7 @@ class TripController extends BaseController<ITrips> {
     }
   }
 
+  // Retrieve trips by specified parameters, including array length of tripDescription
   async getByParamId(req: Request, res: Response) {
     const allowedFields = [
       "_id",
@@ -51,14 +53,13 @@ class TripController extends BaseController<ITrips> {
       "numOfLikes",
       "numOfDays",
     ];
-    console.log("get by params:", req.query);
 
     try {
       const queryParams: ParsedQs = req.query;
       const whereCondition: Record<string, string | number | boolean> = {};
       let numOfDaysCondition: number | null = null;
 
-      // מעבר על הפרמטרים ויצירת תנאים לשאילתה
+      // Build query conditions only for allowed fields
       Object.entries(queryParams).forEach(([key, value]) => {
         if (allowedFields.includes(key) && typeof value === "string") {
           if (key === "numOfDays") {
@@ -78,7 +79,6 @@ class TripController extends BaseController<ITrips> {
           .json({ message: "No valid query parameters provided" });
       }
 
-      // בניית השאילתה עם תנאים
       const query = this.entity
         .createQueryBuilder("trip")
         .leftJoinAndSelect("trip.owner", "owner")
@@ -86,11 +86,14 @@ class TripController extends BaseController<ITrips> {
         .leftJoinAndSelect("trip.comments", "comments")
         .where(whereCondition);
 
-      // הוספת תנאי עבור אורך מערך התיאורים אם הוא קיים
+      // Add condition for length of tripDescription array if specified
       if (numOfDaysCondition !== null) {
-        query.andWhere("array_length(trip.tripDescription, 1) = :numOfDays", {
-          numOfDays: numOfDaysCondition,
-        });
+        query.andWhere(
+          "jsonb_array_length(trip.tripDescription) = :numOfDays",
+          {
+            numOfDays: numOfDaysCondition,
+          }
+        );
       }
 
       const trips = await query.getMany();
@@ -101,8 +104,8 @@ class TripController extends BaseController<ITrips> {
     }
   }
 
+  // Retrieve a specific trip by ID with comments and likes
   async getWithComments(req: Request, res: Response) {
-    console.log(`get by id: ${req.params.id}`);
     try {
       const tripId = req.params.id;
       const trip = await this.entity.findOne({
@@ -116,8 +119,8 @@ class TripController extends BaseController<ITrips> {
     }
   }
 
+  // Add a comment to a specific trip
   async addComment(req: AuthRequest, res: Response) {
-    console.log("addComment");
     try {
       const tripId = req.params.tripId;
       const owner_id = req.user._id;
@@ -149,8 +152,8 @@ class TripController extends BaseController<ITrips> {
     }
   }
 
+  // Delete a comment from a specific trip by comment ID
   async deleteComment(req: AuthRequest, res: Response) {
-    console.log("DeleteComment");
     try {
       const tripId = req.params.tripId;
       const commentId = req.params.commentId;
@@ -177,6 +180,7 @@ class TripController extends BaseController<ITrips> {
     }
   }
 
+  // Add or remove a like on a specific trip by user ID
   async addLike(req: AuthRequest, res: Response) {
     try {
       const tripId = req.params.tripId;
