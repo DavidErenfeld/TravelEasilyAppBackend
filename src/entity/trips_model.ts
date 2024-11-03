@@ -23,6 +23,7 @@ export interface ITrips {
   tripPhotos?: string[];
   comments?: IComment[];
   likes?: ILike[];
+  // הסרת numOfDays מהממשק כי הוא מחושב על ידי המודל
 }
 
 @Entity()
@@ -48,10 +49,13 @@ export class Trip {
   @Column({ type: "varchar" })
   typeTrip: string;
 
-  @Column("jsonb", { nullable: true })
+  // מחיקת השדה numOfDays כי הוא מחושב דינמית
+
+  @Column("json", { nullable: true })
   tripPhotos: string[];
 
-  @Column("jsonb") // Updated to jsonb to support jsonb_array_length
+  @Column("simple-json")
+  @Column("json")
   tripDescription: string[];
 
   @OneToMany(() => Comment, (comment) => comment.trip, { cascade: true })

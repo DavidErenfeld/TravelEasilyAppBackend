@@ -11,7 +11,7 @@ class TripController extends BaseController<ITrips> {
     super(entity);
   }
 
-  // Create a new trip with the authenticated user as owner
+  // יצירת טיול חדש עם זיהוי המשתמש המחובר
   async post(req: AuthRequest, res: Response): Promise<void> {
     req.body.owner = req.user._id;
     try {
@@ -21,7 +21,7 @@ class TripController extends BaseController<ITrips> {
     }
   }
 
-  // Retrieve trips by owner ID
+  // שליפת טיולים לפי מזהה בעלים
   async getByOwnerId(req: Request, res: Response) {
     try {
       const ownerId = req.params.id;
@@ -39,7 +39,7 @@ class TripController extends BaseController<ITrips> {
     }
   }
 
-  // Retrieve trips by specified parameters, including array length of tripDescription
+  // שליפת טיולים לפי פרמטרים מותאמים כולל חיפוש לפי אורך מערך התיאורים
   async getByParamId(req: Request, res: Response) {
     const allowedFields = [
       "_id",
@@ -59,7 +59,7 @@ class TripController extends BaseController<ITrips> {
       const whereCondition: Record<string, string | number | boolean> = {};
       let numOfDaysCondition: number | null = null;
 
-      // Build query conditions only for allowed fields
+      // בניית תנאים לשאילתה רק עבור פרמטרים מותרים
       Object.entries(queryParams).forEach(([key, value]) => {
         if (allowedFields.includes(key) && typeof value === "string") {
           if (key === "numOfDays") {
@@ -86,14 +86,11 @@ class TripController extends BaseController<ITrips> {
         .leftJoinAndSelect("trip.comments", "comments")
         .where(whereCondition);
 
-      // Add condition for length of tripDescription array if specified
+      // הוספת תנאי לפי אורך מערך התיאורים
       if (numOfDaysCondition !== null) {
-        query.andWhere(
-          "jsonb_array_length(trip.tripDescription) = :numOfDays",
-          {
-            numOfDays: numOfDaysCondition,
-          }
-        );
+        query.andWhere("array_length(trip.tripDescription, 1) = :numOfDays", {
+          numOfDays: numOfDaysCondition,
+        });
       }
 
       const trips = await query.getMany();
@@ -104,7 +101,7 @@ class TripController extends BaseController<ITrips> {
     }
   }
 
-  // Retrieve a specific trip by ID with comments and likes
+  // שליפת טיול לפי מזהה כולל תגובות ולייקים
   async getWithComments(req: Request, res: Response) {
     try {
       const tripId = req.params.id;
@@ -119,7 +116,7 @@ class TripController extends BaseController<ITrips> {
     }
   }
 
-  // Add a comment to a specific trip
+  // הוספת תגובה לטיול
   async addComment(req: AuthRequest, res: Response) {
     try {
       const tripId = req.params.tripId;
@@ -152,7 +149,7 @@ class TripController extends BaseController<ITrips> {
     }
   }
 
-  // Delete a comment from a specific trip by comment ID
+  // מחיקת תגובה מטיול לפי מזהה תגובה
   async deleteComment(req: AuthRequest, res: Response) {
     try {
       const tripId = req.params.tripId;
@@ -180,7 +177,7 @@ class TripController extends BaseController<ITrips> {
     }
   }
 
-  // Add or remove a like on a specific trip by user ID
+  // הוספה או הסרה של לייק בטיול לפי מזהה המשתמש
   async addLike(req: AuthRequest, res: Response) {
     try {
       const tripId = req.params.tripId;
