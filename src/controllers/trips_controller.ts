@@ -6,6 +6,8 @@ import { AuthRequest } from "../common/auth_middleware";
 import { ITrips, Trip } from "../entity/trips_model";
 import { User } from "../entity/users_model";
 import { io } from "../services/socket";
+import { In } from "typeorm";
+
 import connectDB from "../data-source";
 
 class TripController extends BaseController<ITrips> {
@@ -122,15 +124,10 @@ class TripController extends BaseController<ITrips> {
 
       console.log(`User ${userId} has favorite trips:`, user.favoriteTrips);
 
-      const trips = await this.entity
-        .createQueryBuilder("trip")
-        .leftJoinAndSelect("trip.owner", "owner")
-        .leftJoinAndSelect("trip.likes", "likes")
-        .leftJoinAndSelect("trip.comments", "comments")
-        .where("trip._id IN (:...favoriteTrips)", {
-          favoriteTrips: user.favoriteTrips,
-        })
-        .getMany();
+      const trips = await this.entity.find({
+        where: { _id: In(user.favoriteTrips) },
+        relations: ["owner", "likes", "comments"],
+      });
 
       console.log(`Found ${trips.length} favorite trips for user: ${userId}`);
       res.status(200).json(trips);
@@ -159,6 +156,10 @@ class TripController extends BaseController<ITrips> {
         .createQueryBuilder("user")
         .where(":tripId = ANY(user.favoriteTrips)", { tripId })
         .getMany();
+
+      console.log(
+        `Found ${usersWithFavoriteTrip.length} users with favorite trip ${tripId}`
+      );
 
       for (const user of usersWithFavoriteTrip) {
         user.favoriteTrips = user.favoriteTrips.filter(
