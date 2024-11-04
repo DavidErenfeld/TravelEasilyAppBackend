@@ -1,22 +1,11 @@
-import jwt from "jsonwebtoken";
-import nodemailer from "nodemailer";
-import bcrypt from "bcrypt";
 import { EntityTarget } from "typeorm";
 import { AuthRequest } from "../common/auth_middleware";
-import { Request, Response } from "express";
+import { Response } from "express";
 import { User } from "../entity/users_model";
 import { BaseController } from "./base_controller";
 import { IUser } from "../entity/users_model";
+import bcrypt from "bcrypt";
 import connectDB from "../data-source";
-
-// הגדרת Nodemailer עם חשבון Gmail
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
 
 class UserController extends BaseController<IUser> {
   constructor(entity: EntityTarget<IUser>) {
@@ -112,71 +101,6 @@ class UserController extends BaseController<IUser> {
     } catch (err) {
       console.error("Error fetching favorite trip IDs:", err);
       res.status(500).json({ message: err.message });
-    }
-  }
-
-  // פונקציה לשליחת מייל לשחזור סיסמה
-  async requestPasswordReset(req: Request, res: Response) {
-    const { email } = req.body;
-    const userRepository = connectDB.getRepository(User);
-
-    try {
-      const user = await userRepository.findOne({ where: { email } });
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-
-      const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
-        expiresIn: "1h",
-      });
-      const resetLink = `https://travel-easily-app.netlify.app/reset-password?token=${token}`;
-
-      const mailOptions = {
-        from: process.env.SMTP_USER,
-        to: email,
-        subject: "Password Reset",
-        html: `<p>Click <a href="${resetLink}">here</a> to reset your password. This link will expire in 1 hour.</p>`,
-      };
-
-      await transporter.sendMail(mailOptions);
-
-      return res.status(200).json({ message: "Password reset email sent" });
-    } catch (error) {
-      console.error("Error in requestPasswordReset:", error);
-      return res.status(500).json({ message: "Internal server error" });
-    }
-  }
-
-  // פונקציה לאיפוס סיסמה
-  async resetPassword(req: Request, res: Response) {
-    const { token, newPassword } = req.body;
-    const userRepository = connectDB.getRepository(User);
-
-    try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET) as {
-        _id: string;
-      };
-      const user = await userRepository.findOne({
-        where: { _id: decoded._id },
-      });
-
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-
-      const salt = await bcrypt.genSalt(10);
-      user.password = await bcrypt.hash(newPassword, salt);
-      await userRepository.save(user);
-
-      return res
-        .status(200)
-        .json({ message: "Password has been reset successfully" });
-    } catch (error) {
-      console.error("Error in resetPassword:", error);
-      if (error.name === "TokenExpiredError") {
-        return res.status(400).json({ message: "Token has expired" });
-      }
-      return res.status(500).json({ message: "Internal server error" });
     }
   }
 }
