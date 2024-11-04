@@ -1,11 +1,12 @@
 import { Request, Response } from "express";
-import { EntityTarget, getRepository } from "typeorm";
+import { EntityTarget } from "typeorm";
 import { ParsedQs } from "qs";
 import { BaseController } from "./base_controller";
 import { AuthRequest } from "../common/auth_middleware";
 import { ITrips, Trip } from "../entity/trips_model";
 import { User } from "../entity/users_model";
 import { io } from "../services/socket";
+import connectDB from "../data-source";
 
 class TripController extends BaseController<ITrips> {
   constructor(entity: EntityTarget<ITrips>) {
@@ -107,7 +108,7 @@ class TripController extends BaseController<ITrips> {
     try {
       const userId = req.user._id;
 
-      const userRepository = getRepository(User);
+      const userRepository = connectDB.getRepository(User);
       const user = await userRepository.findOne({ where: { _id: userId } });
 
       if (!user || !user.favoriteTrips || user.favoriteTrips.length === 0) {

@@ -33,6 +33,11 @@ class UserController extends BaseController<IUser> {
       const user = await userRepository.findOne({ where: { _id: userId } });
 
       if (user) {
+        // וודא כי favoriteTrips מאותחל למערך אם הוא null
+        if (!user.favoriteTrips) {
+          user.favoriteTrips = [];
+        }
+
         // בודק אם הטיול כבר קיים במועדפים של המשתמש
         if (!user.favoriteTrips.includes(tripId)) {
           user.favoriteTrips.push(tripId); // מוסיף את הטיול למועדפים
@@ -65,6 +70,11 @@ class UserController extends BaseController<IUser> {
       const user = await userRepository.findOne({ where: { _id: userId } });
 
       if (user) {
+        // וודא כי favoriteTrips מאותחל למערך אם הוא null
+        if (!user.favoriteTrips) {
+          user.favoriteTrips = [];
+        }
+
         // מסנן את מזהה הטיול מרשימת המועדפים
         user.favoriteTrips = user.favoriteTrips.filter((id) => id !== tripId);
         await userRepository.save(user); // שומר את השינויים בבסיס הנתונים
