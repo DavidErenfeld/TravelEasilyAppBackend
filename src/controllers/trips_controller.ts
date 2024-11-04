@@ -107,12 +107,17 @@ class TripController extends BaseController<ITrips> {
     console.log(`Fetching favorite trips for user: ${req.user._id}`);
     try {
       const userId = req.user._id;
-
       const userRepository = connectDB.getRepository(User);
-      const user = await userRepository.findOne({ where: { _id: userId } });
 
-      if (!user || !user.favoriteTrips || user.favoriteTrips.length === 0) {
-        return res.status(404).json({ message: "No favorite trips found" });
+      const user = await userRepository.findOne({ where: { _id: userId } });
+      if (!user) {
+        console.log(`User not found: ${userId}`);
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      if (!user.favoriteTrips || user.favoriteTrips.length === 0) {
+        console.log(`No favorite trips for user: ${userId}`);
+        return res.status(200).json([]);
       }
 
       const trips = await this.entity
@@ -125,10 +130,56 @@ class TripController extends BaseController<ITrips> {
         })
         .getMany();
 
-      res.status(trips.length > 0 ? 200 : 201).json(trips);
+      console.log(`Found ${trips.length} favorite trips for user: ${userId}`);
+      res.status(200).json(trips);
     } catch (err) {
       console.error("Error fetching favorite trips:", err);
       res.status(500).json({ message: "Internal server error" });
+    }
+  }
+
+  async deleteTrip(req: Request, res: Response) {
+    const tripId = req.params.id;
+    console.log(`Attempting to delete trip with ID: ${tripId}`);
+
+    try {
+      const tripToDelete = await this.entity.findOne({
+        where: { _id: tripId },
+      });
+      if (!tripToDelete) {
+        console.log(`Trip with ID ${tripId} not found`);
+        return res.status(404).send("Trip not found");
+      }
+
+      // עדכון משתמשים שמחזיקים את הטיול הזה במועדפים
+      const userRepository = connectDB.getRepository(User);
+      const usersWithFavoriteTrip = await userRepository
+        .createQueryBuilder("user")
+        .where(":tripId = ANY(user.favoriteTrips)", { tripId })
+        .getMany();
+
+      for (const user of usersWithFavoriteTrip) {
+        user.favoriteTrips = user.favoriteTrips.filter(
+          (favoriteTripId) => favoriteTripId !== tripId
+        );
+        await userRepository.save(user);
+        console.log(`Removed trip ${tripId} from user ${user._id}'s favorites`);
+      }
+
+      // מחיקת הטיול עצמו
+      const deleteResult = await this.entity.delete(tripId);
+      if (deleteResult.affected === 0) {
+        console.log(`Failed to delete trip with ID: ${tripId}`);
+        return res
+          .status(504)
+          .send("No rows deleted, request timed out or object not found");
+      }
+
+      console.log(`Successfully deleted trip with ID: ${tripId}`);
+      res.send("Trip deleted successfully");
+    } catch (err) {
+      console.error("Error deleting trip:", err);
+      res.status(500).send("Error occurred while deleting the trip");
     }
   }
 

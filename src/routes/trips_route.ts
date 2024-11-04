@@ -105,7 +105,7 @@ router.put("/:id", authMiddleware, TripController.put.bind(TripController));
 router.delete(
   "/:id",
   authMiddleware,
-  TripController.delete.bind(TripController)
+  TripController.deleteTrip.bind(TripController)
 );
 
 /**
