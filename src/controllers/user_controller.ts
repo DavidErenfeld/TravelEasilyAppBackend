@@ -1,10 +1,11 @@
-import { getRepository, EntityTarget } from "typeorm";
+import { EntityTarget } from "typeorm";
 import { AuthRequest } from "../common/auth_middleware";
 import { Response } from "express";
 import { User } from "../entity/users_model";
 import { BaseController } from "./base_controller";
 import { IUser } from "../entity/users_model";
 import bcrypt from "bcrypt";
+import connectDB from "../data-source";
 
 class UserController extends BaseController<IUser> {
   constructor(entity: EntityTarget<IUser>) {
@@ -24,23 +25,22 @@ class UserController extends BaseController<IUser> {
   // פונקציה להוספת טיול לרשימת המועדפים
   async addFavoriteTrip(req: AuthRequest, res: Response) {
     try {
-      const userId = req.user._id;
-      const tripId = req.params.tripId;
+      const userId = req.user._id; // מזהה המשתמש
+      const tripId = req.params.tripId; // מזהה הטיול
 
-      const userRepository = getRepository(User);
+      // משתמשים ב-DataSource כדי לקבל את ה-Repository של המשתמשים
+      const userRepository = connectDB.getRepository(User);
       const user = await userRepository.findOne({ where: { _id: userId } });
 
       if (user) {
-        // בודק אם הטיול כבר במועדפים, אם לא - מוסיף אותו
+        // בודק אם הטיול כבר קיים במועדפים של המשתמש
         if (!user.favoriteTrips.includes(tripId)) {
-          user.favoriteTrips.push(tripId);
-          await userRepository.save(user);
-          return res
-            .status(200)
-            .json({
-              message: "Trip added to favorites",
-              favoriteTrips: user.favoriteTrips,
-            });
+          user.favoriteTrips.push(tripId); // מוסיף את הטיול למועדפים
+          await userRepository.save(user); // שומר את השינויים בבסיס הנתונים
+          return res.status(200).json({
+            message: "Trip added to favorites",
+            favoriteTrips: user.favoriteTrips,
+          });
         }
         return res
           .status(409)
@@ -57,22 +57,21 @@ class UserController extends BaseController<IUser> {
   // פונקציה להסרת טיול מרשימת המועדפים
   async removeFavoriteTrip(req: AuthRequest, res: Response) {
     try {
-      const userId = req.user._id;
-      const tripId = req.params.tripId;
+      const userId = req.user._id; // מזהה המשתמש
+      const tripId = req.params.tripId; // מזהה הטיול
 
-      const userRepository = getRepository(User);
+      // משתמשים ב-DataSource כדי לקבל את ה-Repository של המשתמשים
+      const userRepository = connectDB.getRepository(User);
       const user = await userRepository.findOne({ where: { _id: userId } });
 
       if (user) {
         // מסנן את מזהה הטיול מרשימת המועדפים
         user.favoriteTrips = user.favoriteTrips.filter((id) => id !== tripId);
-        await userRepository.save(user);
-        return res
-          .status(200)
-          .json({
-            message: "Trip removed from favorites",
-            favoriteTrips: user.favoriteTrips,
-          });
+        await userRepository.save(user); // שומר את השינויים בבסיס הנתונים
+        return res.status(200).json({
+          message: "Trip removed from favorites",
+          favoriteTrips: user.favoriteTrips,
+        });
       } else {
         return res.status(404).json({ message: "User not found" });
       }
