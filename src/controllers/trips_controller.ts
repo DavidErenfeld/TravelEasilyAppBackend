@@ -104,7 +104,6 @@ class TripController extends BaseController<ITrips> {
       res.status(500).json({ message: "Internal server error" });
     }
   }
-
   async getFavoriteTrips(req: AuthRequest, res: Response) {
     console.log(`Fetching favorite trips for user: ${req.user._id}`);
     try {
@@ -122,10 +121,20 @@ class TripController extends BaseController<ITrips> {
         return res.status(200).json([]);
       }
 
-      console.log(`User ${userId} has favorite trips:`, user.favoriteTrips);
+      // בדיקת תקינות ה-UUIDs
+      const validTripIds = user.favoriteTrips.filter(
+        (id) => typeof id === "string" && id.length === 36
+      );
+
+      console.log(`Valid favorite trips for user ${userId}:`, validTripIds);
+
+      if (validTripIds.length === 0) {
+        console.log(`No valid favorite trips for user: ${userId}`);
+        return res.status(200).json([]);
+      }
 
       const trips = await this.entity.find({
-        where: { _id: In(user.favoriteTrips) },
+        where: { _id: In(validTripIds) },
         relations: ["owner", "likes", "comments"],
       });
 
@@ -133,7 +142,7 @@ class TripController extends BaseController<ITrips> {
       res.status(200).json(trips);
     } catch (err) {
       console.error("Error fetching favorite trips:", err);
-      res.status(500).json({ message: "Internal server error" });
+      res.status(500).json({ message: err.message });
     }
   }
 
