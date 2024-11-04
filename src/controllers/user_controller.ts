@@ -1,47 +1,53 @@
+import jwt from "jsonwebtoken";
+import nodemailer from "nodemailer";
+import bcrypt from "bcrypt";
 import { EntityTarget } from "typeorm";
 import { AuthRequest } from "../common/auth_middleware";
-import { Response } from "express";
+import { Request, Response } from "express";
 import { User } from "../entity/users_model";
 import { BaseController } from "./base_controller";
 import { IUser } from "../entity/users_model";
-import bcrypt from "bcrypt";
 import connectDB from "../data-source";
+
+// הגדרת Nodemailer עם חשבון Gmail
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+});
 
 class UserController extends BaseController<IUser> {
   constructor(entity: EntityTarget<IUser>) {
     super(entity);
   }
 
-  // פונקציה לעדכון משתמש כולל הצפנת סיסמה
   async put(req: AuthRequest, res: Response) {
     if (req.body.password) {
       const salt = await bcrypt.genSalt(10);
       const encryptedPassword = await bcrypt.hash(req.body.password, salt);
       req.body.password = encryptedPassword;
     }
-    return super.put(req, res); // קריאה לפונקציה put מהמחלקה BaseController
+    return super.put(req, res);
   }
 
-  // פונקציה להוספת טיול לרשימת המועדפים
   async addFavoriteTrip(req: AuthRequest, res: Response) {
     try {
-      const userId = req.user._id; // מזהה המשתמש
-      const tripId = req.params.tripId; // מזהה הטיול
+      const userId = req.user._id;
+      const tripId = req.params.tripId;
 
-      // משתמשים ב-DataSource כדי לקבל את ה-Repository של המשתמשים
       const userRepository = connectDB.getRepository(User);
       const user = await userRepository.findOne({ where: { _id: userId } });
 
       if (user) {
-        // וודא כי favoriteTrips מאותחל למערך אם הוא null
         if (!user.favoriteTrips) {
           user.favoriteTrips = [];
         }
 
-        // בודק אם הטיול כבר קיים במועדפים של המשתמש
         if (!user.favoriteTrips.includes(tripId)) {
-          user.favoriteTrips.push(tripId); // מוסיף את הטיול למועדפים
-          await userRepository.save(user); // שומר את השינויים בבסיס הנתונים
+          user.favoriteTrips.push(tripId);
+          await userRepository.save(user);
           return res.status(200).json({
             message: "Trip added to favorites",
             favoriteTrips: user.favoriteTrips,
@@ -59,25 +65,21 @@ class UserController extends BaseController<IUser> {
     }
   }
 
-  // פונקציה להסרת טיול מרשימת המועדפים
   async removeFavoriteTrip(req: AuthRequest, res: Response) {
     try {
-      const userId = req.user._id; // מזהה המשתמש
-      const tripId = req.params.tripId; // מזהה הטיול
+      const userId = req.user._id;
+      const tripId = req.params.tripId;
 
-      // משתמשים ב-DataSource כדי לקבל את ה-Repository של המשתמשים
       const userRepository = connectDB.getRepository(User);
       const user = await userRepository.findOne({ where: { _id: userId } });
 
       if (user) {
-        // וודא כי favoriteTrips מאותחל למערך אם הוא null
         if (!user.favoriteTrips) {
           user.favoriteTrips = [];
         }
 
-        // מסנן את מזהה הטיול מרשימת המועדפים
         user.favoriteTrips = user.favoriteTrips.filter((id) => id !== tripId);
-        await userRepository.save(user); // שומר את השינויים בבסיס הנתונים
+        await userRepository.save(user);
         return res.status(200).json({
           message: "Trip removed from favorites",
           favoriteTrips: user.favoriteTrips,
@@ -97,14 +99,12 @@ class UserController extends BaseController<IUser> {
       const userId = req.params.userId;
       const userRepository = connectDB.getRepository(User);
 
-      // שליפת היוזר על פי ה-ID
       const user = await userRepository.findOne({ where: { _id: userId } });
       if (!user) {
         console.log(`User not found: ${userId}`);
         return res.status(404).json({ message: "User not found" });
       }
 
-      // החזרת מערך המזהים של הטיולים המועדפים בלבד
       const favoriteTripIds = user.favoriteTrips || [];
       console.log(`Favorite trip IDs for user ${userId}:`, favoriteTripIds);
 
@@ -112,6 +112,71 @@ class UserController extends BaseController<IUser> {
     } catch (err) {
       console.error("Error fetching favorite trip IDs:", err);
       res.status(500).json({ message: err.message });
+    }
+  }
+
+  // פונקציה לשליחת מייל לשחזור סיסמה
+  async requestPasswordReset(req: Request, res: Response) {
+    const { email } = req.body;
+    const userRepository = connectDB.getRepository(User);
+
+    try {
+      const user = await userRepository.findOne({ where: { email } });
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
+        expiresIn: "1h",
+      });
+      const resetLink = `https://travel-easily-app.netlify.app/reset-password?token=${token}`;
+
+      const mailOptions = {
+        from: process.env.SMTP_USER,
+        to: email,
+        subject: "Password Reset",
+        html: `<p>Click <a href="${resetLink}">here</a> to reset your password. This link will expire in 1 hour.</p>`,
+      };
+
+      await transporter.sendMail(mailOptions);
+
+      return res.status(200).json({ message: "Password reset email sent" });
+    } catch (error) {
+      console.error("Error in requestPasswordReset:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  }
+
+  // פונקציה לאיפוס סיסמה
+  async resetPassword(req: Request, res: Response) {
+    const { token, newPassword } = req.body;
+    const userRepository = connectDB.getRepository(User);
+
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET) as {
+        _id: string;
+      };
+      const user = await userRepository.findOne({
+        where: { _id: decoded._id },
+      });
+
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const salt = await bcrypt.genSalt(10);
+      user.password = await bcrypt.hash(newPassword, salt);
+      await userRepository.save(user);
+
+      return res
+        .status(200)
+        .json({ message: "Password has been reset successfully" });
+    } catch (error) {
+      console.error("Error in resetPassword:", error);
+      if (error.name === "TokenExpiredError") {
+        return res.status(400).json({ message: "Token has expired" });
+      }
+      return res.status(500).json({ message: "Internal server error" });
     }
   }
 }

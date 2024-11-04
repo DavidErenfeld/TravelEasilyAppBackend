@@ -171,4 +171,69 @@ router.delete(
   UserController.removeFavoriteTrip.bind(UserController)
 );
 
+/**
+ * @swagger
+ * /users/request-password-reset:
+ *   post:
+ *     summary: Request password reset
+ *     tags: [Users]
+ *     description: Sends a password reset email to the user
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 description: User's email address
+ *     responses:
+ *       200:
+ *         description: Password reset email sent
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Internal server error
+ */
+router.post(
+  "/request-password-reset",
+  UserController.requestPasswordReset.bind(UserController)
+);
+
+/**
+ * @swagger
+ * /users/reset-password:
+ *   post:
+ *     summary: Reset password with token
+ *     tags: [Users]
+ *     description: Resets the user's password using a provided token
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               token:
+ *                 type: string
+ *                 description: Password reset token
+ *               newPassword:
+ *                 type: string
+ *                 description: New password for the user
+ *     responses:
+ *       200:
+ *         description: Password has been reset successfully
+ *       400:
+ *         description: Token has expired
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Internal server error
+ */
+router.post(
+  "/reset-password",
+  UserController.resetPassword.bind(UserController)
+);
+
 export default router;
