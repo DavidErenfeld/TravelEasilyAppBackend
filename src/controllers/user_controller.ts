@@ -90,6 +90,30 @@ class UserController extends BaseController<IUser> {
       return res.status(500).json({ message: "Internal server error" });
     }
   }
+
+  async getFavoriteTripIds(req: AuthRequest, res: Response) {
+    console.log(`Fetching favorite trip IDs for user: ${req.user._id}`);
+    try {
+      const userId = req.params.userId;
+      const userRepository = connectDB.getRepository(User);
+
+      // שליפת היוזר על פי ה-ID
+      const user = await userRepository.findOne({ where: { _id: userId } });
+      if (!user) {
+        console.log(`User not found: ${userId}`);
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // החזרת מערך המזהים של הטיולים המועדפים בלבד
+      const favoriteTripIds = user.favoriteTrips || [];
+      console.log(`Favorite trip IDs for user ${userId}:`, favoriteTripIds);
+
+      res.status(200).json(favoriteTripIds);
+    } catch (err) {
+      console.error("Error fetching favorite trip IDs:", err);
+      res.status(500).json({ message: err.message });
+    }
+  }
 }
 
 export default new UserController(User);

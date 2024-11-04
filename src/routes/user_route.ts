@@ -29,6 +29,34 @@ router.get("/:id", authMiddleware, UserController.get.bind(UserController));
 
 /**
  * @swagger
+ * /users/{userId}/favorites:
+ *   get:
+ *     summary: Retrieve list of user's favorite trips by user ID
+ *     tags: [Users]
+ *     description: Get an array of trip IDs that are in the user's favorites list.
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         description: The ID of the user to retrieve favorite trips for.
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: List of favorite trip IDs retrieved successfully
+ *       404:
+ *         description: User not found
+ *       401:
+ *         description: Unauthorized
+ */
+router.get(
+  "/:userId/favorites",
+  authMiddleware,
+  UserController.getFavoriteTripIds.bind(UserController)
+);
+
+/**
+ * @swagger
  * /users/{id}:
  *   put:
  *     summary: Update user details
