@@ -120,6 +120,8 @@ class TripController extends BaseController<ITrips> {
         return res.status(200).json([]);
       }
 
+      console.log(`User ${userId} has favorite trips:`, user.favoriteTrips);
+
       const trips = await this.entity
         .createQueryBuilder("trip")
         .leftJoinAndSelect("trip.owner", "owner")
