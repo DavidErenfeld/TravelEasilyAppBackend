@@ -37,4 +37,7 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Trip, (trip) => trip.owner, { cascade: true })
   trips: Trip[];
+
+  @Column("simple-array", { nullable: true })
+  favoriteTrips: string[];
 }

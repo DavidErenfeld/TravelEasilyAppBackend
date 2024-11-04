@@ -1,9 +1,10 @@
 import { Request, Response } from "express";
-import { EntityTarget } from "typeorm";
+import { EntityTarget, getRepository } from "typeorm";
 import { ParsedQs } from "qs";
 import { BaseController } from "./base_controller";
 import { AuthRequest } from "../common/auth_middleware";
 import { ITrips, Trip } from "../entity/trips_model";
+import { User } from "../entity/users_model";
 import { io } from "../services/socket";
 
 class TripController extends BaseController<ITrips> {
@@ -37,6 +38,7 @@ class TripController extends BaseController<ITrips> {
       res.status(500).json({ message: err.message });
     }
   }
+
   async getByParamId(req: Request, res: Response) {
     const allowedFields = [
       "_id",
@@ -57,18 +59,16 @@ class TripController extends BaseController<ITrips> {
       const whereCondition: Record<string, string | number | boolean> = {};
       let numOfDaysCondition: number | null = null;
 
-      // עובר על הפרמטרים שנשלחו ושומר רק את המותרים
       Object.entries(queryParams).forEach(([key, value]) => {
         if (allowedFields.includes(key) && typeof value === "string") {
           if (key === "numOfDays") {
-            numOfDaysCondition = parseInt(value, 10); // ממיר את הפרמטר למספר
+            numOfDaysCondition = parseInt(value, 10);
           } else {
             whereCondition[key] = value;
           }
         }
       });
 
-      // מוודא שהתקבלו פרמטרים חוקיים לשאילתה
       if (
         Object.keys(whereCondition).length === 0 &&
         numOfDaysCondition === null
@@ -78,7 +78,6 @@ class TripController extends BaseController<ITrips> {
           .json({ message: "No valid query parameters provided" });
       }
 
-      // בונה את השאילתה עם התנאים
       const query = this.entity
         .createQueryBuilder("trip")
         .leftJoinAndSelect("trip.owner", "owner")
@@ -86,7 +85,6 @@ class TripController extends BaseController<ITrips> {
         .leftJoinAndSelect("trip.comments", "comments")
         .where(whereCondition);
 
-      // אם יש תנאי למספר הימים, מוסיף את התנאי לשאילתה
       if (numOfDaysCondition !== null) {
         query.andWhere(
           'json_array_length(trip."tripDescription") = :numOfDays',
@@ -96,11 +94,39 @@ class TripController extends BaseController<ITrips> {
         );
       }
 
-      // מבצע את השאילתה ומחזיר את התוצאות
       const trips = await query.getMany();
       res.status(trips.length > 0 ? 200 : 404).json({ data: trips });
     } catch (err) {
       console.error("Error fetching trips:", err);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  }
+
+  async getFavoriteTrips(req: AuthRequest, res: Response) {
+    console.log(`Fetching favorite trips for user: ${req.user._id}`);
+    try {
+      const userId = req.user._id;
+
+      const userRepository = getRepository(User);
+      const user = await userRepository.findOne({ where: { _id: userId } });
+
+      if (!user || !user.favoriteTrips || user.favoriteTrips.length === 0) {
+        return res.status(404).json({ message: "No favorite trips found" });
+      }
+
+      const trips = await this.entity
+        .createQueryBuilder("trip")
+        .leftJoinAndSelect("trip.owner", "owner")
+        .leftJoinAndSelect("trip.likes", "likes")
+        .leftJoinAndSelect("trip.comments", "comments")
+        .where("trip._id IN (:...favoriteTrips)", {
+          favoriteTrips: user.favoriteTrips,
+        })
+        .getMany();
+
+      res.status(trips.length > 0 ? 200 : 201).json(trips);
+    } catch (err) {
+      console.error("Error fetching favorite trips:", err);
       res.status(500).json({ message: "Internal server error" });
     }
   }

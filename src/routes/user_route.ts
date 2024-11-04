@@ -2,18 +2,43 @@ import express from "express";
 const router = express.Router();
 import authMiddleware from "../common/auth_middleware";
 import UserController from "../controllers/user_controller";
+
 /**
  * @swagger
- * /auth/update/{id}:
- *   patch:
- *     summary: updates a user
- *     tags: [Auth]
- *     description: Updates user information based on the provided ID
+ * /users/{id}:
+ *   get:
+ *     summary: Retrieve user details by ID
+ *     tags: [Users]
+ *     description: Get user details using the user's unique ID.
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
- *         description: The ID of the user to update
+ *         description: The ID of the user to retrieve.
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: User retrieved successfully
+ *       404:
+ *         description: User not found
+ *       401:
+ *         description: Unauthorized
+ */
+router.get("/:id", authMiddleware, UserController.get.bind(UserController));
+
+/**
+ * @swagger
+ * /users/{id}:
+ *   put:
+ *     summary: Update user details
+ *     tags: [Users]
+ *     description: Update user information, including encrypted password if a new one is provided.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: The ID of the user to update.
  *         schema:
  *           type: string
  *     requestBody:
@@ -25,41 +50,97 @@ import UserController from "../controllers/user_controller";
  *     responses:
  *       200:
  *         description: User updated successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/User'
+ *       404:
+ *         description: User not found
+ *       401:
+ *         description: Unauthorized
  */
 router.put("/:id", authMiddleware, UserController.put.bind(UserController));
 
 /**
  * @swagger
- * /auth/{id}:
- *   get:
- *     summary: retrieves a user via id
- *     tags: [Auth]
- *     description: get user id and retrieves its info
+ * /users/{id}:
+ *   delete:
+ *     summary: Delete user by ID
+ *     tags: [Users]
+ *     description: Delete a user based on the provided ID.
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
- *         description: The ID of the user to retrieve
+ *         description: The ID of the user to delete.
  *         schema:
  *           type: string
  *     responses:
  *       200:
- *         description: User retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/User'
+ *         description: User deleted successfully
+ *       404:
+ *         description: User not found
+ *       401:
+ *         description: Unauthorized
  */
-router.get("/:id", authMiddleware, UserController.get.bind(UserController));
-
 router.delete(
   "/:id",
   authMiddleware,
   UserController.delete.bind(UserController)
+);
+
+/**
+ * @swagger
+ * /users/favorites/{tripId}:
+ *   post:
+ *     summary: Add a trip to user's favorites
+ *     tags: [Users]
+ *     description: Add a trip to the user's list of favorite trips.
+ *     parameters:
+ *       - in: path
+ *         name: tripId
+ *         required: true
+ *         description: The ID of the trip to add to favorites.
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Trip added to favorites successfully
+ *       404:
+ *         description: User not found
+ *       409:
+ *         description: Trip is already in favorites
+ *       401:
+ *         description: Unauthorized
+ */
+router.post(
+  "/favorites/:tripId",
+  authMiddleware,
+  UserController.addFavoriteTrip.bind(UserController)
+);
+
+/**
+ * @swagger
+ * /users/favorites/{tripId}:
+ *   delete:
+ *     summary: Remove a trip from user's favorites
+ *     tags: [Users]
+ *     description: Remove a trip from the user's list of favorite trips.
+ *     parameters:
+ *       - in: path
+ *         name: tripId
+ *         required: true
+ *         description: The ID of the trip to remove from favorites.
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Trip removed from favorites successfully
+ *       404:
+ *         description: User not found
+ *       401:
+ *         description: Unauthorized
+ */
+router.delete(
+  "/favorites/:tripId",
+  authMiddleware,
+  UserController.removeFavoriteTrip.bind(UserController)
 );
 
 export default router;
