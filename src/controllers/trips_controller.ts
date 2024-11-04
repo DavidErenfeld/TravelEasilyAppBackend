@@ -107,7 +107,7 @@ class TripController extends BaseController<ITrips> {
   async getFavoriteTrips(req: AuthRequest, res: Response) {
     console.log(`Fetching favorite trips for user: ${req.user._id}`);
     try {
-      const userId = req.user._id;
+      const userId = req.params.userId;
       const userRepository = connectDB.getRepository(User);
 
       const user = await userRepository.findOne({ where: { _id: userId } });

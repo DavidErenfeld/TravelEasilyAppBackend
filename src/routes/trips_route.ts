@@ -146,7 +146,7 @@ router.get(
  *         description: Internal server error
  */
 router.get(
-  "/favorites",
+  "/favorites/:userId",
   authMiddleware,
   TripController.getFavoriteTrips.bind(TripController)
 );
