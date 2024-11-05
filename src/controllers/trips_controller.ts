@@ -14,7 +14,6 @@ class TripController extends BaseController<ITrips> {
     super(entity);
   }
 
-  // הוספת טיול חדש
   async post(req: AuthRequest, res: Response): Promise<void> {
     req.body.owner = req.user._id;
     try {
@@ -25,7 +24,6 @@ class TripController extends BaseController<ITrips> {
     }
   }
 
-  // קבלת טיולים לפי ID של בעל הטיול
   async getByOwnerId(req: Request, res: Response) {
     try {
       const ownerId = req.params.id;
@@ -43,7 +41,6 @@ class TripController extends BaseController<ITrips> {
     }
   }
 
-  // קבלת טיולים לפי פרמטרים דינאמיים
   async getByParamId(req: Request, res: Response) {
     try {
       const queryParams: ParsedQs = req.query;
@@ -80,7 +77,6 @@ class TripController extends BaseController<ITrips> {
     }
   }
 
-  // קבלת טיולים מועדפים לפי מזהה משתמש
   async getFavoriteTrips(req: AuthRequest, res: Response) {
     try {
       const userId = req.params.userId;
@@ -100,7 +96,6 @@ class TripController extends BaseController<ITrips> {
     }
   }
 
-  // מחיקת טיול
   async deleteTrip(req: Request, res: Response) {
     try {
       const tripId = req.params.id;
@@ -131,7 +126,6 @@ class TripController extends BaseController<ITrips> {
     }
   }
 
-  // הוספת תגובה
   async addComment(req: AuthRequest, res: Response) {
     try {
       const tripId = req.params.tripId;
@@ -154,7 +148,6 @@ class TripController extends BaseController<ITrips> {
     }
   }
 
-  // הוספת לייק והסרת לייק
   async addLike(req: AuthRequest, res: Response) {
     try {
       const tripId = req.params.tripId;
@@ -187,7 +180,6 @@ class TripController extends BaseController<ITrips> {
     }
   }
 
-  // קבלת טיול עם תגובות
   async getWithComments(req: Request, res: Response) {
     try {
       const tripId = req.params.id;
@@ -202,7 +194,6 @@ class TripController extends BaseController<ITrips> {
     }
   }
 
-  // מחיקת תגובה
   async deleteComment(req: AuthRequest, res: Response) {
     try {
       const tripId = req.params.tripId;

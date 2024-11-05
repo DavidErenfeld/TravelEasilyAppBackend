@@ -9,6 +9,7 @@ import jwt from "jsonwebtoken"; // ייבוא jwt
 import connectDB from "../data-source";
 import nodemailer from "nodemailer";
 import dotenv from "dotenv"; // ייבוא dotenv
+import { io } from "../services/socket";
 dotenv.config();
 
 // הגדרת Nodemailer עם חשבון Gmail
@@ -117,7 +118,6 @@ class UserController extends BaseController<IUser> {
     }
   }
 
-  // פונקציה לשליחת מייל לשחזור סיסמה
   async requestPasswordReset(req: Request, res: Response) {
     const { email } = req.body;
     const userRepository = connectDB.getRepository(User);
@@ -149,7 +149,6 @@ class UserController extends BaseController<IUser> {
     }
   }
 
-  // פונקציה לאיפוס סיסמה
   async resetPassword(req: Request, res: Response) {
     const { token, newPassword } = req.body;
     const userRepository = connectDB.getRepository(User);
@@ -179,6 +178,25 @@ class UserController extends BaseController<IUser> {
         return res.status(400).json({ message: "Token has expired" });
       }
       return res.status(500).json({ message: "Internal server error" });
+    }
+  }
+
+  async deleteUser(req: AuthRequest, res: Response) {
+    console.log("Deleting user...");
+    try {
+      const result = await this.entity.delete(req.params.id);
+      if (result.affected === 0) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // שליחת אירוע Socket לניתוק כל החיבורים של המשתמש
+      io.to(req.params.id).emit("disconnectUser");
+
+      console.log("User deleted successfully:", req.params.id);
+      res.status(200).json({ message: "User deleted successfully" });
+    } catch (error) {
+      console.error("Error in user deletion:", error);
+      res.status(500).json({ message: "Internal server error", error });
     }
   }
 }
