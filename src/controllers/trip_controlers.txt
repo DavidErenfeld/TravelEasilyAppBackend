@@ -212,3 +212,617 @@ class TripController extends BaseController<ITrips> {
 }
 
 export default new TripController(Trip);
+
+
+//////////////////////////////////////////////////
+
+PS C:\Users\97250\Desktop\backend> git add .                                                                                                                       
+PS C:\Users\97250\Desktop\backend> git commit -m "Fixes in socketIO so that they don't cause a crash"                                                              
+[main 6e908e0] Fixes in socketIO so that they don't cause a crash
+ 2 files changed, 110 insertions(+), 178 deletions(-)
+PS C:\Users\97250\Desktop\backend> git push heroku main
+Enumerating objects: 13, done.
+Counting objects: 100% (13/13), done.
+Delta compression using up to 8 threads
+Compressing objects: 100% (6/6), done.
+Writing objects: 100% (7/7), 2.14 KiB | 731.00 KiB/s, done.
+Total 7 (delta 4), reused 0 (delta 0), pack-reused 0
+remote: Updated 39 paths from 44e6a7c
+remote: Compressing source files... done.
+remote: Building source:
+remote: 
+remote: -----> Building on the Heroku-22 stack
+remote: -----> Using buildpack: heroku/nodejs
+remote: -----> Node.js app detected
+remote:
+remote: -----> Creating runtime environment
+remote:
+remote:        NPM_CONFIG_LOGLEVEL=error
+remote:        NODE_VERBOSE=false
+remote:        NODE_ENV=production
+remote:        NODE_MODULES_CACHE=true
+remote:
+remote: -----> Installing binaries
+remote:        engines.node (package.json):   unspecified
+remote:        engines.npm (package.json):    unspecified (use default)     
+remote:
+remote:        Resolving node version 22.x...
+remote:        Downloading and installing node 22.11.0...
+remote:        Using default npm version: 10.9.0
+remote:
+remote: -----> Restoring cache
+remote:        - npm cache
+remote:
+remote: -----> Installing dependencies
+remote:        Installing node modules
+remote:
+remote:        added 739 packages, and audited 740 packages in 5s
+remote:
+remote:        99 packages are looking for funding
+remote:          run `npm fund` for details
+remote:
+remote:        found 0 vulnerabilities
+remote:
+remote: -----> Build
+remote:        Detected both "build" and "heroku-postbuild" scripts
+remote:        Running heroku-postbuild
+remote:
+remote:        > travel_easily@1.0.0 heroku-postbuild
+remote:        > npm run build
+remote:
+remote:
+remote:        > travel_easily@1.0.0 build
+remote:        > tsc
+remote:
+remote:
+remote: -----> Caching build
+remote:        - npm cache
+remote:
+remote: -----> Pruning devDependencies
+remote:
+remote:        up to date, audited 472 packages in 4s
+remote:
+remote:        73 packages are looking for funding
+remote:          run `npm fund` for details
+remote:
+remote:        found 0 vulnerabilities
+remote:
+remote: -----> Build succeeded!
+remote: -----> Discovering process types
+remote:        Procfile declares types -> web
+remote:
+remote: -----> Compressing...
+remote:        Done: 75.8M
+remote: -----> Launching...
+remote:        Released v79
+remote:        https://evening-bayou-77034-176dc93fb1e1.herokuapp.com/ deployed to Heroku
+remote:
+remote: This app is using the Heroku-22 stack, however a newer stack is available.
+remote: To upgrade to Heroku-24, see:
+remote: https://devcenter.heroku.com/articles/upgrading-to-the-latest-stack
+remote:
+remote: Verifying deploy... done.
+To https://git.heroku.com/evening-bayou-77034.git
+   a3ed7ec..6e908e0  main -> main
+PS C:\Users\97250\Desktop\backend> heroku logs --tail
+ »   Warning: heroku update available from 9.1.0 to 9.3.0.
+2024-11-05T00:15:04.913734+00:00 heroku[router]: at=error code=H10 desc="App crashed" method=GET path="/socket.io/?EIO=4&transport=polling&t=p9u0uezo" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=bb734b01-52de-4264-85a9-f19b8359e0a9 fwd="147.235.192.212" dyno= connect= service= status=503 bytes= protocol=https
+2024-11-05T00:15:05.793433+00:00 heroku[router]: at=error code=H10 desc="App crashed" method=GET path="/socket.io/?EIO=4&transport=polling&t=p9usgg64" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=614d4ae3-f3be-48f6-b23c-08a0e21c6049 fwd="147.235.192.212" dyno= connect= service= status=503 bytes= protocol=https
+2024-11-05T00:15:07.870336+00:00 heroku[router]: at=error code=H10 desc="App crashed" method=GET path="/socket.io/?EIO=4&transport=polling&t=p9wc7ad8" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=b305b1b2-0ab5-481d-8f42-dc63962401ad fwd="147.235.192.212" dyno= connect= service= status=503 bytes= protocol=https
+2024-11-05T00:15:08.897329+00:00 heroku[router]: at=error code=H10 desc="App crashed" method=GET path="/socket.io/?EIO=4&transport=polling&t=p9x41q1x" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=2af2a06d-b703-4228-a2fa-13936a082115 fwd="147.235.192.212" dyno= connect= service= status=503 bytes= protocol=https
+2024-11-05T00:15:10.941603+00:00 heroku[router]: at=error code=H10 desc="App crashed" method=GET path="/socket.io/?EIO=4&transport=polling&t=p9yniwde" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=c3e67c87-1c71-4aeb-8bdf-8f5ce5179e06 fwd="147.235.192.212" dyno= connect= service= status=503 bytes= protocol=https
+2024-11-05T00:15:11.877399+00:00 heroku[router]: at=error code=H10 desc="App crashed" method=GET path="/socket.io/?EIO=4&transport=polling&t=p9zf73go" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=70e11e24-b121-4689-b33d-9410d7511232 fwd="147.235.192.212" dyno= connect= service= status=503 bytes= protocol=https
+2024-11-05T00:15:13.806816+00:00 heroku[router]: at=error code=H10 desc="App crashed" method=GET path="/socket.io/?EIO=4&transport=polling&t=pa0yma0s" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=1a3f0746-6e94-47ea-93ae-37b6f8c5fce4 fwd="147.235.192.212" dyno= connect= service= status=503 bytes= protocol=https
+2024-11-05T00:15:14.841795+00:00 heroku[router]: at=error code=H10 desc="App crashed" method=GET path="/socket.io/?EIO=4&transport=polling&t=pa1qsxnp" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=fea13e3d-5c52-4288-a088-13dbca10010a fwd="147.235.192.212" dyno= connect= service= status=503 bytes= protocol=https
+2024-11-05T00:15:16.878574+00:00 heroku[router]: at=error code=H10 desc="App crashed" method=GET path="/socket.io/?EIO=4&transport=polling&t=pa3a7tum" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=d14eed26-521a-4819-9434-add108ca2ca8 fwd="147.235.192.212" dyno= connect= service= status=503 bytes= protocol=https
+2024-11-05T00:15:17.803471+00:00 heroku[router]: at=error code=H10 desc="App crashed" method=GET path="/socket.io/?EIO=4&transport=polling&t=pa41xvot" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=e4e2f0d2-57e8-46d3-9404-3f2e9bb2fa0e fwd="147.235.192.212" dyno= connect= service= status=503 bytes= protocol=https
+2024-11-05T00:15:19.853829+00:00 heroku[router]: at=error code=H10 desc="App crashed" method=GET path="/socket.io/?EIO=4&transport=polling&t=pa5lk71f" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=e5a9821a-bbd9-4844-9f95-a155e2067b5e fwd="147.235.192.212" dyno= connect= service= status=503 bytes= protocol=https
+2024-11-05T00:15:20.884661+00:00 heroku[router]: at=error code=H10 desc="App crashed" method=GET path="/socket.io/?EIO=4&transport=polling&t=pa6d4ra9" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=7c02bb62-17b1-4a1b-93af-d8ef2276b885 fwd="147.235.192.212" dyno= connect= service= status=503 bytes= protocol=https
+2024-11-05T00:15:22.820964+00:00 heroku[router]: at=error code=H10 desc="App crashed" method=GET path="/socket.io/?EIO=4&transport=polling&t=pa7wxmq2" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=c01fe05e-c41a-4258-a6c5-4ac2511dc4eb fwd="147.235.192.212" dyno= connect= service= status=503 bytes= protocol=https
+2024-11-05T00:15:23.844198+00:00 heroku[router]: at=error code=H10 desc="App crashed" method=GET path="/socket.io/?EIO=4&transport=polling&t=pa8oizmt" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=db88508f-97a9-4484-9d84-58704200cd6e fwd="147.235.192.212" dyno= connect= service= status=503 bytes= protocol=https
+2024-11-05T00:15:24.247414+00:00 heroku[web.1]: State changed from crashed to starting
+2024-11-05T00:15:30.545597+00:00 heroku[web.1]: Starting process with command `node dist/server.js`
+2024-11-05T00:15:31.657635+00:00 app[web.1]: (node:2) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2024-11-05T00:15:31.657670+00:00 app[web.1]: (Use `node --trace-deprecation ...` to show where the warning was created)
+2024-11-05T00:15:31.781806+00:00 app[web.1]: Data Source has been initialized` true
+2024-11-05T00:15:31.821451+00:00 app[web.1]: Server listening on port 43625
+2024-11-05T00:15:32.198097+00:00 heroku[web.1]: State changed from starting to up
+2024-11-05T00:15:32.796169+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=padbcclm" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=0075dfc9-d5f3-4ea8-96c6-e75532c830b7 fwd="147.235.192.212" dyno=web.1 connect=0ms service=5ms status=200 bytes=312 protocol=https
+2024-11-05T00:15:32.869057+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pacjo5c3" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=a50cfc16-1fe9-42ff-83f3-1f3cb1b23505 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=312 protocol=https
+2024-11-05T00:15:33.007467+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=paa82lg2" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=56d08047-567c-4506-9aec-096667ba78c1 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=312 protocol=https
+2024-11-05T00:15:33.072177+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pag4bf65&sid=bBDXtOOr36mJuWhnAAAA" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=96baf3dc-6ae7-4cbd-a64c-51ae4a633f82 fwd="147.235.192.212" dyno=web.1 connect=0ms service=2ms status=200 bytes=178 protocol=https
+2024-11-05T00:15:33.072910+00:00 app[web.1]: Client connected: 7lXXWo6eAinPTZ7xAAAD
+2024-11-05T00:15:33.074021+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pag4gl3r&sid=bBDXtOOr36mJuWhnAAAA" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=decf2a91-6c4f-46a9-97d8-4401e2fe0ee4 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=225 protocol=https
+2024-11-05T00:15:33.164507+00:00 app[web.1]: Client connected: 6op59fZjyNX3yL7fAAAE
+2024-11-05T00:15:33.164662+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pag4oqjl&sid=-Zxl5q26E0-pHfyNAAAB" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=70b9243c-a4f8-413c-ba83-45bf60f65134 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=178 protocol=https
+2024-11-05T00:15:33.230514+00:00 app[web.1]: Client connected: v0irpaH6hrIHC386AAAF
+2024-11-05T00:15:33.230658+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pag78fpd&sid=nzzRwJ7t7R7tlkIAAAAC" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=3d102447-b0ab-453d-89f7-01fab7b433d7 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=178 protocol=https
+2024-11-05T00:15:33.232712+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pag4u32a&sid=-Zxl5q26E0-pHfyNAAAB" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=0f9ed9d9-f44a-4a9d-8794-af1bb77a199e fwd="147.235.192.212" dyno=web.1 connect=0ms service=2ms status=200 bytes=225 protocol=https
+2024-11-05T00:15:33.325498+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pag7fra8&sid=nzzRwJ7t7R7tlkIAAAAC" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=482fc859-6358-4d36-b915-7f7ba75460a9 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=225 protocol=https
+2024-11-05T00:15:33.438006+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=paazuadn" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=73619df1-70e7-4cca-aead-a86208f08100 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=312 protocol=https
+2024-11-05T00:15:33.621606+00:00 app[web.1]: Client connected: Uy5DITzB5FJ85wfuAAAH
+2024-11-05T00:15:33.621810+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pagjk2ar&sid=pEDrndBfxUiS-VUhAAAG" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=869d30a9-090c-4dda-8d90-d5817e092aa8 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=178 protocol=https
+2024-11-05T00:15:33.673850+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pagju898&sid=pEDrndBfxUiS-VUhAAAG" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=9225346e-2ae5-472e-8ae1-6810ed1924b1 fwd="147.235.192.212" dyno=web.1 connect=0ms service=0ms status=200 bytes=225 protocol=https
+2024-11-05T00:15:33.689707+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pag934rl&sid=bBDXtOOr36mJuWhnAAAA" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=0b87e95e-7800-41b2-a320-34156542e6c5 fwd="147.235.192.212" dyno=web.1 connect=0ms service=304ms status=200 bytes=193 protocol=https
+2024-11-05T00:15:34.288151+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pagdlnbi&sid=-Zxl5q26E0-pHfyNAAAB" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=51256c3c-a180-428d-ad19-68cb05e97736 fwd="147.235.192.212" dyno=web.1 connect=0ms service=879ms status=200 bytes=193 protocol=https
+2024-11-05T00:15:34.860707+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pagijxtv&sid=nzzRwJ7t7R7tlkIAAAAC" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=803bf1d7-29d6-4a45-b8eb-595ce479569a fwd="147.235.192.212" dyno=web.1 connect=0ms service=1282ms status=200 bytes=193 protocol=https
+2024-11-05T00:15:35.514747+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pagq05dh&sid=pEDrndBfxUiS-VUhAAAG" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=412ca726-ae9c-407f-b697-46f4253e985f fwd="147.235.192.212" dyno=web.1 connect=0ms service=1666ms status=200 bytes=193 protocol=https
+2024-11-05T00:22:14.000000+00:00 app[api]: Build started by user 1020dudu@gmail.com
+2024-11-05T00:22:46.872915+00:00 heroku[web.1]: Restarting
+2024-11-05T00:22:46.922840+00:00 heroku[web.1]: State changed from up to starting
+2024-11-05T00:22:47.472297+00:00 heroku[web.1]: Stopping all processes with SIGTERM
+2024-11-05T00:22:47.496596+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=websocket&sid=-Zxl5q26E0-pHfyNAAAB" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=bc2cad88-9346-44bf-8aaf-2c3ff5dacf14 fwd="147.235.192.212" dyno=web.1 connect=0ms service=433506ms status=101 bytes=161 protocol=https
+2024-11-05T00:22:47.496612+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=websocket&sid=pEDrndBfxUiS-VUhAAAG" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=9146474a-0ad7-4b54-93dc-bba6ff275326 fwd="147.235.192.212" dyno=web.1 connect=0ms service=432288ms status=101 bytes=161 protocol=https
+2024-11-05T00:22:47.496871+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=websocket&sid=nzzRwJ7t7R7tlkIAAAAC" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=b2326a93-1558-4b40-9a63-2592f1964cd6 fwd="147.235.192.212" dyno=web.1 connect=0ms service=432900ms status=101 bytes=161 protocol=https
+2024-11-05T00:22:47.497123+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=websocket&sid=bBDXtOOr36mJuWhnAAAA" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=43fdc76c-2978-4dfc-bb94-450dca336327 fwd="147.235.192.212" dyno=web.1 connect=0ms service=434083ms status=101 bytes=161 protocol=https
+2024-11-05T00:22:47.544360+00:00 heroku[web.1]: Process exited with status 143
+2024-11-05T00:22:50.739854+00:00 heroku[web.1]: Starting process with command `node dist/server.js`
+2024-11-05T00:22:51.838969+00:00 app[web.1]: (node:2) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2024-11-05T00:22:51.839001+00:00 app[web.1]: (Use `node --trace-deprecation ...` to show where the warning was created)
+2024-11-05T00:22:51.963264+00:00 app[web.1]: Data Source has been initialized` true
+2024-11-05T00:22:51.999828+00:00 app[web.1]: Server listening on port 11672
+2024-11-05T00:22:52.362754+00:00 heroku[web.1]: State changed from starting to up
+2024-11-05T00:22:53.208419+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pjsth0lv" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=217fa665-a23b-453c-8936-e11f143108f6 fwd="147.235.192.212" dyno=web.1 connect=0ms service=5ms status=200 bytes=312 protocol=https
+2024-11-05T00:22:53.210076+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pjstngyu" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=7fffa933-0c50-4919-a693-76a8a297be48 fwd="147.235.192.212" dyno=web.1 connect=0ms service=7ms status=200 bytes=312 protocol=https
+2024-11-05T00:22:53.211034+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pjstjl2a" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=81a20a95-9a4c-44fc-9763-07a9a436bdcd fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=312 protocol=https
+2024-11-05T00:22:53.211752+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pjstpicz" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=323acdf7-5d5c-4e8d-83d7-fb7bb8c45211 fwd="147.235.192.212" dyno=web.1 connect=0ms service=2ms status=200 bytes=312 protocol=https
+2024-11-05T00:22:53.392293+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pjvvlf39&sid=-KsgLz-pnyCq7g9IAAAA" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=40367d91-8ddc-45e4-a478-b581c1f60eb4 fwd="147.235.192.212" dyno=web.1 connect=0ms service=2ms status=200 bytes=178 protocol=https
+2024-11-05T00:22:53.402406+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pjvvvhvk&sid=O8ARdyF9SlZ7NoJEAAAC" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=b8a7bf55-2d7f-47e6-9421-912854d48326 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=178 protocol=https
+2024-11-05T00:22:53.416066+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pjvw5tmd&sid=cDm-Hc7iKBtqgUrzAAAB" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=bf677206-92d2-48b0-94de-be1e761686ff fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=178 protocol=https
+2024-11-05T00:22:53.424067+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pjvwhep3&sid=oqEA6GbaQfsl8zXcAAAD" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=79999bf9-70a6-48dd-b3ce-bb8aa6291b5f fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=178 protocol=https
+2024-11-05T00:22:53.602987+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pjvvotj1&sid=-KsgLz-pnyCq7g9IAAAA" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=3f567d6a-8527-4502-8a0d-cc78cd3d0194 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=229 protocol=https
+2024-11-05T00:22:53.603782+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pjvw0mxj&sid=O8ARdyF9SlZ7NoJEAAAC" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=d1669054-772e-42c5-b3d4-683d310fd192 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=229 protocol=https
+2024-11-05T00:22:53.605451+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pjvwmom1&sid=oqEA6GbaQfsl8zXcAAAD" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=6891e279-8069-46b1-a3cd-bedc74e4cdcf fwd="147.235.192.212" dyno=web.1 connect=0ms service=0ms status=200 bytes=229 protocol=https
+2024-11-05T00:22:53.608219+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pjvwdbli&sid=cDm-Hc7iKBtqgUrzAAAB" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=56e88162-ccc7-41d3-886b-dc80b0886efd fwd="147.235.192.212" dyno=web.1 connect=0ms service=0ms status=200 bytes=229 protocol=https
+2024-11-05T00:22:53.816339+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pjw7cs0g&sid=O8ARdyF9SlZ7NoJEAAAC" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=37ce96ea-816b-489d-8a63-03373a6fe6c4 fwd="147.235.192.212" dyno=web.1 connect=0ms service=4ms status=200 bytes=193 protocol=https
+2024-11-05T00:22:53.816930+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pjw7ez5q&sid=O8ARdyF9SlZ7NoJEAAAC" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=9196803f-fbd0-4871-a8b1-9fac9da415df fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=178 protocol=https
+2024-11-05T00:22:53.817690+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pjw719mf&sid=-KsgLz-pnyCq7g9IAAAA" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=1c574e95-2474-44a5-9c37-abe80a602045 fwd="147.235.192.212" dyno=web.1 connect=0ms service=6ms status=200 bytes=193 protocol=https
+2024-11-05T00:22:53.817944+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pjw73go8&sid=-KsgLz-pnyCq7g9IAAAA" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=252a1ae6-290a-43d7-ae23-8fa2c5e2515b fwd="147.235.192.212" dyno=web.1 connect=0ms service=2ms status=200 bytes=178 protocol=https
+2024-11-05T00:22:53.823859+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pjw7nhrw&sid=oqEA6GbaQfsl8zXcAAAD" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=1f72a071-bfb6-4c18-afa4-07a9225f4274 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=178 protocol=https
+2024-11-05T00:22:53.823899+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pjw7l7sv&sid=oqEA6GbaQfsl8zXcAAAD" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=bcf52b25-0802-4633-bd4f-503b48c84f74 fwd="147.235.192.212" dyno=web.1 connect=0ms service=3ms status=200 bytes=193 protocol=https
+2024-11-05T00:22:54.004386+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pjw7xa5h&sid=cDm-Hc7iKBtqgUrzAAAB" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=6c104830-f2d0-4509-b468-a50c6777c9b7 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=178 protocol=https
+2024-11-05T00:22:54.004410+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pjw7v3q0&sid=cDm-Hc7iKBtqgUrzAAAB" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=8a9d73b5-dc57-4cee-9b50-e7392e2df46a fwd="147.235.192.212" dyno=web.1 connect=0ms service=7ms status=200 bytes=193 protocol=https
+2024-11-05T00:23:09.764087+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pi289rz2" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=2622bd7c-8953-4622-bf10-a66a116fc78b fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=312 protocol=https
+2024-11-05T00:23:09.765647+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pi289ntb" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=90b883c9-b5ad-4dcb-984f-d8dc0f627b29 fwd="147.235.192.212" dyno=web.1 connect=0ms service=0ms status=200 bytes=312 protocol=https
+2024-11-05T00:23:09.768748+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pi27wdxd" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=fcccd27f-819e-422a-9ed6-c84864821c47 fwd="147.235.192.212" dyno=web.1 connect=0ms service=0ms status=200 bytes=312 protocol=https
+2024-11-05T00:23:09.923455+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pi2z5de2&sid=DUnLUKo5dQExEZyeAAAI" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=bddec317-65a9-472f-bfb1-528e8fbc94a7 fwd="147.235.192.212" dyno=web.1 connect=0ms service=2ms status=200 bytes=178 protocol=https
+2024-11-05T00:23:09.948236+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pi2zp4zc&sid=pXFfkT4r3-k5TfPTAAAJ" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=6e808034-e8f4-4fb1-affd-8448fec3ef0c fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=178 protocol=https
+2024-11-05T00:23:09.948542+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pi2z9zbl&sid=DUnLUKo5dQExEZyeAAAI" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=eb8ac0f1-0513-44dd-bf5d-d748c94db307 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=229 protocol=https
+2024-11-05T00:23:10.084372+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pi2zsqdg&sid=n9HHjiJ8KkqEiT5uAAAK" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=31c7ebac-9467-4be2-8461-8d6978f82ea1 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=178 protocol=https
+2024-11-05T00:23:10.119541+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pi2ztj9z&sid=n9HHjiJ8KkqEiT5uAAAK" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=32b46239-74f7-4889-8da3-57847c631ecc fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=229 protocol=https
+2024-11-05T00:23:10.121394+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pi2zrkh9&sid=pXFfkT4r3-k5TfPTAAAJ" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=3fab2be2-449e-4282-ac5b-90ed85097da1 fwd="147.235.192.212" dyno=web.1 connect=0ms service=0ms status=200 bytes=229 protocol=https
+2024-11-05T00:23:10.286164+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pi34m4zp&sid=DUnLUKo5dQExEZyeAAAI" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=0903eee1-aaf2-488e-a14d-c625238cdcd4 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=178 protocol=https
+2024-11-05T00:23:10.287657+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pi34lvqw&sid=DUnLUKo5dQExEZyeAAAI" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=a924a11d-203e-4df9-a4f7-dea770c84dde fwd="147.235.192.212" dyno=web.1 connect=0ms service=0ms status=400 bytes=228 protocol=https
+2024-11-05T00:23:10.291540+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pi3998wz&sid=n9HHjiJ8KkqEiT5uAAAK" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=ac89d83b-2c85-4e8a-bb9d-87c3a3f3990e fwd="147.235.192.212" dyno=web.1 connect=0ms service=3ms status=200 bytes=193 protocol=https
+2024-11-05T00:23:10.291642+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pi3991ph&sid=n9HHjiJ8KkqEiT5uAAAK" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=d25375a7-2881-4c2b-b3f5-20a2d372562e fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=178 protocol=https
+2024-11-05T00:23:10.302658+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pi39bms2&sid=pXFfkT4r3-k5TfPTAAAJ" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=f325d8dc-fbd4-4c55-bc2f-363a9a1cb8e1 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=178 protocol=https
+2024-11-05T00:23:10.302718+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pi39bm8p&sid=pXFfkT4r3-k5TfPTAAAJ" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=c28e45cf-0e41-4198-b2d2-8ae9f5a0816f fwd="147.235.192.212" dyno=web.1 connect=0ms service=13ms status=200 bytes=193 protocol=https
+2024-11-05T00:23:13.972305+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pi637qmr" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=21d4dcb5-4889-4fcf-a53c-3da8a94e100e fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=312 protocol=https
+2024-11-05T00:23:14.149794+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pi68ft2y&sid=8zAg-VKwgbMp0CjcAAAO" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=0ffabec9-cd74-4f17-a979-d63f87063756 fwd="147.235.192.212" dyno=web.1 connect=0ms service=2ms status=200 bytes=178 protocol=https
+2024-11-05T00:23:14.153406+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pi68gk3x&sid=8zAg-VKwgbMp0CjcAAAO" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=446cd194-eaa1-414c-94bb-7b260a8bb147 fwd="147.235.192.212" dyno=web.1 connect=0ms service=0ms status=200 bytes=229 protocol=https
+2024-11-05T00:23:14.396104+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pi6f8cmu&sid=8zAg-VKwgbMp0CjcAAAO" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=92cd4b88-0e92-4682-bce3-2ca60c2f3a87 fwd="147.235.192.212" dyno=web.1 connect=0ms service=5ms status=200 bytes=193 protocol=https
+2024-11-05T00:23:14.396205+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pi6f9zsg&sid=8zAg-VKwgbMp0CjcAAAO" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=e0198ac2-7607-4163-ace7-7bc53b2bb68b fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=178 protocol=https
+2024-11-05T00:23:15.688412+00:00 heroku[router]: at=info method=OPTIONS path="/auth/login" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=7bf4bea6-4c82-4963-be51-dbe8a0f1af0e fwd="147.235.192.212" dyno=web.1 connect=0ms service=2ms status=204 bytes=301 protocol=https
+2024-11-05T00:23:15.911822+00:00 app[web.1]: Login request received: moshe@gmail.com du10du20
+2024-11-05T00:23:15.937876+00:00 app[web.1]: User not found: moshe@gmail.com
+2024-11-05T00:23:15.940604+00:00 heroku[router]: at=info method=POST path="/auth/login" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=9c1a9eb7-344b-4240-b7d1-56b116b1551e fwd="147.235.192.212" dyno=web.1 connect=0ms service=35ms status=401 bytes=269 protocol=https
+2024-11-05T00:22:46.535947+00:00 app[api]: Release v79 created by user 1020dudu@gmail.com
+2024-11-05T00:22:46.535947+00:00 app[api]: Deploy 6e908e0e by user 1020dudu@gmail.com
+2024-11-05T00:22:48.000000+00:00 app[api]: Build succeeded
+2024-11-05T00:24:43.062733+00:00 heroku[router]: at=info method=OPTIONS path="/users/request-password-reset" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=76f09c9f-d87c-4a71-9ab3-bf7f63e7d99d fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=204 bytes=301 protocol=https
+2024-11-05T00:24:44.713369+00:00 heroku[router]: at=info method=POST path="/users/request-password-reset" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=919dc748-5b13-4a49-b3f8-209cb5afe3a4 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1438ms status=200 bytes=278 protocol=https
+2024-11-05T00:24:58.264513+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pkekais3" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=b05c6bdb-6f80-473b-a773-efdf862361e2 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=312 protocol=https
+2024-11-05T00:24:58.422029+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pkekqfqs" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=d020b3a1-a6dc-4cd1-9f64-93220b302972 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=312 protocol=https
+2024-11-05T00:24:58.587141+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pkekrujd" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=8b362c13-8b46-4bf2-bb10-31580c3716c1 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=312 protocol=https
+2024-11-05T00:24:58.805895+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pkeowadq&sid=QuO4xtlLM11eIFgoAAAQ" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=5e43849c-2264-4159-9311-6f413dba0f98 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=178 protocol=https
+2024-11-05T00:24:58.754051+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pkekrme6" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=08953ef6-753c-4686-b495-adad424e199f fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=312 protocol=https
+2024-11-05T00:24:58.812463+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pkethct6&sid=EDXnT-rNw3WhemR4AAAR" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=c0979145-b019-4163-9b46-c0565338f4e1 fwd="147.235.192.212" dyno=web.1 connect=0ms service=0ms status=200 bytes=178 protocol=https
+2024-11-05T00:24:58.815423+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pketjckp&sid=EDXnT-rNw3WhemR4AAAR" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=c149ec86-2299-4d89-8bf9-531a1bb163ad fwd="147.235.192.212" dyno=web.1 connect=0ms service=0ms status=200 bytes=229 protocol=https
+2024-11-05T00:24:58.811646+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pkeoyrsn&sid=QuO4xtlLM11eIFgoAAAQ" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=488499ea-b891-4381-894d-992ee732af95 fwd="147.235.192.212" dyno=web.1 connect=0ms service=0ms status=200 bytes=229 protocol=https
+2024-11-05T00:24:58.976754+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pkey81et&sid=U1jTKPUP8vYQqY67AAAS" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=add18edd-09e0-485f-973e-400239c9de51 fwd="147.235.192.212" dyno=web.1 connect=0ms service=0ms status=200 bytes=229 protocol=https
+2024-11-05T00:24:58.829694+00:00 heroku[router]: at=info method=GET path="/trips" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=ea0469b0-4f0e-434a-a8ab-b896cdfa6954 fwd="147.235.192.212" dyno=web.1 connect=0ms service=25ms status=200 bytes=1433 protocol=https
+2024-11-05T00:24:58.828899+00:00 app[web.1]: [
+2024-11-05T00:24:58.828909+00:00 app[web.1]: Trip {
+2024-11-05T00:24:58.828912+00:00 app[web.1]: _id: 'd120bf49-3b61-42b2-baf6-4bb6556b022e',
+2024-11-05T00:24:58.828912+00:00 app[web.1]: userName: 'test3',
+2024-11-05T00:24:58.828913+00:00 app[web.1]: imgUrl: null,
+2024-11-05T00:24:58.828914+00:00 app[web.1]: typeTraveler: 'romantic couple',
+2024-11-05T00:24:58.828914+00:00 app[web.1]: country: 'Taiwan',
+2024-11-05T00:24:58.828916+00:00 app[web.1]: typeTrip: 'romantic',
+2024-11-05T00:24:58.828916+00:00 app[web.1]: tripPhotos: [
+2024-11-05T00:24:58.828917+00:00 app[web.1]: 'https://res.cloudinary.com/dstyeoecz/image/upload/q_auto,f_auto,w_600,h_400,c_limit/olhxu5wrhamm7jom306p',
+2024-11-05T00:24:58.828917+00:00 app[web.1]: 'https://res.cloudinary.com/dstyeoecz/image/upload/q_auto,f_auto,w_600,h_400,c_limit/l8y4dsqquowud9zulilk',
+2024-11-05T00:24:58.828918+00:00 app[web.1]: 'https://res.cloudinary.com/dstyeoecz/image/upload/q_auto,f_auto,w_600,h_400,c_limit/kgn58dtb26iz2vsxjwks',
+2024-11-05T00:24:58.828918+00:00 app[web.1]: 'https://res.cloudinary.com/dstyeoecz/image/upload/q_auto,f_auto,w_600,h_400,c_limit/n6kqdk3authojtjqyirt'
+2024-11-05T00:24:58.828918+00:00 app[web.1]: ],
+2024-11-05T00:24:58.828918+00:00 app[web.1]: tripDescription: [ 'jgkm' ],
+2024-11-05T00:24:58.828919+00:00 app[web.1]: numOfComments: 0,
+2024-11-05T00:24:58.828919+00:00 app[web.1]: numOfLikes: 0,
+2024-11-05T00:24:58.828919+00:00 app[web.1]: owner: User {
+2024-11-05T00:24:58.828919+00:00 app[web.1]: _id: '404c6c55-762c-4370-9da3-018089092a75',
+2024-11-05T00:24:58.828919+00:00 app[web.1]: email: 'test3@gmail.com',
+2024-11-05T00:24:58.828919+00:00 app[web.1]: userName: 'test3',
+2024-11-05T00:24:58.828920+00:00 app[web.1]: password: '$2b$10$rjBZMr4KVgsTvlTxZ9EW6OvahdBVHcKNpjtP0oP7iKhOJpIGHvCNa',
+2024-11-05T00:24:58.828920+00:00 app[web.1]: imgUrl: 'https://res.cloudinary.com/dstyeoecz/image/upload/q_auto,f_auto,w_600,h_400,c_limit/ah8ponozhnjxor9okrzu',   
+2024-11-05T00:24:58.828921+00:00 app[web.1]: refreshTokens: [Array],
+2024-11-05T00:24:58.828921+00:00 app[web.1]: favoriteTrips: [Array]
+2024-11-05T00:24:58.828921+00:00 app[web.1]: }
+2024-11-05T00:24:58.828921+00:00 app[web.1]: }
+2024-11-05T00:24:58.828921+00:00 app[web.1]: ]
+2024-11-05T00:24:58.991968+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pkf4hrte&sid=QuO4xtlLM11eIFgoAAAQ" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=c325d683-0ac5-4eac-afc8-7f9165f406fa fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=400 bytes=228 protocol=https
+2024-11-05T00:24:58.988787+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pkf2lfno&sid=_KATrWfSNs4zHPu2AAAT" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=aa231c79-23c2-4d4f-b004-d651256e3950 fwd="147.235.192.212" dyno=web.1 connect=0ms service=5ms status=200 bytes=229 protocol=https
+2024-11-05T00:24:58.917732+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pkey3uno&sid=U1jTKPUP8vYQqY67AAAS" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=d70850e5-eab7-4ee5-bf33-f2c44d22b2ad fwd="147.235.192.212" dyno=web.1 connect=1ms service=1ms status=200 bytes=178 protocol=https
+2024-11-05T00:24:58.988703+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pkf2jqvl&sid=_KATrWfSNs4zHPu2AAAT" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=9a18fb77-0a70-4640-80ae-14d1cdbd48f8 fwd="147.235.192.212" dyno=web.1 connect=2ms service=2ms status=200 bytes=178 protocol=https
+2024-11-05T00:24:58.984888+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=websocket&sid=QuO4xtlLM11eIFgoAAAQ" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=a14f74ea-88e7-497c-958e-cd9abe2b1f4d fwd="147.235.192.212" dyno=web.1 connect=0ms service=20ms status=101 bytes=161 protocol=https
+2024-11-05T00:24:59.139850+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pkf4lnnl&sid=EDXnT-rNw3WhemR4AAAR" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=12310b4d-8339-4401-8e2c-b8198d59cccb fwd="147.235.192.212" dyno=web.1 connect=0ms service=58ms status=200 bytes=193 protocol=https
+2024-11-05T00:24:59.140218+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pkf4llaj&sid=EDXnT-rNw3WhemR4AAAR" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=73850e8c-9646-4d3a-9067-f27c0d358ada fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=178 protocol=https
+2024-11-05T00:24:58.988434+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pkf4jtly&sid=QuO4xtlLM11eIFgoAAAQ" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=6aa0e669-f883-4eaa-abeb-cafe977daf6f fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=178 protocol=https
+2024-11-05T00:24:59.156376+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pkf98w3q&sid=_KATrWfSNs4zHPu2AAAT" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=69abe6fa-628c-4eee-adce-6ae64a2b7489 fwd="147.235.192.212" dyno=web.1 connect=0ms service=5ms status=200 bytes=193 protocol=https
+2024-11-05T00:24:59.157605+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pkf9153y&sid=U1jTKPUP8vYQqY67AAAS" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=8a9280d0-431c-4ed8-a11e-869bcb1a9dab fwd="147.235.192.212" dyno=web.1 connect=0ms service=4ms status=200 bytes=193 protocol=https
+2024-11-05T00:24:59.157806+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pkf94izy&sid=U1jTKPUP8vYQqY67AAAS" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=1fdfb293-83fd-422c-b080-e46e360f114d fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=178 protocol=https
+2024-11-05T00:24:59.156472+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pkf99wkz&sid=_KATrWfSNs4zHPu2AAAT" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=0ee7cd15-d325-4ed5-95d1-b3bab4373d71 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=178 protocol=https
+2024-11-05T00:26:00.676565+00:00 heroku[router]: at=info method=OPTIONS path="/users/reset-password" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=b7cc89e4-0de7-4c9d-a9c8-8a26b4f1d635 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=204 bytes=301 protocol=https
+2024-11-05T00:26:00.972284+00:00 heroku[router]: at=info method=POST path="/users/reset-password" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=b3afa8f5-df06-4858-96b5-d4d762df4fe7 fwd="147.235.192.212" dyno=web.1 connect=0ms service=98ms status=200 bytes=289 protocol=https
+
+
+....................................................................
+......................................................................
+
+PS C:\Users\97250\Desktop\backend> git add .                                                                                                                       
+PS C:\Users\97250\Desktop\backend> git commit -m "Fixes in socketIO so that they don't cause a crash"                                                              
+[main 6e908e0] Fixes in socketIO so that they don't cause a crash
+ 2 files changed, 110 insertions(+), 178 deletions(-)
+PS C:\Users\97250\Desktop\backend> git push heroku main
+Enumerating objects: 13, done.
+Counting objects: 100% (13/13), done.
+Delta compression using up to 8 threads
+Compressing objects: 100% (6/6), done.
+Writing objects: 100% (7/7), 2.14 KiB | 731.00 KiB/s, done.
+Total 7 (delta 4), reused 0 (delta 0), pack-reused 0
+remote: Updated 39 paths from 44e6a7c
+remote: Compressing source files... done.
+remote: Building source:
+remote: 
+remote: -----> Building on the Heroku-22 stack
+remote: -----> Using buildpack: heroku/nodejs
+remote: -----> Node.js app detected
+remote:
+remote: -----> Creating runtime environment
+remote:
+remote:        NPM_CONFIG_LOGLEVEL=error
+remote:        NODE_VERBOSE=false
+remote:        NODE_ENV=production
+remote:        NODE_MODULES_CACHE=true
+remote:
+remote: -----> Installing binaries
+remote:        engines.node (package.json):   unspecified
+remote:        engines.npm (package.json):    unspecified (use default)     
+remote:
+remote:        Resolving node version 22.x...
+remote:        Downloading and installing node 22.11.0...
+remote:        Using default npm version: 10.9.0
+remote:
+remote: -----> Restoring cache
+remote:        - npm cache
+remote:
+remote: -----> Installing dependencies
+remote:        Installing node modules
+remote:
+remote:        added 739 packages, and audited 740 packages in 5s
+remote:
+remote:        99 packages are looking for funding
+remote:          run `npm fund` for details
+remote:
+remote:        found 0 vulnerabilities
+remote:
+remote: -----> Build
+remote:        Detected both "build" and "heroku-postbuild" scripts
+remote:        Running heroku-postbuild
+remote:
+remote:        > travel_easily@1.0.0 heroku-postbuild
+remote:        > npm run build
+remote:
+remote:
+remote:        > travel_easily@1.0.0 build
+remote:        > tsc
+remote:
+remote:
+remote: -----> Caching build
+remote:        - npm cache
+remote:
+remote: -----> Pruning devDependencies
+remote:
+remote:        up to date, audited 472 packages in 4s
+remote:
+remote:        73 packages are looking for funding
+remote:          run `npm fund` for details
+remote:
+remote:        found 0 vulnerabilities
+remote:
+remote: -----> Build succeeded!
+remote: -----> Discovering process types
+remote:        Procfile declares types -> web
+remote:
+remote: -----> Compressing...
+remote:        Done: 75.8M
+remote: -----> Launching...
+remote:        Released v79
+remote:        https://evening-bayou-77034-176dc93fb1e1.herokuapp.com/ deployed to Heroku
+remote:
+remote: This app is using the Heroku-22 stack, however a newer stack is available.
+remote: To upgrade to Heroku-24, see:
+remote: https://devcenter.heroku.com/articles/upgrading-to-the-latest-stack
+remote:
+remote: Verifying deploy... done.
+To https://git.heroku.com/evening-bayou-77034.git
+   a3ed7ec..6e908e0  main -> main
+PS C:\Users\97250\Desktop\backend> heroku logs --tail
+ »   Warning: heroku update available from 9.1.0 to 9.3.0.
+2024-11-05T00:15:04.913734+00:00 heroku[router]: at=error code=H10 desc="App crashed" method=GET path="/socket.io/?EIO=4&transport=polling&t=p9u0uezo" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=bb734b01-52de-4264-85a9-f19b8359e0a9 fwd="147.235.192.212" dyno= connect= service= status=503 bytes= protocol=https
+2024-11-05T00:15:05.793433+00:00 heroku[router]: at=error code=H10 desc="App crashed" method=GET path="/socket.io/?EIO=4&transport=polling&t=p9usgg64" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=614d4ae3-f3be-48f6-b23c-08a0e21c6049 fwd="147.235.192.212" dyno= connect= service= status=503 bytes= protocol=https
+2024-11-05T00:15:07.870336+00:00 heroku[router]: at=error code=H10 desc="App crashed" method=GET path="/socket.io/?EIO=4&transport=polling&t=p9wc7ad8" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=b305b1b2-0ab5-481d-8f42-dc63962401ad fwd="147.235.192.212" dyno= connect= service= status=503 bytes= protocol=https
+2024-11-05T00:15:08.897329+00:00 heroku[router]: at=error code=H10 desc="App crashed" method=GET path="/socket.io/?EIO=4&transport=polling&t=p9x41q1x" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=2af2a06d-b703-4228-a2fa-13936a082115 fwd="147.235.192.212" dyno= connect= service= status=503 bytes= protocol=https
+2024-11-05T00:15:10.941603+00:00 heroku[router]: at=error code=H10 desc="App crashed" method=GET path="/socket.io/?EIO=4&transport=polling&t=p9yniwde" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=c3e67c87-1c71-4aeb-8bdf-8f5ce5179e06 fwd="147.235.192.212" dyno= connect= service= status=503 bytes= protocol=https
+2024-11-05T00:15:11.877399+00:00 heroku[router]: at=error code=H10 desc="App crashed" method=GET path="/socket.io/?EIO=4&transport=polling&t=p9zf73go" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=70e11e24-b121-4689-b33d-9410d7511232 fwd="147.235.192.212" dyno= connect= service= status=503 bytes= protocol=https
+2024-11-05T00:15:13.806816+00:00 heroku[router]: at=error code=H10 desc="App crashed" method=GET path="/socket.io/?EIO=4&transport=polling&t=pa0yma0s" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=1a3f0746-6e94-47ea-93ae-37b6f8c5fce4 fwd="147.235.192.212" dyno= connect= service= status=503 bytes= protocol=https
+2024-11-05T00:15:14.841795+00:00 heroku[router]: at=error code=H10 desc="App crashed" method=GET path="/socket.io/?EIO=4&transport=polling&t=pa1qsxnp" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=fea13e3d-5c52-4288-a088-13dbca10010a fwd="147.235.192.212" dyno= connect= service= status=503 bytes= protocol=https
+2024-11-05T00:15:16.878574+00:00 heroku[router]: at=error code=H10 desc="App crashed" method=GET path="/socket.io/?EIO=4&transport=polling&t=pa3a7tum" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=d14eed26-521a-4819-9434-add108ca2ca8 fwd="147.235.192.212" dyno= connect= service= status=503 bytes= protocol=https
+2024-11-05T00:15:17.803471+00:00 heroku[router]: at=error code=H10 desc="App crashed" method=GET path="/socket.io/?EIO=4&transport=polling&t=pa41xvot" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=e4e2f0d2-57e8-46d3-9404-3f2e9bb2fa0e fwd="147.235.192.212" dyno= connect= service= status=503 bytes= protocol=https
+2024-11-05T00:15:19.853829+00:00 heroku[router]: at=error code=H10 desc="App crashed" method=GET path="/socket.io/?EIO=4&transport=polling&t=pa5lk71f" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=e5a9821a-bbd9-4844-9f95-a155e2067b5e fwd="147.235.192.212" dyno= connect= service= status=503 bytes= protocol=https
+2024-11-05T00:15:20.884661+00:00 heroku[router]: at=error code=H10 desc="App crashed" method=GET path="/socket.io/?EIO=4&transport=polling&t=pa6d4ra9" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=7c02bb62-17b1-4a1b-93af-d8ef2276b885 fwd="147.235.192.212" dyno= connect= service= status=503 bytes= protocol=https
+2024-11-05T00:15:22.820964+00:00 heroku[router]: at=error code=H10 desc="App crashed" method=GET path="/socket.io/?EIO=4&transport=polling&t=pa7wxmq2" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=c01fe05e-c41a-4258-a6c5-4ac2511dc4eb fwd="147.235.192.212" dyno= connect= service= status=503 bytes= protocol=https
+2024-11-05T00:15:23.844198+00:00 heroku[router]: at=error code=H10 desc="App crashed" method=GET path="/socket.io/?EIO=4&transport=polling&t=pa8oizmt" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=db88508f-97a9-4484-9d84-58704200cd6e fwd="147.235.192.212" dyno= connect= service= status=503 bytes= protocol=https
+2024-11-05T00:15:24.247414+00:00 heroku[web.1]: State changed from crashed to starting
+2024-11-05T00:15:30.545597+00:00 heroku[web.1]: Starting process with command `node dist/server.js`
+2024-11-05T00:15:31.657635+00:00 app[web.1]: (node:2) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2024-11-05T00:15:31.657670+00:00 app[web.1]: (Use `node --trace-deprecation ...` to show where the warning was created)
+2024-11-05T00:15:31.781806+00:00 app[web.1]: Data Source has been initialized` true
+2024-11-05T00:15:31.821451+00:00 app[web.1]: Server listening on port 43625
+2024-11-05T00:15:32.198097+00:00 heroku[web.1]: State changed from starting to up
+2024-11-05T00:15:32.796169+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=padbcclm" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=0075dfc9-d5f3-4ea8-96c6-e75532c830b7 fwd="147.235.192.212" dyno=web.1 connect=0ms service=5ms status=200 bytes=312 protocol=https
+2024-11-05T00:15:32.869057+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pacjo5c3" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=a50cfc16-1fe9-42ff-83f3-1f3cb1b23505 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=312 protocol=https
+2024-11-05T00:15:33.007467+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=paa82lg2" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=56d08047-567c-4506-9aec-096667ba78c1 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=312 protocol=https
+2024-11-05T00:15:33.072177+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pag4bf65&sid=bBDXtOOr36mJuWhnAAAA" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=96baf3dc-6ae7-4cbd-a64c-51ae4a633f82 fwd="147.235.192.212" dyno=web.1 connect=0ms service=2ms status=200 bytes=178 protocol=https
+2024-11-05T00:15:33.072910+00:00 app[web.1]: Client connected: 7lXXWo6eAinPTZ7xAAAD
+2024-11-05T00:15:33.074021+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pag4gl3r&sid=bBDXtOOr36mJuWhnAAAA" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=decf2a91-6c4f-46a9-97d8-4401e2fe0ee4 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=225 protocol=https
+2024-11-05T00:15:33.164507+00:00 app[web.1]: Client connected: 6op59fZjyNX3yL7fAAAE
+2024-11-05T00:15:33.164662+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pag4oqjl&sid=-Zxl5q26E0-pHfyNAAAB" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=70b9243c-a4f8-413c-ba83-45bf60f65134 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=178 protocol=https
+2024-11-05T00:15:33.230514+00:00 app[web.1]: Client connected: v0irpaH6hrIHC386AAAF
+2024-11-05T00:15:33.230658+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pag78fpd&sid=nzzRwJ7t7R7tlkIAAAAC" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=3d102447-b0ab-453d-89f7-01fab7b433d7 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=178 protocol=https
+2024-11-05T00:15:33.232712+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pag4u32a&sid=-Zxl5q26E0-pHfyNAAAB" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=0f9ed9d9-f44a-4a9d-8794-af1bb77a199e fwd="147.235.192.212" dyno=web.1 connect=0ms service=2ms status=200 bytes=225 protocol=https
+2024-11-05T00:15:33.325498+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pag7fra8&sid=nzzRwJ7t7R7tlkIAAAAC" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=482fc859-6358-4d36-b915-7f7ba75460a9 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=225 protocol=https
+2024-11-05T00:15:33.438006+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=paazuadn" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=73619df1-70e7-4cca-aead-a86208f08100 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=312 protocol=https
+2024-11-05T00:15:33.621606+00:00 app[web.1]: Client connected: Uy5DITzB5FJ85wfuAAAH
+2024-11-05T00:15:33.621810+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pagjk2ar&sid=pEDrndBfxUiS-VUhAAAG" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=869d30a9-090c-4dda-8d90-d5817e092aa8 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=178 protocol=https
+2024-11-05T00:15:33.673850+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pagju898&sid=pEDrndBfxUiS-VUhAAAG" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=9225346e-2ae5-472e-8ae1-6810ed1924b1 fwd="147.235.192.212" dyno=web.1 connect=0ms service=0ms status=200 bytes=225 protocol=https
+2024-11-05T00:15:33.689707+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pag934rl&sid=bBDXtOOr36mJuWhnAAAA" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=0b87e95e-7800-41b2-a320-34156542e6c5 fwd="147.235.192.212" dyno=web.1 connect=0ms service=304ms status=200 bytes=193 protocol=https
+2024-11-05T00:15:34.288151+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pagdlnbi&sid=-Zxl5q26E0-pHfyNAAAB" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=51256c3c-a180-428d-ad19-68cb05e97736 fwd="147.235.192.212" dyno=web.1 connect=0ms service=879ms status=200 bytes=193 protocol=https
+2024-11-05T00:15:34.860707+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pagijxtv&sid=nzzRwJ7t7R7tlkIAAAAC" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=803bf1d7-29d6-4a45-b8eb-595ce479569a fwd="147.235.192.212" dyno=web.1 connect=0ms service=1282ms status=200 bytes=193 protocol=https
+2024-11-05T00:15:35.514747+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pagq05dh&sid=pEDrndBfxUiS-VUhAAAG" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=412ca726-ae9c-407f-b697-46f4253e985f fwd="147.235.192.212" dyno=web.1 connect=0ms service=1666ms status=200 bytes=193 protocol=https
+2024-11-05T00:22:14.000000+00:00 app[api]: Build started by user 1020dudu@gmail.com
+2024-11-05T00:22:46.872915+00:00 heroku[web.1]: Restarting
+2024-11-05T00:22:46.922840+00:00 heroku[web.1]: State changed from up to starting
+2024-11-05T00:22:47.472297+00:00 heroku[web.1]: Stopping all processes with SIGTERM
+2024-11-05T00:22:47.496596+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=websocket&sid=-Zxl5q26E0-pHfyNAAAB" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=bc2cad88-9346-44bf-8aaf-2c3ff5dacf14 fwd="147.235.192.212" dyno=web.1 connect=0ms service=433506ms status=101 bytes=161 protocol=https
+2024-11-05T00:22:47.496612+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=websocket&sid=pEDrndBfxUiS-VUhAAAG" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=9146474a-0ad7-4b54-93dc-bba6ff275326 fwd="147.235.192.212" dyno=web.1 connect=0ms service=432288ms status=101 bytes=161 protocol=https
+2024-11-05T00:22:47.496871+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=websocket&sid=nzzRwJ7t7R7tlkIAAAAC" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=b2326a93-1558-4b40-9a63-2592f1964cd6 fwd="147.235.192.212" dyno=web.1 connect=0ms service=432900ms status=101 bytes=161 protocol=https
+2024-11-05T00:22:47.497123+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=websocket&sid=bBDXtOOr36mJuWhnAAAA" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=43fdc76c-2978-4dfc-bb94-450dca336327 fwd="147.235.192.212" dyno=web.1 connect=0ms service=434083ms status=101 bytes=161 protocol=https
+2024-11-05T00:22:47.544360+00:00 heroku[web.1]: Process exited with status 143
+2024-11-05T00:22:50.739854+00:00 heroku[web.1]: Starting process with command `node dist/server.js`
+2024-11-05T00:22:51.838969+00:00 app[web.1]: (node:2) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2024-11-05T00:22:51.839001+00:00 app[web.1]: (Use `node --trace-deprecation ...` to show where the warning was created)
+2024-11-05T00:22:51.963264+00:00 app[web.1]: Data Source has been initialized` true
+2024-11-05T00:22:51.999828+00:00 app[web.1]: Server listening on port 11672
+2024-11-05T00:22:52.362754+00:00 heroku[web.1]: State changed from starting to up
+2024-11-05T00:22:53.208419+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pjsth0lv" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=217fa665-a23b-453c-8936-e11f143108f6 fwd="147.235.192.212" dyno=web.1 connect=0ms service=5ms status=200 bytes=312 protocol=https
+2024-11-05T00:22:53.210076+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pjstngyu" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=7fffa933-0c50-4919-a693-76a8a297be48 fwd="147.235.192.212" dyno=web.1 connect=0ms service=7ms status=200 bytes=312 protocol=https
+2024-11-05T00:22:53.211034+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pjstjl2a" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=81a20a95-9a4c-44fc-9763-07a9a436bdcd fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=312 protocol=https
+2024-11-05T00:22:53.211752+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pjstpicz" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=323acdf7-5d5c-4e8d-83d7-fb7bb8c45211 fwd="147.235.192.212" dyno=web.1 connect=0ms service=2ms status=200 bytes=312 protocol=https
+2024-11-05T00:22:53.392293+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pjvvlf39&sid=-KsgLz-pnyCq7g9IAAAA" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=40367d91-8ddc-45e4-a478-b581c1f60eb4 fwd="147.235.192.212" dyno=web.1 connect=0ms service=2ms status=200 bytes=178 protocol=https
+2024-11-05T00:22:53.402406+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pjvvvhvk&sid=O8ARdyF9SlZ7NoJEAAAC" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=b8a7bf55-2d7f-47e6-9421-912854d48326 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=178 protocol=https
+2024-11-05T00:22:53.416066+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pjvw5tmd&sid=cDm-Hc7iKBtqgUrzAAAB" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=bf677206-92d2-48b0-94de-be1e761686ff fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=178 protocol=https
+2024-11-05T00:22:53.424067+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pjvwhep3&sid=oqEA6GbaQfsl8zXcAAAD" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=79999bf9-70a6-48dd-b3ce-bb8aa6291b5f fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=178 protocol=https
+2024-11-05T00:22:53.602987+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pjvvotj1&sid=-KsgLz-pnyCq7g9IAAAA" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=3f567d6a-8527-4502-8a0d-cc78cd3d0194 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=229 protocol=https
+2024-11-05T00:22:53.603782+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pjvw0mxj&sid=O8ARdyF9SlZ7NoJEAAAC" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=d1669054-772e-42c5-b3d4-683d310fd192 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=229 protocol=https
+2024-11-05T00:22:53.605451+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pjvwmom1&sid=oqEA6GbaQfsl8zXcAAAD" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=6891e279-8069-46b1-a3cd-bedc74e4cdcf fwd="147.235.192.212" dyno=web.1 connect=0ms service=0ms status=200 bytes=229 protocol=https
+2024-11-05T00:22:53.608219+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pjvwdbli&sid=cDm-Hc7iKBtqgUrzAAAB" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=56e88162-ccc7-41d3-886b-dc80b0886efd fwd="147.235.192.212" dyno=web.1 connect=0ms service=0ms status=200 bytes=229 protocol=https
+2024-11-05T00:22:53.816339+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pjw7cs0g&sid=O8ARdyF9SlZ7NoJEAAAC" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=37ce96ea-816b-489d-8a63-03373a6fe6c4 fwd="147.235.192.212" dyno=web.1 connect=0ms service=4ms status=200 bytes=193 protocol=https
+2024-11-05T00:22:53.816930+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pjw7ez5q&sid=O8ARdyF9SlZ7NoJEAAAC" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=9196803f-fbd0-4871-a8b1-9fac9da415df fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=178 protocol=https
+2024-11-05T00:22:53.817690+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pjw719mf&sid=-KsgLz-pnyCq7g9IAAAA" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=1c574e95-2474-44a5-9c37-abe80a602045 fwd="147.235.192.212" dyno=web.1 connect=0ms service=6ms status=200 bytes=193 protocol=https
+2024-11-05T00:22:53.817944+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pjw73go8&sid=-KsgLz-pnyCq7g9IAAAA" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=252a1ae6-290a-43d7-ae23-8fa2c5e2515b fwd="147.235.192.212" dyno=web.1 connect=0ms service=2ms status=200 bytes=178 protocol=https
+2024-11-05T00:22:53.823859+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pjw7nhrw&sid=oqEA6GbaQfsl8zXcAAAD" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=1f72a071-bfb6-4c18-afa4-07a9225f4274 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=178 protocol=https
+2024-11-05T00:22:53.823899+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pjw7l7sv&sid=oqEA6GbaQfsl8zXcAAAD" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=bcf52b25-0802-4633-bd4f-503b48c84f74 fwd="147.235.192.212" dyno=web.1 connect=0ms service=3ms status=200 bytes=193 protocol=https
+2024-11-05T00:22:54.004386+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pjw7xa5h&sid=cDm-Hc7iKBtqgUrzAAAB" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=6c104830-f2d0-4509-b468-a50c6777c9b7 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=178 protocol=https
+2024-11-05T00:22:54.004410+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pjw7v3q0&sid=cDm-Hc7iKBtqgUrzAAAB" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=8a9d73b5-dc57-4cee-9b50-e7392e2df46a fwd="147.235.192.212" dyno=web.1 connect=0ms service=7ms status=200 bytes=193 protocol=https
+2024-11-05T00:23:09.764087+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pi289rz2" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=2622bd7c-8953-4622-bf10-a66a116fc78b fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=312 protocol=https
+2024-11-05T00:23:09.765647+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pi289ntb" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=90b883c9-b5ad-4dcb-984f-d8dc0f627b29 fwd="147.235.192.212" dyno=web.1 connect=0ms service=0ms status=200 bytes=312 protocol=https
+2024-11-05T00:23:09.768748+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pi27wdxd" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=fcccd27f-819e-422a-9ed6-c84864821c47 fwd="147.235.192.212" dyno=web.1 connect=0ms service=0ms status=200 bytes=312 protocol=https
+2024-11-05T00:23:09.923455+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pi2z5de2&sid=DUnLUKo5dQExEZyeAAAI" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=bddec317-65a9-472f-bfb1-528e8fbc94a7 fwd="147.235.192.212" dyno=web.1 connect=0ms service=2ms status=200 bytes=178 protocol=https
+2024-11-05T00:23:09.948236+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pi2zp4zc&sid=pXFfkT4r3-k5TfPTAAAJ" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=6e808034-e8f4-4fb1-affd-8448fec3ef0c fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=178 protocol=https
+2024-11-05T00:23:09.948542+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pi2z9zbl&sid=DUnLUKo5dQExEZyeAAAI" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=eb8ac0f1-0513-44dd-bf5d-d748c94db307 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=229 protocol=https
+2024-11-05T00:23:10.084372+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pi2zsqdg&sid=n9HHjiJ8KkqEiT5uAAAK" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=31c7ebac-9467-4be2-8461-8d6978f82ea1 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=178 protocol=https
+2024-11-05T00:23:10.119541+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pi2ztj9z&sid=n9HHjiJ8KkqEiT5uAAAK" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=32b46239-74f7-4889-8da3-57847c631ecc fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=229 protocol=https
+2024-11-05T00:23:10.121394+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pi2zrkh9&sid=pXFfkT4r3-k5TfPTAAAJ" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=3fab2be2-449e-4282-ac5b-90ed85097da1 fwd="147.235.192.212" dyno=web.1 connect=0ms service=0ms status=200 bytes=229 protocol=https
+2024-11-05T00:23:10.286164+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pi34m4zp&sid=DUnLUKo5dQExEZyeAAAI" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=0903eee1-aaf2-488e-a14d-c625238cdcd4 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=178 protocol=https
+2024-11-05T00:23:10.287657+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pi34lvqw&sid=DUnLUKo5dQExEZyeAAAI" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=a924a11d-203e-4df9-a4f7-dea770c84dde fwd="147.235.192.212" dyno=web.1 connect=0ms service=0ms status=400 bytes=228 protocol=https
+2024-11-05T00:23:10.291540+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pi3998wz&sid=n9HHjiJ8KkqEiT5uAAAK" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=ac89d83b-2c85-4e8a-bb9d-87c3a3f3990e fwd="147.235.192.212" dyno=web.1 connect=0ms service=3ms status=200 bytes=193 protocol=https
+2024-11-05T00:23:10.291642+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pi3991ph&sid=n9HHjiJ8KkqEiT5uAAAK" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=d25375a7-2881-4c2b-b3f5-20a2d372562e fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=178 protocol=https
+2024-11-05T00:23:10.302658+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pi39bms2&sid=pXFfkT4r3-k5TfPTAAAJ" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=f325d8dc-fbd4-4c55-bc2f-363a9a1cb8e1 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=178 protocol=https
+2024-11-05T00:23:10.302718+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pi39bm8p&sid=pXFfkT4r3-k5TfPTAAAJ" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=c28e45cf-0e41-4198-b2d2-8ae9f5a0816f fwd="147.235.192.212" dyno=web.1 connect=0ms service=13ms status=200 bytes=193 protocol=https
+2024-11-05T00:23:13.972305+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pi637qmr" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=21d4dcb5-4889-4fcf-a53c-3da8a94e100e fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=312 protocol=https
+2024-11-05T00:23:14.149794+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pi68ft2y&sid=8zAg-VKwgbMp0CjcAAAO" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=0ffabec9-cd74-4f17-a979-d63f87063756 fwd="147.235.192.212" dyno=web.1 connect=0ms service=2ms status=200 bytes=178 protocol=https
+2024-11-05T00:23:14.153406+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pi68gk3x&sid=8zAg-VKwgbMp0CjcAAAO" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=446cd194-eaa1-414c-94bb-7b260a8bb147 fwd="147.235.192.212" dyno=web.1 connect=0ms service=0ms status=200 bytes=229 protocol=https
+2024-11-05T00:23:14.396104+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pi6f8cmu&sid=8zAg-VKwgbMp0CjcAAAO" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=92cd4b88-0e92-4682-bce3-2ca60c2f3a87 fwd="147.235.192.212" dyno=web.1 connect=0ms service=5ms status=200 bytes=193 protocol=https
+2024-11-05T00:23:14.396205+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pi6f9zsg&sid=8zAg-VKwgbMp0CjcAAAO" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=e0198ac2-7607-4163-ace7-7bc53b2bb68b fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=178 protocol=https
+2024-11-05T00:23:15.688412+00:00 heroku[router]: at=info method=OPTIONS path="/auth/login" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=7bf4bea6-4c82-4963-be51-dbe8a0f1af0e fwd="147.235.192.212" dyno=web.1 connect=0ms service=2ms status=204 bytes=301 protocol=https
+2024-11-05T00:23:15.911822+00:00 app[web.1]: Login request received: moshe@gmail.com du10du20
+2024-11-05T00:23:15.937876+00:00 app[web.1]: User not found: moshe@gmail.com
+2024-11-05T00:23:15.940604+00:00 heroku[router]: at=info method=POST path="/auth/login" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=9c1a9eb7-344b-4240-b7d1-56b116b1551e fwd="147.235.192.212" dyno=web.1 connect=0ms service=35ms status=401 bytes=269 protocol=https
+2024-11-05T00:22:46.535947+00:00 app[api]: Release v79 created by user 1020dudu@gmail.com
+2024-11-05T00:22:46.535947+00:00 app[api]: Deploy 6e908e0e by user 1020dudu@gmail.com
+2024-11-05T00:22:48.000000+00:00 app[api]: Build succeeded
+2024-11-05T00:24:43.062733+00:00 heroku[router]: at=info method=OPTIONS path="/users/request-password-reset" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=76f09c9f-d87c-4a71-9ab3-bf7f63e7d99d fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=204 bytes=301 protocol=https
+2024-11-05T00:24:44.713369+00:00 heroku[router]: at=info method=POST path="/users/request-password-reset" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=919dc748-5b13-4a49-b3f8-209cb5afe3a4 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1438ms status=200 bytes=278 protocol=https
+2024-11-05T00:24:58.264513+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pkekais3" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=b05c6bdb-6f80-473b-a773-efdf862361e2 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=312 protocol=https
+2024-11-05T00:24:58.422029+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pkekqfqs" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=d020b3a1-a6dc-4cd1-9f64-93220b302972 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=312 protocol=https
+2024-11-05T00:24:58.587141+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pkekrujd" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=8b362c13-8b46-4bf2-bb10-31580c3716c1 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=312 protocol=https
+2024-11-05T00:24:58.805895+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pkeowadq&sid=QuO4xtlLM11eIFgoAAAQ" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=5e43849c-2264-4159-9311-6f413dba0f98 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=178 protocol=https
+2024-11-05T00:24:58.754051+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pkekrme6" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=08953ef6-753c-4686-b495-adad424e199f fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=312 protocol=https
+2024-11-05T00:24:58.812463+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pkethct6&sid=EDXnT-rNw3WhemR4AAAR" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=c0979145-b019-4163-9b46-c0565338f4e1 fwd="147.235.192.212" dyno=web.1 connect=0ms service=0ms status=200 bytes=178 protocol=https
+2024-11-05T00:24:58.815423+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pketjckp&sid=EDXnT-rNw3WhemR4AAAR" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=c149ec86-2299-4d89-8bf9-531a1bb163ad fwd="147.235.192.212" dyno=web.1 connect=0ms service=0ms status=200 bytes=229 protocol=https
+2024-11-05T00:24:58.811646+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pkeoyrsn&sid=QuO4xtlLM11eIFgoAAAQ" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=488499ea-b891-4381-894d-992ee732af95 fwd="147.235.192.212" dyno=web.1 connect=0ms service=0ms status=200 bytes=229 protocol=https
+2024-11-05T00:24:58.976754+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pkey81et&sid=U1jTKPUP8vYQqY67AAAS" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=add18edd-09e0-485f-973e-400239c9de51 fwd="147.235.192.212" dyno=web.1 connect=0ms service=0ms status=200 bytes=229 protocol=https
+2024-11-05T00:24:58.829694+00:00 heroku[router]: at=info method=GET path="/trips" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=ea0469b0-4f0e-434a-a8ab-b896cdfa6954 fwd="147.235.192.212" dyno=web.1 connect=0ms service=25ms status=200 bytes=1433 protocol=https
+2024-11-05T00:24:58.828899+00:00 app[web.1]: [
+2024-11-05T00:24:58.828909+00:00 app[web.1]: Trip {
+2024-11-05T00:24:58.828912+00:00 app[web.1]: _id: 'd120bf49-3b61-42b2-baf6-4bb6556b022e',
+2024-11-05T00:24:58.828912+00:00 app[web.1]: userName: 'test3',
+2024-11-05T00:24:58.828913+00:00 app[web.1]: imgUrl: null,
+2024-11-05T00:24:58.828914+00:00 app[web.1]: typeTraveler: 'romantic couple',
+2024-11-05T00:24:58.828914+00:00 app[web.1]: country: 'Taiwan',
+2024-11-05T00:24:58.828916+00:00 app[web.1]: typeTrip: 'romantic',
+2024-11-05T00:24:58.828916+00:00 app[web.1]: tripPhotos: [
+2024-11-05T00:24:58.828917+00:00 app[web.1]: 'https://res.cloudinary.com/dstyeoecz/image/upload/q_auto,f_auto,w_600,h_400,c_limit/olhxu5wrhamm7jom306p',
+2024-11-05T00:24:58.828917+00:00 app[web.1]: 'https://res.cloudinary.com/dstyeoecz/image/upload/q_auto,f_auto,w_600,h_400,c_limit/l8y4dsqquowud9zulilk',
+2024-11-05T00:24:58.828918+00:00 app[web.1]: 'https://res.cloudinary.com/dstyeoecz/image/upload/q_auto,f_auto,w_600,h_400,c_limit/kgn58dtb26iz2vsxjwks',
+2024-11-05T00:24:58.828918+00:00 app[web.1]: 'https://res.cloudinary.com/dstyeoecz/image/upload/q_auto,f_auto,w_600,h_400,c_limit/n6kqdk3authojtjqyirt'
+2024-11-05T00:24:58.828918+00:00 app[web.1]: ],
+2024-11-05T00:24:58.828918+00:00 app[web.1]: tripDescription: [ 'jgkm' ],
+2024-11-05T00:24:58.828919+00:00 app[web.1]: numOfComments: 0,
+2024-11-05T00:24:58.828919+00:00 app[web.1]: numOfLikes: 0,
+2024-11-05T00:24:58.828919+00:00 app[web.1]: owner: User {
+2024-11-05T00:24:58.828919+00:00 app[web.1]: _id: '404c6c55-762c-4370-9da3-018089092a75',
+2024-11-05T00:24:58.828919+00:00 app[web.1]: email: 'test3@gmail.com',
+2024-11-05T00:24:58.828919+00:00 app[web.1]: userName: 'test3',
+2024-11-05T00:24:58.828920+00:00 app[web.1]: password: '$2b$10$rjBZMr4KVgsTvlTxZ9EW6OvahdBVHcKNpjtP0oP7iKhOJpIGHvCNa',
+2024-11-05T00:24:58.828920+00:00 app[web.1]: imgUrl: 'https://res.cloudinary.com/dstyeoecz/image/upload/q_auto,f_auto,w_600,h_400,c_limit/ah8ponozhnjxor9okrzu',   
+2024-11-05T00:24:58.828921+00:00 app[web.1]: refreshTokens: [Array],
+2024-11-05T00:24:58.828921+00:00 app[web.1]: favoriteTrips: [Array]
+2024-11-05T00:24:58.828921+00:00 app[web.1]: }
+2024-11-05T00:24:58.828921+00:00 app[web.1]: }
+2024-11-05T00:24:58.828921+00:00 app[web.1]: ]
+2024-11-05T00:24:58.991968+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pkf4hrte&sid=QuO4xtlLM11eIFgoAAAQ" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=c325d683-0ac5-4eac-afc8-7f9165f406fa fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=400 bytes=228 protocol=https
+2024-11-05T00:24:58.988787+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pkf2lfno&sid=_KATrWfSNs4zHPu2AAAT" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=aa231c79-23c2-4d4f-b004-d651256e3950 fwd="147.235.192.212" dyno=web.1 connect=0ms service=5ms status=200 bytes=229 protocol=https
+2024-11-05T00:24:58.917732+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pkey3uno&sid=U1jTKPUP8vYQqY67AAAS" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=d70850e5-eab7-4ee5-bf33-f2c44d22b2ad fwd="147.235.192.212" dyno=web.1 connect=1ms service=1ms status=200 bytes=178 protocol=https
+2024-11-05T00:24:58.988703+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pkf2jqvl&sid=_KATrWfSNs4zHPu2AAAT" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=9a18fb77-0a70-4640-80ae-14d1cdbd48f8 fwd="147.235.192.212" dyno=web.1 connect=2ms service=2ms status=200 bytes=178 protocol=https
+2024-11-05T00:24:58.984888+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=websocket&sid=QuO4xtlLM11eIFgoAAAQ" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=a14f74ea-88e7-497c-958e-cd9abe2b1f4d fwd="147.235.192.212" dyno=web.1 connect=0ms service=20ms status=101 bytes=161 protocol=https
+2024-11-05T00:24:59.139850+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pkf4lnnl&sid=EDXnT-rNw3WhemR4AAAR" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=12310b4d-8339-4401-8e2c-b8198d59cccb fwd="147.235.192.212" dyno=web.1 connect=0ms service=58ms status=200 bytes=193 protocol=https
+https
+2024-11-05T00:24:59.139850+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pkf4lnnl&sid=EDXnT-rNw3WhemR4AAAR" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=12310b4d-8339-4401-8e2c-b8198d59cccb fwd="147.235.192.212" dyno=web.1 connect=0ms service=58ms status=200 bytes=193 protocol=https
+2024-11-05T00:24:59.139850+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pkf4lnnl&sid=EDXnT-rNw3WhemR4AAAR" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=12310b4d-8339-4401-8e2c-b8198d59cccb fwd="147.235.192.212" dyno=web.1 connect=0ms service=58ms status=200 bytes=193 protocol=https
+protocol=https
+2024-11-05T00:24:59.140218+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pkf4llaj&sid=EDXnT-rNw3WhemR4AAAR" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=73850e8c-9646-4d3a-9067-f27c0d358ada fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=178 protocol=https
+2024-11-05T00:24:58.988434+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pkf4jtly&sid=QuO4xtlLM11eIFgoAAAQ" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=6aa0e669-f883-4eaa-abeb-cafe977daf6f fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=178 protocol=https
+2024-11-05T00:24:59.156376+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pkf98w3q&sid=_KATrWfSNs4zHPu2AAAT" host=evening-bayyou-77034-176dc93fb1e1.herokuapp.com request_id=73850e8c-9646-4d3a-9067-f27c0d358ada fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=178 protocol=https
+2024-11-05T00:24:58.988434+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pkf4jtly&sid=QuO4xtlLM11eIFgoAAAQ" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=6aa0e669-f883-4eaa-abeb-cafe977daf6f fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=178 protocol=https
+2024-11-05T00:24:59.156376+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pkf98w3q&sid=_KATrWfSNs4zHPu2AAAT" host=evening-bay2024-11-05T00:24:58.988434+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pkf4jtly&sid=QuO4xtlLM11eIFgoAAAQ" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=6aa0e669-f883-4eaa-abeb-cafe977daf6f fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=178 protocol=https
+2024-11-05T00:24:59.156376+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pkf98w3q&sid=_KATrWfSNs4zHPu2AAAT" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=69abe6fa-628c-4eee-adce-6ae64a2b7489 fwd="147.235.192.212" dyno=web.1 connect=0ms service=5ms status=200 bytes=193 protocol=https
+2024-11-05T00:24:59.156376+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pkf98w3q&sid=_KATrWfSNs4zHPu2AAAT" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=69abe6fa-628c-4eee-adce-6ae64a2b7489 fwd="147.235.192.212" dyno=web.1 connect=0ms service=5ms status=200 bytes=193 protocol=https
+ou-77034-176dc93fb1e1.herokuapp.com request_id=69abe6fa-628c-4eee-adce-6ae64a2b7489 fwd="147.235.192.212" dyno=web.1 connect=0ms service=5ms status=200 bytes=193 protocol=https
+rotocol=https
+2024-11-05T00:24:59.157605+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pkf9153y&sid=U1jTKPUP8vYQqY67AAAS" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=8a9280d0-431c-4ed8-a11e-869bcb1a9dab fwd="147.235.192.212" dyno=web.1 connect=0ms service=4ms status=200 bytes=193 protocol=https
+2024-11-05T00:24:59.157806+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pkf94izy&sid=U1jTKPUP8vYQqY67AAAS" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=1fdfb293-83fd-422c-b080-e46e360f114d fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=178 protocol=https
+2024-11-05T00:24:59.156472+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pkf99wkz&sid=_KATrWfSNs4zHPu2AAAT" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=1fdfb293-83fd-422c-b080-e46e360f114d fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=178 protocol=https
+2024-11-05T00:24:59.156472+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pkf99wkz&sid=_KATrWfSNs4zHPu2AAAT" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=0ee7cd15-d325-4ed5-95d1-b3bab4373d71 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=178 protocol=https
+2024-11-05T00:26:00.676565+00:00 heroku[router]: at=info method=OPTIONS path="/users/reset-password" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=b7cc89e4-0de7-4c9d-a9c8-8a26b4f1d635 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=204 bytes=301 protocol=https
+2024-11-05T00:26:00.972284+00:00 heroku[router]: at=info method=POST path="/users/reset-password" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=b3afa8f5-df06-4858-96b5-d4d762df4fe7 fwd="147.235.192.212" dyno=web.1 connect=0ms service=98ms status=200 bytes=289 protocol=https
+2024-11-05T00:30:18.836201+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pr9a7wt7" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=ca0c1c8b-7204-48a7-9316-fba666dad58d fwd="147.235.192.212" dyno=web.1 connect=0ms service=0ms status=200 bytes=312 protocol=https
+2024-11-05T00:30:18.828095+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pr9ab09o" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=c37871be-b961-4615-b3ee-2498d1591e2f fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=312 protocol=https
+2024-11-05T00:30:18.833292+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pr9aczl2" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=abb5eb18-0dea-45bc-9997-ad7f6cf3d36f fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=312 protocol=https
+2024-11-05T00:30:18.855018+00:00 heroku[router]: at=info method=GET path="/trips" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=3ea76ebb-491d-4676-8f87-87a5b9b6c607 fwd="147.235.192.212" dyno=web.1 connect=0ms service=21ms status=304 bytes=183 protocol=https
+2024-11-05T00:30:18.853994+00:00 app[web.1]: [
+2024-11-05T00:30:18.854009+00:00 app[web.1]: Trip {
+2024-11-05T00:30:18.854011+00:00 app[web.1]: _id: 'd120bf49-3b61-42b2-baf6-4bb6556b022e',
+2024-11-05T00:30:18.854013+00:00 app[web.1]: userName: 'test3',
+2024-11-05T00:30:18.854013+00:00 app[web.1]: imgUrl: null,
+2024-11-05T00:30:18.854014+00:00 app[web.1]: typeTraveler: 'romantic couple',
+2024-11-05T00:30:18.854015+00:00 app[web.1]: country: 'Taiwan',
+2024-11-05T00:30:18.854016+00:00 app[web.1]: typeTrip: 'romantic',
+2024-11-05T00:30:18.854016+00:00 app[web.1]: tripPhotos: [
+2024-11-05T00:30:18.854017+00:00 app[web.1]: 'https://res.cloudinary.com/dstyeoecz/image/upload/q_auto,f_auto,w_600,h_400,c_limit/olhxu5wrhamm7jom306p',
+2024-11-05T00:30:18.854018+00:00 app[web.1]: 'https://res.cloudinary.com/dstyeoecz/image/upload/q_auto,f_auto,w_600,h_400,c_limit/l8y4dsqquowud9zulilk',
+2024-11-05T00:30:18.854018+00:00 app[web.1]: 'https://res.cloudinary.com/dstyeoecz/image/upload/q_auto,f_auto,w_600,h_400,c_limit/kgn58dtb26iz2vsxjwks',
+2024-11-05T00:30:18.854018+00:00 app[web.1]: 'https://res.cloudinary.com/dstyeoecz/image/upload/q_auto,f_auto,w_600,h_400,c_limit/n6kqdk3authojtjqyirt'
+2024-11-05T00:30:18.854019+00:00 app[web.1]: ],
+2024-11-05T00:30:18.854019+00:00 app[web.1]: tripDescription: [ 'jgkm' ],
+2024-11-05T00:30:18.854019+00:00 app[web.1]: numOfComments: 0,
+2024-11-05T00:30:18.854019+00:00 app[web.1]: numOfLikes: 0,
+2024-11-05T00:30:18.854019+00:00 app[web.1]: owner: User {
+2024-11-05T00:30:18.854020+00:00 app[web.1]: _id: '404c6c55-762c-4370-9da3-018089092a75',
+2024-11-05T00:30:18.854020+00:00 app[web.1]: email: 'test3@gmail.com',
+2024-11-05T00:30:18.854020+00:00 app[web.1]: userName: 'test3',
+2024-11-05T00:30:18.854021+00:00 app[web.1]: password: '$2b$10$rjBZMr4KVgsTvlTxZ9EW6OvahdBVHcKNpjtP0oP7iKhOJpIGHvCNa',
+2024-11-05T00:30:18.854021+00:00 app[web.1]: imgUrl: 'https://res.cloudinary.com/dstyeoecz/image/upload/q_auto,f_auto,w_600,h_400,c_limit/ah8ponozhnjxor9okrzu',   
+2024-11-05T00:30:18.854022+00:00 app[web.1]: refreshTokens: [Array],
+2024-11-05T00:30:18.854022+00:00 app[web.1]: favoriteTrips: [Array]
+2024-11-05T00:30:18.854022+00:00 app[web.1]: }
+2024-11-05T00:30:18.854022+00:00 app[web.1]: }
+2024-11-05T00:30:18.854022+00:00 app[web.1]: ]
+2024-11-05T00:30:18.835578+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pr9acq0d" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=c8f85973-080a-43d8-89e9-69b7cfb40f7e fwd="147.235.192.212" dyno=web.1 connect=0ms service=0ms status=200 bytes=312 protocol=https
+2024-11-05T00:30:19.012141+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pra1tzlw&sid=84PVEKV5q-hoaediAAAY" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=5e36eaff-cb1e-4900-93dc-ecc98495098e fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=178 protocol=https
+2024-11-05T00:30:19.017738+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pra21j1c&sid=Y7W5eO8MvNuIse5yAAAZ" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=1732614b-b909-41cc-abf2-c524663385df fwd="147.235.192.212" dyno=web.1 connect=0ms service=8ms status=200 bytes=229 protocol=https
+2024-11-05T00:30:19.017343+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pra20xdb&sid=Y7W5eO8MvNuIse5yAAAZ" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=89e7f53f-c748-40d2-96d3-b9a7ae26a98b fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=178 protocol=https
+2024-11-05T00:30:19.015508+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pra1wbp3&sid=84PVEKV5q-hoaediAAAY" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=cec6be11-edab-469a-8782-de9408c5877c fwd="147.235.192.212" dyno=web.1 connect=0ms service=0ms status=200 bytes=229 protocol=https
+2024-11-05T00:30:19.180623+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pra23vd8&sid=KrYV5S03k1FA6uEGAAAa" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=4d99fccb-043d-405a-bb3f-14e44a45b35f fwd="147.235.192.212" dyno=web.1 connect=0ms service=150ms status=200 bytes=229 protocol=https
+2024-11-05T00:30:19.180397+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pra22sp0&sid=KrYV5S03k1FA6uEGAAAa" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=6a12bb55-fbdb-49f3-b827-e8bf6fdecb42 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=178 protocol=https
+2024-11-05T00:30:19.182759+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pra26mha&sid=Eq1ghwouwz8k97aFAAAb" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=d7213aa0-501a-4a69-909e-9d080e87409f fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=178 protocol=https
+2024-11-05T00:30:19.184012+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pra27ote&sid=Eq1ghwouwz8k97aFAAAb" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=f24a567a-b74d-468b-b9b1-d27ec42475e8 fwd="147.235.192.212" dyno=web.1 connect=0ms service=0ms status=200 bytes=229 protocol=https
+2024-11-05T00:30:19.359191+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=prabmszw&sid=Eq1ghwouwz8k97aFAAAb" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=1a6a5ea8-1070-469d-a2ee-6aa4554f39e7 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=178 protocol=https
+2024-11-05T00:30:19.358804+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=prabk879&sid=Eq1ghwouwz8k97aFAAAb" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=9553f482-2da8-4e82-81c1-0748bed12e12 fwd="147.235.192.212" dyno=web.1 connect=0ms service=4ms status=200 bytes=193 protocol=https
+2024-11-05T00:30:19.355210+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pra6z3cr&sid=Y7W5eO8MvNuIse5yAAAZ" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=1c1a4a7b-f8fe-405e-86f3-50ec1b6c3042 fwd="147.235.192.212" dyno=web.1 connect=0ms service=3ms status=200 bytes=193 protocol=https
+2024-11-05T00:30:19.351412+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=pra6vgzf&sid=84PVEKV5q-hoaediAAAY" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=cba25196-e983-4848-a683-6ff5026ae274 fwd="147.235.192.212" dyno=web.1 connect=0ms service=174ms status=200 bytes=193 protocol=https
+2024-11-05T00:30:19.351430+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pra6xey0&sid=84PVEKV5q-hoaediAAAY" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=5174ae29-80e0-40fc-8220-5284273caa9c fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=178 protocol=https
+2024-11-05T00:30:19.355129+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=pra70a6k&sid=Y7W5eO8MvNuIse5yAAAZ" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=6c925279-0d30-4b36-8190-d419bf7d54c3 fwd="147.235.192.212" dyno=web.1 connect=0ms service=0ms status=200 bytes=178 protocol=https
+2024-11-05T00:30:19.528363+00:00 heroku[router]: at=info method=GET path="/socket.io/?EIO=4&transport=polling&t=prabost2&sid=KrYV5S03k1FA6uEGAAAa" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=3d19ee4c-44ca-4f30-9c92-489744a829bf fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=193 protocol=https
+2024-11-05T00:30:19.528327+00:00 heroku[router]: at=info method=POST path="/socket.io/?EIO=4&transport=polling&t=prabo93w&sid=KrYV5S03k1FA6uEGAAAa" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=884ce2db-4d62-468a-9f2b-da79a62213b9 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=200 bytes=178 protocol=https
+2024-11-05T00:30:49.425318+00:00 heroku[router]: at=info method=OPTIONS path="/auth/login" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=da192827-3c84-4a0d-974c-213fc0764157 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=204 bytes=301 protocol=https
+2024-11-05T00:30:49.589837+00:00 app[web.1]: Login request received: 1020dudu@gmail.com du10du20
+2024-11-05T00:30:49.673894+00:00 app[web.1]: Password match result: true
+2024-11-05T00:30:49.686548+00:00 app[web.1]: Login successful, generating tokens for: 1020dudu@gmail.com
+2024-11-05T00:30:49.687406+00:00 heroku[router]: at=info method=POST path="/auth/login" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=ee078605-71e1-42ac-8b6c-43a4c05f2aa4 fwd="147.235.192.212" dyno=web.1 connect=0ms service=98ms status=200 bytes=754 protocol=https
+2024-11-05T00:30:54.716554+00:00 app[web.1]: [
+2024-11-05T00:30:54.716565+00:00 app[web.1]: Trip {
+2024-11-05T00:30:54.716568+00:00 app[web.1]: _id: 'd120bf49-3b61-42b2-baf6-4bb6556b022e',
+2024-11-05T00:30:54.716568+00:00 app[web.1]: userName: 'test3',
+2024-11-05T00:30:54.716569+00:00 app[web.1]: imgUrl: null,
+2024-11-05T00:30:54.716569+00:00 app[web.1]: typeTraveler: 'romantic couple',
+2024-11-05T00:30:54.716569+00:00 app[web.1]: country: 'Taiwan',
+2024-11-05T00:30:54.716570+00:00 app[web.1]: typeTrip: 'romantic',
+2024-11-05T00:30:54.716570+00:00 app[web.1]: tripPhotos: [
+2024-11-05T00:30:54.716571+00:00 app[web.1]: 'https://res.cloudinary.com/dstyeoecz/image/upload/q_auto,f_auto,w_600,h_400,c_limit/olhxu5wrhamm7jom306p',
+2024-11-05T00:30:54.716571+00:00 app[web.1]: 'https://res.cloudinary.com/dstyeoecz/image/upload/q_auto,f_auto,w_600,h_400,c_limit/l8y4dsqquowud9zulilk',
+2024-11-05T00:30:54.716572+00:00 app[web.1]: 'https://res.cloudinary.com/dstyeoecz/image/upload/q_auto,f_auto,w_600,h_400,c_limit/kgn58dtb26iz2vsxjwks',
+2024-11-05T00:30:54.716572+00:00 app[web.1]: 'https://res.cloudinary.com/dstyeoecz/image/upload/q_auto,f_auto,w_600,h_400,c_limit/n6kqdk3authojtjqyirt'
+2024-11-05T00:30:54.716572+00:00 app[web.1]: ],
+2024-11-05T00:30:54.716572+00:00 app[web.1]: tripDescription: [ 'jgkm' ],
+2024-11-05T00:30:54.716573+00:00 app[web.1]: numOfComments: 0,
+2024-11-05T00:30:54.716573+00:00 app[web.1]: numOfLikes: 0,
+2024-11-05T00:30:54.716573+00:00 app[web.1]: owner: User {
+2024-11-05T00:30:54.716574+00:00 app[web.1]: _id: '404c6c55-762c-4370-9da3-018089092a75',
+2024-11-05T00:30:54.716574+00:00 app[web.1]: email: 'test3@gmail.com',
+2024-11-05T00:30:54.716582+00:00 app[web.1]: userName: 'test3',
+2024-11-05T00:30:54.716583+00:00 app[web.1]: password: '$2b$10$rjBZMr4KVgsTvlTxZ9EW6OvahdBVHcKNpjtP0oP7iKhOJpIGHvCNa',
+2024-11-05T00:30:54.716583+00:00 app[web.1]: imgUrl: 'https://res.cloudinary.com/dstyeoecz/image/upload/q_auto,f_auto,w_600,h_400,c_limit/ah8ponozhnjxor9okrzu',   
+2024-11-05T00:30:54.716583+00:00 app[web.1]: refreshTokens: [Array],
+2024-11-05T00:30:54.716583+00:00 app[web.1]: favoriteTrips: [Array]
+2024-11-05T00:30:54.716584+00:00 app[web.1]: }
+2024-11-05T00:30:54.716584+00:00 app[web.1]: }
+2024-11-05T00:30:54.716584+00:00 app[web.1]: ]
+2024-11-05T00:30:54.717445+00:00 heroku[router]: at=info method=GET path="/trips" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=d8a72a41-7c22-49b1-985a-f0f83b02f589 fwd="147.235.192.212" dyno=web.1 connect=1ms service=5ms status=304 bytes=183 protocol=https
+2024-11-05T00:30:55.071795+00:00 heroku[router]: at=info method=GET path="/trips/FullTrip/d120bf49-3b61-42b2-baf6-4bb6556b022e" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=9e5cb2b6-d46e-4ab5-a878-70d2c965b523 fwd="147.235.192.212" dyno=web.1 connect=0ms service=8ms status=200 bytes=1456 protocol=https     
+2024-11-05T00:30:54.900841+00:00 heroku[router]: at=info method=OPTIONS path="/trips/FullTrip/d120bf49-3b61-42b2-baf6-4bb6556b022e" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=d43fc767-cb18-479a-bd2a-55c7aaa30b78 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=204 bytes=302 protocol=https  
+2024-11-05T00:30:55.250636+00:00 heroku[router]: at=info method=OPTIONS path="/users/013e2110-c8c3-4fb8-b947-6024c9378f40/favorites" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=2cc522ff-3445-4915-80a2-da16fc8f7828 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=204 bytes=302 protocol=https 
+2024-11-05T00:30:55.420676+00:00 heroku[router]: at=info method=GET path="/users/013e2110-c8c3-4fb8-b947-6024c9378f40/favorites" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=fb8f7b76-04c2-43b4-a16b-2aacb65ffe1e fwd="147.235.192.212" dyno=web.1 connect=0ms service=4ms status=200 bytes=279 protocol=https     
+2024-11-05T00:30:55.417813+00:00 app[web.1]: Fetching favorite trip IDs for user: 013e2110-c8c3-4fb8-b947-6024c9378f40
+2024-11-05T00:30:55.419726+00:00 app[web.1]: Favorite trip IDs for user 013e2110-c8c3-4fb8-b947-6024c9378f40: [ 'd120bf49-3b61-42b2-baf6-4bb6556b022e' ]
+2024-11-05T00:31:00.361377+00:00 heroku[router]: at=info method=POST path="/trips/d120bf49-3b61-42b2-baf6-4bb6556b022e/likes" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=c8e04428-b58b-45d6-b545-df4a6c41c765 fwd="147.235.192.212" dyno=web.1 connect=0ms service=54ms status=200 bytes=1001 protocol=https      
+2024-11-05T00:31:00.140883+00:00 heroku[router]: at=info method=OPTIONS path="/trips/d120bf49-3b61-42b2-baf6-4bb6556b022e/likes" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=30a9a7b6-797a-4077-adb7-c2feab6c25d2 fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=204 bytes=315 protocol=https     
+2024-11-05T00:31:00.529721+00:00 heroku[router]: at=info method=OPTIONS path="/trips/FullTrip/d120bf49-3b61-42b2-baf6-4bb6556b022e" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=a6e9fe7e-ceaa-4883-8131-aaf2e09adfea fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=204 bytes=302 protocol=https  
+2024-11-05T00:31:00.709397+00:00 heroku[router]: at=info method=GET path="/trips/FullTrip/d120bf49-3b61-42b2-baf6-4bb6556b022e" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=c0f362cb-57af-4431-b8ef-786ee7b3618b fwd="147.235.192.212" dyno=web.1 connect=1ms service=8ms status=200 bytes=1549 protocol=https     
+2024-11-05T00:31:03.998347+00:00 heroku[router]: at=info method=OPTIONS path="/trips/favorites/013e2110-c8c3-4fb8-b947-6024c9378f40" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=65d2593f-2127-486f-8431-85a6c190043a fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=204 bytes=302 protocol=https 
+2024-11-05T00:31:04.183465+00:00 heroku[router]: at=info method=GET path="/trips/favorites/013e2110-c8c3-4fb8-b947-6024c9378f40" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=6ca7ec68-b905-4863-83f6-c671c1699e32 fwd="147.235.192.212" dyno=web.1 connect=0ms service=20ms status=200 bytes=1551 protocol=https   
+2024-11-05T00:31:04.369905+00:00 heroku[router]: at=info method=GET path="/trips/FullTrip/d120bf49-3b61-42b2-baf6-4bb6556b022e" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=2d4b08a4-58c5-45d6-a960-44b7a7cd7107 fwd="147.235.192.212" dyno=web.1 connect=0ms service=5ms status=304 bytes=183 protocol=https      
+2024-11-05T00:31:04.550022+00:00 heroku[router]: at=info method=OPTIONS path="/users/013e2110-c8c3-4fb8-b947-6024c9378f40/favorites" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=e90fb079-9455-462d-9cef-e26a2a8b259a fwd="147.235.192.212" dyno=web.1 connect=0ms service=1ms status=204 bytes=302 protocol=https 
+2024-11-05T00:31:04.722790+00:00 heroku[router]: at=info method=GET path="/users/013e2110-c8c3-4fb8-b947-6024c9378f40/favorites" host=evening-bayou-77034-176dc93fb1e1.herokuapp.com request_id=0fbbcfc7-f94a-405f-a872-95d50aacc7ee fwd="147.235.192.212" dyno=web.1 connect=0ms service=4ms status=304 bytes=182 protocol=https     
+2024-11-05T00:31:04.718797+00:00 app[web.1]: Fetching favorite trip IDs for user: 013e2110-c8c3-4fb8-b947-6024c9378f40
+2024-11-05T00:31:04.720330+00:00 app[web.1]: Favorite trip IDs for user 013e2110-c8c3-4fb8-b947-6024c9378f40: [ 'd120bf49-3b61-42b2-baf6-4bb6556b022e' ]

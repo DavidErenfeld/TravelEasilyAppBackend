@@ -6,9 +6,10 @@ export let io: SocketIOServer;
 export default function initializeSocket(server: http.Server) {
   io = new SocketIOServer(server, {
     cors: {
-      origin: "*", // מומלץ להגדיר origin ספציפי עבור פרודקשן
+      origin: "*", // יש להגדיר origin מתאים לפרודקשן
       methods: ["GET", "POST"],
     },
+    transports: ["websocket"], // שימוש רק ב-WebSocket
   });
 
   // Middleware לבדיקות טרם חיבור
