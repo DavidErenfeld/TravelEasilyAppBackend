@@ -143,6 +143,7 @@ class TripController extends BaseController<ITrips> {
 
       const newComment = { ownerId: req.user._id, ...req.body.comment };
       trip.comments.push(newComment);
+      trip.numOfComments = trip.comments.length;
       await this.entity.save(trip);
 
       io.emit("commentAdded", { tripId, newComment });
@@ -174,7 +175,9 @@ class TripController extends BaseController<ITrips> {
       }
 
       trip.likes = trip.likes.filter((like) => like.owner !== req.user._id);
+      trip.numOfLikes = trip.likes.length;
       await this.entity.save(trip);
+
       io.emit("likeRemoved", { tripId, userId: req.user._id });
       res.status(200).send(trip);
     } catch (error) {
@@ -213,6 +216,7 @@ class TripController extends BaseController<ITrips> {
       trip.comments = trip.comments.filter(
         (comment) => comment._id.toString() !== commentId
       );
+      trip.numOfComments = trip.comments.length;
       trip.numOfComments = trip.comments.length;
       await this.entity.save(trip);
 
