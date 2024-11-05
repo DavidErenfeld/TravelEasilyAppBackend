@@ -158,28 +158,28 @@ class TripController extends BaseController<ITrips> {
   async addLike(req: AuthRequest, res: Response) {
     try {
       const tripId = req.params.tripId;
+      const userId = req.user._id;
+      req.body.owner = userId;
+
       const trip = await this.entity.findOne({
         where: { _id: tripId },
         relations: ["likes"],
       });
-      if (!trip) return res.status(404).send("Trip not found");
-
-      const alreadyLiked = trip.likes.some(
-        (like) => like.owner === req.user._id
-      );
-      if (!alreadyLiked) {
-        trip.likes.push({ owner: req.user._id });
-        await this.entity.save(trip);
-        trip.numOfLikes = trip.likes.length;
-        io.emit("likeAdded", { tripId, userId: req.user._id });
-        return res.status(200).send(trip);
+      if (!trip) {
+        return res.status(404).send("Trip not found");
       }
 
-      trip.likes = trip.likes.filter((like) => like.owner !== req.user._id);
-      trip.numOfLikes = trip.likes.length;
+      if (!trip.likes.some((like) => like.owner === userId)) {
+        trip.likes.push({ owner: userId });
+        trip.numOfLikes++;
+        await this.entity.save(trip);
+        io.emit("likeAdded", { tripId, userId });
+        return res.status(200).send(trip);
+      }
+      trip.likes = trip.likes.filter((user) => user.owner !== userId);
+      trip.numOfLikes--;
       await this.entity.save(trip);
-
-      io.emit("likeRemoved", { tripId, userId: req.user._id });
+      io.emit("likeRemoved", { tripId, userId });
       res.status(200).send(trip);
     } catch (error) {
       console.error("Error in addLike:", error.message);
