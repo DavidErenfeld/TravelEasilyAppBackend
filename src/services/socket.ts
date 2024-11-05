@@ -1,65 +1,76 @@
-import { Server as SocketIOServer } from "socket.io";
+import { Server as SocketIOServer, Socket } from "socket.io";
 import http from "http";
 
 export let io: SocketIOServer;
+
 export default function initializeSocket(server: http.Server) {
   io = new SocketIOServer(server, {
     cors: {
-      origin: "*", // עדיף להגדיר origin מדויק לפרודקשן
+      origin: "*", // מומלץ להגדיר origin ספציפי עבור פרודקשן
       methods: ["GET", "POST"],
     },
   });
 
-  io.on("connection", (socket) => {
+  // Middleware לבדיקות טרם חיבור
+  io.use((socket, next) => {
+    // ניתן להוסיף כאן בדיקות אימות או הרשאות, לדוגמה:
+    if (socket.handshake.auth.token) {
+      next(); // במידה והבדיקות עוברות, המשך לחיבור
+    } else {
+      next(new Error("Authentication error")); // חסום חיבור ללא אימות
+    }
+  });
+
+  io.on("connection", (socket: Socket) => {
     console.log("Client connected:", socket.id);
 
-    // חדש - אירוע לטיפול בהוספת טיול חדש
+    // טיפול באירוע של הוספת טיול חדש
     socket.on("newTrip", (newTripData) => {
-      try {
-        io.emit("tripPosted", newTripData); // שולח לכל המשתמשים מחוברים
-      } catch (error) {
-        console.error("Error posting new trip:", error);
-      }
+      handleEventWithErrorLogging(() => {
+        io.emit("tripPosted", newTripData); // שולח לכל המשתמשים
+      }, "Error posting new trip");
     });
 
-    // אירועים עבור עדכון טיול
+    // טיפול באירוע של עדכון טיול
     socket.on("updateTrip", (tripData) => {
-      try {
+      handleEventWithErrorLogging(() => {
         io.emit("tripUpdated", tripData);
-      } catch (error) {
-        console.error("Error updating trip:", error);
-      }
+      }, "Error updating trip");
     });
 
-    // אירועים עבור הוספת תמונה
+    // טיפול באירוע של הוספת תמונה
     socket.on("addImage", (imageData) => {
-      try {
+      handleEventWithErrorLogging(() => {
         io.emit("imageAdded", imageData);
-      } catch (error) {
-        console.error("Error adding image:", error);
-      }
+      }, "Error adding image");
     });
 
-    // אירועים עבור הוספת לייק
+    // טיפול באירוע של הוספת לייק
     socket.on("addLike", (likeData) => {
-      try {
+      handleEventWithErrorLogging(() => {
         io.emit("likeAdded", likeData);
-      } catch (error) {
-        console.error("Error adding like:", error);
-      }
+      }, "Error adding like");
     });
 
-    // אירועים עבור הוספת תגובה
+    // טיפול באירוע של הוספת תגובה
     socket.on("addComment", (commentData) => {
-      try {
+      handleEventWithErrorLogging(() => {
         io.emit("commentAdded", commentData);
-      } catch (error) {
-        console.error("Error adding comment:", error);
-      }
+      }, "Error adding comment");
     });
 
+    // טיפול בניתוק חיבור
     socket.on("disconnect", () => {
       console.log("Client disconnected:", socket.id);
     });
   });
+}
+
+// פונקציה כללית לניהול אירועים עם טיפול בשגיאות
+function handleEventWithErrorLogging(eventFn: Function, errorMsg: string) {
+  try {
+    eventFn();
+  } catch (error) {
+    console.error(errorMsg, error);
+  }
 }
