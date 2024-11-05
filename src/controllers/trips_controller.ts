@@ -170,6 +170,7 @@ class TripController extends BaseController<ITrips> {
       if (!alreadyLiked) {
         trip.likes.push({ owner: req.user._id });
         await this.entity.save(trip);
+        trip.numOfLikes = trip.likes.length;
         io.emit("likeAdded", { tripId, userId: req.user._id });
         return res.status(200).send(trip);
       }
