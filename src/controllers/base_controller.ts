@@ -10,14 +10,14 @@ export class BaseController<Entity extends { _id?: string }> {
   }
 
   async post(req: Request, res: Response) {
-    console.log("save object");
-    console.log(req.body);
+    console.log("Attempting to save object:", req.body);
     try {
       const response = await this.entity.save(req.body);
+      console.log("Object saved successfully:", response);
       res.status(200).send(response);
     } catch (err) {
-      console.log(err);
-      res.status(500).send("fail" + err);
+      console.error("Failed to save object:", err);
+      res.status(500).send({ message: "Failed to save object", error: err });
     }
   }
 
@@ -27,60 +27,60 @@ export class BaseController<Entity extends { _id?: string }> {
         const object = await this.entity.findOneBy({
           _id: req.params.id,
         } as FindOptionsWhere<Entity>);
-        console.log(object);
-        res.send(object);
+        if (object) {
+          console.log("Object found:", object);
+          res.send(object);
+        } else {
+          console.log("Object not found, id:", req.params.id);
+          res.status(404).send({ message: "Object not found" });
+        }
       } else {
         const objects = await this.entity.find({ relations: ["owner"] });
-        console.log(objects);
+        console.log("Objects retrieved:", objects);
         res.send(objects);
       }
     } catch (err) {
-      res.status(500).send(err);
+      console.error("Failed to retrieve data:", err);
+      res.status(500).send({ message: "Error retrieving data", error: err });
     }
   }
 
   async put(req: Request, res: Response) {
-    console.log("update Object");
-    console.log(req.params.id);
-
+    console.log("Attempting to update object, id:", req.params.id);
     try {
-      const userToUpdate = await this.entity.findOneBy({
+      const objectToUpdate = await this.entity.findOneBy({
         _id: req.params.id,
       } as FindOptionsWhere<Entity>);
 
-      if (!userToUpdate) {
-        return res.status(404).json({ message: "User not found" });
+      if (objectToUpdate) {
+        Object.assign(objectToUpdate, req.body);
+        const updatedObject = await this.entity.save(objectToUpdate);
+        console.log("Object updated successfully:", updatedObject);
+        res.status(200).send(updatedObject);
+      } else {
+        console.log("Object not found, id:", req.params.id);
+        res.status(404).json({ message: "Object not found" });
       }
-
-      // Replace the entire user object with the new data
-      Object.assign(userToUpdate, req.body);
-      const updatedObject = await this.entity.save(userToUpdate);
-      res.status(200).send(updatedObject);
-      console.log(updatedObject);
     } catch (err) {
-      res.status(404).send(err);
+      console.error("Failed to update object:", err);
+      res.status(500).send({ message: "Error updating object", error: err });
     }
   }
 
   async delete(req: Request, res: Response) {
-    console.log("delete Object");
+    console.log("Attempting to delete object, id:", req.params.id);
     try {
-      if (req.params.id) {
-        const object = await this.entity.delete(req.params.id);
-        if (object.affected === 0) {
-          // No rows affected, respond with 504
-          return res
-            .status(504)
-            .send("No rows deleted, request timed out or object not found");
-        }
-        console.log(object);
+      const result = await this.entity.delete(req.params.id);
+      if (result.affected === 0) {
+        console.log("No object found to delete, id:", req.params.id);
+        res.status(404).send({ message: "Object not found" });
       } else {
-        await this.entity.delete({});
-        console.log("All object deleted");
+        console.log("Object deleted successfully");
+        res.send({ message: "Object deleted successfully" });
       }
-      res.send("deleted successfully");
     } catch (err) {
-      res.status(404).send(err);
+      console.error("Failed to delete object:", err);
+      res.status(500).send({ message: "Error deleting object", error: err });
     }
   }
 }

@@ -4,25 +4,35 @@ import http from "http";
 export let io: SocketIOServer;
 
 export default function initializeSocket(server: http.Server) {
-  console.log("Initializing Socket.io server..."); // לוג לאתחול השרת
+  console.log("Initializing Socket.io server...");
+
+  const allowedOrigins = [
+    "https://travel-easily-app.netlify.app", // prodaction
+    "http://localhost:5173", // dev
+  ];
 
   io = new SocketIOServer(server, {
     cors: {
-      origin: "https://travel-easily-app.netlify.app/", // יש להגדיר origin מתאים לפרודקשן
+      origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+          callback(null, true); // מאפשר חיבור אם ה-origin ברשימה
+        } else {
+          callback(new Error("Not allowed by CORS")); // שגיאה אם ה-origin לא ברשימה
+        }
+      },
       methods: ["GET", "POST"],
     },
-    transports: ["websocket"], // שימוש רק ב-WebSocket
+    transports: ["websocket"],
   });
 
-  // Middleware לבדיקות טרם חיבור
   io.use((socket, next) => {
-    console.log("Running middleware authentication check..."); // לוג למעבר במידלוור
+    console.log("Running middleware authentication check...");
     if (socket.handshake.auth.token) {
-      console.log("Authentication successful for socket:", socket.id); // הצלחת אימות
-      next(); // במידה והבדיקות עוברות, המשך לחיבור
+      console.log("Authentication successful for socket:", socket.id);
+      next();
     } else {
-      console.error("Authentication error - no token provided"); // שגיאת אימות
-      next(new Error("Authentication error")); // חסום חיבור ללא אימות
+      console.error("Authentication error - no token provided");
+      next(new Error("Authentication error"));
     }
   });
 

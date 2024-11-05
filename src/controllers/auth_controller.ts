@@ -283,7 +283,7 @@ const refresh = async (req: Request, res: Response) => {
   console.log("Received refresh token:", refreshToken);
 
   try {
-    // וודא שה- refreshToken חוקי
+
     jwt.verify(
       refreshToken,
       process.env.JWT_REFRESH_SECRET,
@@ -294,7 +294,7 @@ const refresh = async (req: Request, res: Response) => {
         }
 
         try {
-          // בדיקת המשתמש במערכת לפי ה-ID
+    
           const userDb = await UserRepository.findOneBy({
             _id: decodedUser._id,
           });
