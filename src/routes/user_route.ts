@@ -110,7 +110,7 @@ router.put("/:id", authMiddleware, UserController.put.bind(UserController));
 router.delete(
   "/:id",
   authMiddleware,
-  UserController.delete.bind(UserController)
+  UserController.deleteUser.bind(UserController)
 );
 
 /**
