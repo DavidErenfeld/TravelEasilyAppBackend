@@ -162,17 +162,39 @@ class TripController extends BaseController<ITrips> {
         return res.status(404).send("Trip not found");
       }
 
+      // בדיקה אם הלייק כבר קיים
       if (!trip.likes.some((like) => like.owner === userId)) {
+        // הוספת לייק אם לא קיים
         trip.likes.push({ owner: userId });
         trip.numOfLikes++;
         await this.entity.save(trip);
+
+        // שידור לכולם על כך שהתווסף לייק
         io.emit("likeAdded", { tripId, userId });
+
+        // שידור ספציפי לחדר של המשתמש על עדכון סטטוס הלייק
+        io.to(userId.toString()).emit("likeStatusUpdated", {
+          tripId,
+          status: "liked",
+        });
+
         return res.status(200).send(trip);
       }
+
+      // הסרת לייק אם כבר קיים
       trip.likes = trip.likes.filter((user) => user.owner !== userId);
       trip.numOfLikes--;
       await this.entity.save(trip);
+
+      // שידור לכולם על כך שהוסר לייק
       io.emit("likeRemoved", { tripId, userId });
+
+      // שידור ספציפי לחדר של המשתמש על עדכון סטטוס הלייק
+      io.to(userId.toString()).emit("likeStatusUpdated", {
+        tripId,
+        status: "unliked",
+      });
+
       res.status(200).send(trip);
     } catch (error) {
       console.error("Error in addLike:", error.message);
