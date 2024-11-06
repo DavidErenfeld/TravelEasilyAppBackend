@@ -193,7 +193,7 @@ class UserController extends BaseController<IUser> {
 
       // Sending Socket event to disconnect all user connections
       io.to(req.params.id).emit("disconnectUser");
-
+      console.log(`Sent disconnectUser event to user ID: ${req.params.id}`);
       console.log("User deleted successfully:", req.params.id);
       res.status(200).json({ message: "User deleted successfully" });
     } catch (error) {
