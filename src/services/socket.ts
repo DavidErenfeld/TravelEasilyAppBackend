@@ -59,12 +59,7 @@ export default function initializeSocket(server: http.Server) {
     socket.on("addLike", (likeData) => {
       console.log("Received addLike event:", likeData); // לוג בעת קבלת אירוע addLike
       handleEventWithErrorLogging(() => {
-        io.emit("likeAdded", likeData); // שליחה לכל המשתמשים
-        io.to(likeData.userId).emit("likeStatusUpdated", {
-          // שליחה לחדר של המשתמש
-          tripId: likeData.tripId,
-          status: likeData.status,
-        });
+        io.emit("likeAdded", likeData);
       }, "Error adding like");
     });
 
