@@ -55,14 +55,6 @@ export default function initializeSocket(server: http.Server) {
       }, "Error updating trip");
     });
 
-    // טיפול באירוע של הוספת תמונה
-    socket.on("addImage", (imageData) => {
-      console.log("Received addImage event:", imageData); // לוג בעת קבלת אירוע addImage
-      handleEventWithErrorLogging(() => {
-        io.emit("imageAdded", imageData);
-      }, "Error adding image");
-    });
-
     // טיפול באירוע של הוספת לייק
     socket.on("addLike", (likeData) => {
       console.log("Received addLike event:", likeData); // לוג בעת קבלת אירוע addLike
@@ -77,6 +69,19 @@ export default function initializeSocket(server: http.Server) {
       handleEventWithErrorLogging(() => {
         io.emit("commentAdded", commentData);
       }, "Error adding comment");
+    });
+
+    // הצטרפות לחדר על פי מזהה המשתמש
+    socket.on("join", ({ userId }) => {
+      socket.join(userId);
+      console.log(`Socket ${socket.id} הצטרף לחדר ${userId}`);
+    });
+
+    // טיפול באירוע של מחיקת משתמש
+    socket.on("deleteUser", ({ userId }) => {
+      console.log(`User ${userId} requested account deletion.`);
+      // שליחת אירוע לניתוק כל המכשירים של המשתמש
+      io.to(userId).emit("disconnectUser");
     });
 
     // טיפול בניתוק חיבור
