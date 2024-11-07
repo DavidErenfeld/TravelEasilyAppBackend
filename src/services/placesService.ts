@@ -11,7 +11,7 @@ interface Place {
   website: string;
 }
 
-const CACHE_EXPIRATION = 3600; // Cache lifetime in seconds (e.g., one hour)
+const CACHE_EXPIRATION = 3600; // זמן חיי המטמון בשניות (שעה)
 
 export async function fetchPlaces(
   location: string,
@@ -23,7 +23,7 @@ export async function fetchPlaces(
 
   if (cachedData) {
     console.log("Returning cached result");
-    return JSON.parse(cachedData);
+    return JSON.parse(cachedData); // החזרת כל התוצאות שנשמרו במטמון, ללא חיתוך
   }
 
   console.log("Fetching data from Google Places API");
@@ -34,14 +34,17 @@ export async function fetchPlaces(
       {
         params: {
           location,
-          radius: Math.min(radius, 2000), // Maximum radius limit
+          radius: Math.min(radius, 2000), // מגבלת רדיוס מקסימלית
           type,
-          key: process.env.GOOGLE_PLACES_API_KEY, // Environment variable for API key
+          key: process.env.GOOGLE_PLACES_API_KEY, // מפתח API כמשתנה סביבה
         },
       }
     );
 
-    const places = response.data.results.slice(0, 10).map((place: any) => ({
+    // הדפסת כל התגובה שהתקבלה מה-API כדי לראות מה חזר בדיוק
+    console.log("API Response:", response.data);
+
+    const places = response.data.results.map((place: any) => ({
       id: place.place_id,
       name: place.name,
       address: place.vicinity,
@@ -51,11 +54,12 @@ export async function fetchPlaces(
       website: place.website || "Not available",
     }));
 
+    // שמירת כל התוצאות במטמון Redis
     await redisClient.set(cacheKey, JSON.stringify(places), {
       EX: CACHE_EXPIRATION,
     });
 
-    return places;
+    return places; // החזרת כל התוצאות ללקוח, ללא חיתוך
   } catch (error) {
     console.error("Error fetching places:", error);
     throw new Error("Unable to retrieve place information at the moment.");
