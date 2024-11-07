@@ -1,30 +1,32 @@
 import axios from "axios";
 import redisClient from "./redisClient";
 
-const CACHE_EXPIRATION = 3600; // זמן חיי המטמון בשניות (שעה)
+interface Place {
+  id: string;
+  name: string;
+  address: string;
+  lat: number;
+  lon: number;
+  phone: string;
+  website: string;
+}
 
-// פונקציה ראשית לשליפת כל פרטי המקומות
-export async function fetchPlacesWithFullDetails(
+const CACHE_EXPIRATION = 3600; // Cache lifetime in seconds (e.g., one hour)
+
+export async function fetchPlaces(
   location: string,
   radius: number,
   type: string
-): Promise<any> {
-  const cacheKey = `places_full:${location}:${radius}:${type}`;
-  console.log("Starting fetchPlacesWithFullDetails with params:", {
-    location,
-    radius,
-    type,
-  });
-  console.log("Generated cache key:", cacheKey);
-
-  // בדיקת מטמון
+): Promise<Place[]> {
+  const cacheKey = `places:${location}:${radius}:${type}`;
   const cachedData = await redisClient.get(cacheKey);
+
   if (cachedData) {
-    console.log("Cache hit - returning cached data for key:", cacheKey);
+    console.log("Returning cached result");
     return JSON.parse(cachedData);
   }
 
-  console.log("Cache miss - fetching data from Google Places API");
+  console.log("Fetching data from Google Places API");
 
   try {
     const response = await axios.get(
@@ -32,39 +34,30 @@ export async function fetchPlacesWithFullDetails(
       {
         params: {
           location,
-          radius: Math.min(radius, 20),
+          radius: Math.min(radius, 2000), // Maximum radius limit
           type,
-          key: process.env.GOOGLE_MAPS_API_KEY,
+          key: process.env.GOOGLE_PLACES_API_KEY, // Environment variable for API key
         },
       }
     );
 
-    // הדפסת כל התגובה מה-API כדי לראות מה חזר בדיוק
-    console.log(
-      "Received API response:",
-      JSON.stringify(response.data, null, 2)
-    );
+    const places = response.data.results.slice(0, 10).map((place: any) => ({
+      id: place.place_id,
+      name: place.name,
+      address: place.vicinity,
+      lat: place.geometry.location.lat,
+      lon: place.geometry.location.lng,
+      phone: place.formatted_phone_number || "Not available",
+      website: place.website || "Not available",
+    }));
 
-    // שמירת כל התוצאות במטמון Redis כפי שהן
-    await redisClient.set(cacheKey, JSON.stringify(response.data), {
+    await redisClient.set(cacheKey, JSON.stringify(places), {
       EX: CACHE_EXPIRATION,
     });
-    console.log("Data cached successfully with key:", cacheKey);
 
-    return response.data;
-  } catch (error: any) {
-    if (axios.isAxiosError(error)) {
-      console.error("Axios error details:");
-      console.error("Message:", error.message);
-      console.error("Code:", error.code);
-      console.error("Config:", error.config);
-      if (error.response) {
-        console.error("Status:", error.response.status);
-        console.error("Data:", error.response.data);
-      }
-    } else {
-      console.error("Unexpected error:", error);
-    }
+    return places;
+  } catch (error) {
+    console.error("Error fetching places:", error);
     throw new Error("Unable to retrieve place information at the moment.");
   }
 }
