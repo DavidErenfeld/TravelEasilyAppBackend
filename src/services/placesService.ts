@@ -34,7 +34,7 @@ export async function fetchPlacesWithFullDetails(
           location,
           radius: Math.min(radius, 20),
           type,
-          key: process.env.GOOGLE_PLACES_API_KEY,
+          key: process.env.GOOGLE_MAPS_API_KEY,
         },
       }
     );
