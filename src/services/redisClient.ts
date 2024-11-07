@@ -1,14 +1,27 @@
-import Redis from "redis";
-import dotenv from "dotenv";
+import { createClient } from "redis";
 
-dotenv.config();
+let redisClient: ReturnType<typeof createClient>; // ייצוא הלקוח לשימוש מחוץ לפונקציה
 
-const redisClient = Redis.createClient({
-  url: process.env.REDIS_URL, // משתנה סביבה עם הקישור ל-Redis
+async function initializeRedis() {
+  try {
+    redisClient = createClient({
+      url: process.env.REDISCLOUD_URL, // שימוש ב-REDISCLOUD_URL שהוגדר בהרוקו
+    });
+
+    redisClient.on("error", (err) => console.log("Redis Client Error", err));
+
+    await redisClient.connect(); // ודא שההתחברות מתבצעת לפני השימוש ב-client
+
+    console.log("Connected to Redis");
+  } catch (error) {
+    console.error("Error initializing Redis:", error);
+    throw error;
+  }
+}
+
+// אתחול Redis רק פעם אחת במבנה זה
+initializeRedis().catch((error) => {
+  console.error("Failed to initialize Redis:", error);
 });
 
-redisClient.on("error", (err) => console.error("Redis Client Error", err));
-
-redisClient.connect();
-
-export default redisClient;
+export default redisClient; // ייצוא הלקוח לשימוש מחוץ לפונקציה
