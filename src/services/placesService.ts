@@ -7,11 +7,15 @@ interface Place {
   address: string;
   lat: number;
   lon: number;
-  phone: string;
-  website: string;
+  phone?: string;
+  website?: string;
+  rating?: number;
+  user_ratings_total?: number;
+  types?: string[];
+  business_status?: string;
 }
 
-const CACHE_EXPIRATION = 300; // Cache lifetime in seconds (e.g., one hour)
+const CACHE_EXPIRATION = 300; // Cache lifetime in seconds
 
 export async function fetchPlaces(
   location: string,
@@ -73,6 +77,10 @@ export async function fetchPlaces(
             detailsResponse.data.result.formatted_phone_number ||
             "Not available",
           website: detailsResponse.data.result.website || "Not available",
+          rating: place.rating,
+          user_ratings_total: place.user_ratings_total,
+          types: place.types,
+          business_status: place.business_status,
         };
       })
     );
