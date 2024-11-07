@@ -11,7 +11,7 @@ interface Place {
   website: string;
 }
 
-const CACHE_EXPIRATION = 3600; // Cache lifetime in seconds (e.g., one hour)
+const CACHE_EXPIRATION = 300; // Cache lifetime in seconds (e.g., one hour)
 
 export async function fetchPlaces(
   location: string,
@@ -36,7 +36,7 @@ export async function fetchPlaces(
           location,
           radius,
           type,
-          key: process.env.GOOGLE_PLACES_API_KEY, // Make sure the environment variable is set
+          key: process.env.GOOGLE_MAPS_API_KEY, // Make sure the environment variable is set
         },
       }
     );
