@@ -1,11 +1,17 @@
-// placesController.ts
 import { Request, Response } from "express";
 import { fetchPlacesWithFullDetails } from "../services/placesService";
 
 export const getPlaces = async (req: Request, res: Response) => {
   const { location, radius, type } = req.query;
 
+  console.log("Received request to /getPlaces with params:", {
+    location,
+    radius,
+    type,
+  });
+
   if (!location || !radius || !type) {
+    console.error("Missing required parameters");
     return res
       .status(400)
       .json({ error: "Location, radius, and type are required." });
@@ -18,8 +24,10 @@ export const getPlaces = async (req: Request, res: Response) => {
       type as string
     );
 
-    res.json(places); // החזרת כל המידע ללקוח
+    console.log("Returning places data to client");
+    res.json(places);
   } catch (error) {
+    console.error("Error in getPlaces:", error);
     res.status(500).json({ error: "Unable to retrieve results at this time." });
   }
 };

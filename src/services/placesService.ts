@@ -1,4 +1,3 @@
-// placesService.ts
 import axios from "axios";
 import redisClient from "./redisClient";
 
@@ -11,14 +10,21 @@ export async function fetchPlacesWithFullDetails(
   type: string
 ): Promise<any> {
   const cacheKey = `places_full:${location}:${radius}:${type}`;
-  const cachedData = await redisClient.get(cacheKey);
+  console.log("Starting fetchPlacesWithFullDetails with params:", {
+    location,
+    radius,
+    type,
+  });
+  console.log("Generated cache key:", cacheKey);
 
+  // בדיקת מטמון
+  const cachedData = await redisClient.get(cacheKey);
   if (cachedData) {
-    console.log("Returning cached result");
-    return JSON.parse(cachedData); // החזרת כל התוצאות שנשמרו במטמון
+    console.log("Cache hit - returning cached data for key:", cacheKey);
+    return JSON.parse(cachedData);
   }
 
-  console.log("Fetching data from Google Places API");
+  console.log("Cache miss - fetching data from Google Places API");
 
   try {
     const response = await axios.get(
@@ -26,24 +32,39 @@ export async function fetchPlacesWithFullDetails(
       {
         params: {
           location,
-          radius: Math.min(radius, 2000), // מגבלת רדיוס מקסימלית
+          radius: Math.min(radius, 2000),
           type,
-          key: process.env.GOOGLE_PLACES_API_KEY, // מפתח API כמשתנה סביבה
+          key: process.env.GOOGLE_PLACES_API_KEY,
         },
       }
     );
 
     // הדפסת כל התגובה מה-API כדי לראות מה חזר בדיוק
-    console.log("Nearby Search Full API Response:", response.data);
+    console.log(
+      "Received API response:",
+      JSON.stringify(response.data, null, 2)
+    );
 
     // שמירת כל התוצאות במטמון Redis כפי שהן
     await redisClient.set(cacheKey, JSON.stringify(response.data), {
       EX: CACHE_EXPIRATION,
     });
+    console.log("Data cached successfully with key:", cacheKey);
 
-    return response.data; // החזרת כל התוצאה ללקוח כפי שהתקבלה
-  } catch (error) {
-    console.error("Error fetching places:", error);
+    return response.data;
+  } catch (error: any) {
+    if (axios.isAxiosError(error)) {
+      console.error("Axios error details:");
+      console.error("Message:", error.message);
+      console.error("Code:", error.code);
+      console.error("Config:", error.config);
+      if (error.response) {
+        console.error("Status:", error.response.status);
+        console.error("Data:", error.response.data);
+      }
+    } else {
+      console.error("Unexpected error:", error);
+    }
     throw new Error("Unable to retrieve place information at the moment.");
   }
 }
