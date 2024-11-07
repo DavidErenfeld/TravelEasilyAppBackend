@@ -53,7 +53,7 @@ export async function fetchPlaces(
             params: {
               place_id: place.place_id,
               fields: "formatted_phone_number,website",
-              key: process.env.GOOGLE_PLACES_API_KEY,
+              key: process.env.GOOGLE_MAPS_API_KEY,
             },
           }
         );
