@@ -32,7 +32,7 @@ export async function fetchPlacesWithFullDetails(
       {
         params: {
           location,
-          radius: Math.min(radius, 2000),
+          radius: Math.min(radius, 20),
           type,
           key: process.env.GOOGLE_PLACES_API_KEY,
         },
