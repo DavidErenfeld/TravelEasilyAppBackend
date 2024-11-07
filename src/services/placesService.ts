@@ -22,7 +22,7 @@ export async function fetchPlaces(
   const cachedData = await redisClient.get(cacheKey);
 
   if (cachedData) {
-    console.log("Returning cached result");
+    console.log("Returning cached result from Redis");
     return JSON.parse(cachedData);
   }
 
@@ -34,30 +34,64 @@ export async function fetchPlaces(
       {
         params: {
           location,
-          radius: Math.min(radius, 2000), // Maximum radius limit
+          radius,
           type,
-          key: process.env.GOOGLE_PLACES_API_KEY, // Environment variable for API key
+          key: process.env.GOOGLE_PLACES_API_KEY, // Make sure the environment variable is set
         },
       }
     );
 
-    const places = response.data.results.slice(0, 10).map((place: any) => ({
-      id: place.place_id,
-      name: place.name,
-      address: place.vicinity,
-      lat: place.geometry.location.lat,
-      lon: place.geometry.location.lng,
-      phone: place.formatted_phone_number || "Not available",
-      website: place.website || "Not available",
-    }));
+    console.log("Google API response received:", response.data);
 
+    const places = await Promise.all(
+      response.data.results.slice(0, 10).map(async (place: any) => {
+        console.log(`Fetching details for place_id: ${place.place_id}`);
+
+        const detailsResponse = await axios.get(
+          `https://maps.googleapis.com/maps/api/place/details/json`,
+          {
+            params: {
+              place_id: place.place_id,
+              fields: "formatted_phone_number,website",
+              key: process.env.GOOGLE_PLACES_API_KEY,
+            },
+          }
+        );
+
+        console.log(
+          `Details for place_id ${place.place_id}:`,
+          detailsResponse.data
+        );
+
+        return {
+          id: place.place_id,
+          name: place.name,
+          address: place.vicinity,
+          lat: place.geometry.location.lat,
+          lon: place.geometry.location.lng,
+          phone:
+            detailsResponse.data.result.formatted_phone_number ||
+            "Not available",
+          website: detailsResponse.data.result.website || "Not available",
+        };
+      })
+    );
+
+    console.log("Caching fetched places data with key:", cacheKey);
     await redisClient.set(cacheKey, JSON.stringify(places), {
       EX: CACHE_EXPIRATION,
     });
 
     return places;
   } catch (error) {
-    console.error("Error fetching places:", error);
+    if (axios.isAxiosError(error)) {
+      console.error(
+        "Axios error while fetching places:",
+        error.response?.data || error.message
+      );
+    } else {
+      console.error("Unexpected error while fetching places:", error);
+    }
     throw new Error("Unable to retrieve place information at the moment.");
   }
 }
