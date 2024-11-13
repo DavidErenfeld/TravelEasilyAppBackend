@@ -232,8 +232,8 @@ class TripController extends BaseController<ITrips> {
           "like.ownerDetails",
           User,
           "user",
-          "user._id::text = like.owner" // המרה ל-text להשוואה
-        ) // מצרף את פרטי המשתמש
+          "CAST(user._id AS TEXT) = like.owner" // המרה ל-text עם CAST
+        )
         .where("trip._id = :tripId", { tripId })
         .getOne();
 
@@ -249,10 +249,9 @@ class TripController extends BaseController<ITrips> {
         });
       }
 
-      // שימוש בפרטים שהצטרפו דרך `user`
       const likesDetails = tripWithLikes.likes.map((like) => ({
         userName: (like as any).ownerDetails?.userName || "Unknown User",
-        imgUrl: (like as any).ownerDetails?.imgUrl || "", // מחרוזת ריקה אם אין תמונה
+        imgUrl: (like as any).ownerDetails?.imgUrl || "",
       }));
 
       res.status(200).json({
