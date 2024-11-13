@@ -304,4 +304,50 @@ router.get(
   TripController.getByParamId.bind(TripController)
 );
 
+/**
+ * @swagger
+ * /trips/{tripId}/likes/details:
+ *   get:
+ *     summary: Get details of users who liked a trip
+ *     tags: [Trips]
+ *     parameters:
+ *       - in: path
+ *         name: tripId
+ *         required: true
+ *         description: ID of the trip to retrieve like details for
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: List of users who liked the trip with their details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 totalLikes:
+ *                   type: integer
+ *                   description: Total number of likes
+ *                 likesDetails:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       userName:
+ *                         type: string
+ *                         description: User's name who liked the trip
+ *                       imgUrl:
+ *                         type: string
+ *                         description: URL of the user's profile picture
+ *       404:
+ *         description: Trip not found
+ *       500:
+ *         description: Internal server error
+ */
+router.get(
+  "/:tripId/likes/details",
+  authMiddleware,
+  TripController.getLikesWithUserDetails.bind(TripController)
+);
+
 export default router;

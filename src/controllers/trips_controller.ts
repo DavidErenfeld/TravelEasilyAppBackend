@@ -219,6 +219,51 @@ class TripController extends BaseController<ITrips> {
       res.status(500).send(error.message);
     }
   }
+
+  async getLikesWithUserDetails(req: Request, res: Response) {
+    try {
+      const tripId = req.params.tripId;
+
+      // שליפת כל הלייקים עם פרטי המשתמשים
+      const tripWithLikes = await this.entity
+        .createQueryBuilder("trip")
+        .leftJoinAndSelect("trip.likes", "like")
+        .leftJoinAndMapOne(
+          "like.ownerDetails",
+          User,
+          "user",
+          "user._id = like.owner"
+        ) // מצרף את פרטי המשתמש
+        .where("trip._id = :tripId", { tripId })
+        .getOne();
+
+      if (!tripWithLikes) {
+        return res.status(404).send("Trip not found");
+      }
+
+      if (!tripWithLikes.likes || tripWithLikes.likes.length === 0) {
+        return res.status(200).json({
+          message: "No likes found for this trip.",
+          totalLikes: 0,
+          likesDetails: [],
+        });
+      }
+
+      // שימוש בפרטים שהצטרפו דרך `user`
+      const likesDetails = tripWithLikes.likes.map((like) => ({
+        userName: (like as any).ownerDetails?.userName || "Unknown User",
+        imgUrl: (like as any).ownerDetails?.imgUrl || "", // מחרוזת ריקה אם אין תמונה
+      }));
+
+      res.status(200).json({
+        totalLikes: likesDetails.length,
+        likesDetails,
+      });
+    } catch (error) {
+      console.error("Error fetching likes with user details:", error.message);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  }
 }
 
 export default new TripController(Trip);

@@ -4,7 +4,6 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { OAuth2Client } from "google-auth-library";
 import connectDB from "../data-source";
-import { access } from "fs";
 
 const client = new OAuth2Client();
 const UserRepository = connectDB.getRepository(User);
@@ -26,16 +25,15 @@ const googleSignin = async (req: Request, res: Response) => {
     let user = await UserRepository.findOneBy({ email });
 
     if (!user) {
-      // ודא שכל השדות הנדרשים קיימים
-      const userName = payload?.name || "DefaultUserName"; // שם משתמש ברירת מחדל אם חסר
+      const userName = payload?.name || "DefaultUserName";
       user = UserRepository.create({
         email,
-        password: "0", // סיסמא ריקה או ערך דיפולטיבי כלשהו
+        password: "0",
         imgUrl: payload?.picture,
-        userName, // חשוב להוסיף את השדה הזה
+        userName,
       });
 
-      await UserRepository.save(user); // שמירה של המשתמש בבסיס הנתונים
+      await UserRepository.save(user);
     }
 
     const tokens = await generateTokens(user);
@@ -52,6 +50,7 @@ const googleSignin = async (req: Request, res: Response) => {
     return res.status(400).send(err.message);
   }
 };
+
 const register = async (req: Request, res: Response) => {
   const email = req.body.email;
   const password = req.body.password;
@@ -161,20 +160,17 @@ const verifyPassword = async (req: Request, res: Response) => {
 };
 
 const login = async (req: Request, res: Response) => {
-  // לוג ראשוני להדפסת הבקשה שמתקבלת
   console.log("Login request received:", req.body.email, req.body.password);
 
   const password = req.body.password;
   const email = req.body.email;
 
-  // בדיקה אם חסר אימייל או סיסמה
   if (!email || !password) {
     console.log("Missing email or password");
     return res.status(400).send("Missing email or password");
   }
 
   try {
-    // בדיקה אם המשתמש קיים במערכת
     const user = await UserRepository.findOneBy({ email: email });
 
     if (user == null) {
@@ -182,7 +178,6 @@ const login = async (req: Request, res: Response) => {
       return res.status(401).send("Email or password incorrect");
     }
 
-    // השוואת הסיסמאות
     const match = await bcrypt.compare(password, user.password);
     console.log("Password match result:", match);
 
@@ -191,7 +186,6 @@ const login = async (req: Request, res: Response) => {
       return res.status(401).send("Email or password incorrect");
     }
 
-    // אם הכל בסדר, יוצרים את ה-tokens
     const tokens = await generateTokens(user);
     console.log("Login successful, generating tokens for:", user.email);
 
@@ -219,7 +213,6 @@ const logout = async (req: Request, res: Response) => {
   }
 
   try {
-    // וודא שה- refreshToken חוקי
     jwt.verify(
       refreshToken,
       process.env.JWT_REFRESH_SECRET,
@@ -230,7 +223,6 @@ const logout = async (req: Request, res: Response) => {
         }
 
         try {
-          // שליפת המשתמש מהמאגר
           const userDb = await UserRepository.findOneBy({
             _id: decodedUser._id,
           });
@@ -240,7 +232,6 @@ const logout = async (req: Request, res: Response) => {
             return res.status(404).send("User not found");
           }
 
-          // בדיקה אם ה-refresh token קיים במערך ה-tokens של המשתמש
           if (
             !userDb.refreshTokens ||
             !userDb.refreshTokens.includes(refreshToken)
@@ -283,7 +274,6 @@ const refresh = async (req: Request, res: Response) => {
   console.log("Received refresh token:", refreshToken);
 
   try {
-
     jwt.verify(
       refreshToken,
       process.env.JWT_REFRESH_SECRET,
@@ -294,7 +284,6 @@ const refresh = async (req: Request, res: Response) => {
         }
 
         try {
-    
           const userDb = await UserRepository.findOneBy({
             _id: decodedUser._id,
           });
