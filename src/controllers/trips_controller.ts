@@ -232,7 +232,7 @@ class TripController extends BaseController<ITrips> {
           "like.ownerDetails",
           User,
           "user",
-          "user._id = like.owner"
+          "user._id::text = like.owner" // המרה ל-text להשוואה
         ) // מצרף את פרטי המשתמש
         .where("trip._id = :tripId", { tripId })
         .getOne();
