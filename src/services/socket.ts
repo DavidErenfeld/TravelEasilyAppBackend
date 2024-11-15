@@ -66,6 +66,7 @@ export default function initializeSocket(server: http.Server) {
       console.log(`User ${userId} added trip ${tripId} to favorites.`);
       handleEventWithErrorLogging(() => {
         io.to(userId).emit("favoriteUpdated", { tripId, isFavorite: true });
+        console.log(`Event emitted: favoriteTripAdded to userId: ${userId}`);
       }, "Error adding favorite");
     });
 
@@ -73,6 +74,7 @@ export default function initializeSocket(server: http.Server) {
       console.log(`User ${userId} removed trip ${tripId} from favorites.`);
       handleEventWithErrorLogging(() => {
         io.to(userId).emit("favoriteUpdated", { tripId, isFavorite: false });
+        console.log(`Event emitted: favoriteTripRemoved to userId: ${userId}`);
       }, "Error removing favorite");
     });
 
