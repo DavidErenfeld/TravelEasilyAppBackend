@@ -55,36 +55,45 @@ export default function initializeSocket(server: http.Server) {
       }, "Error updating trip");
     });
 
-    // טיפול באירוע של הוספת לייק
     socket.on("addLike", (likeData) => {
-      console.log("Received addLike event:", likeData); // לוג בעת קבלת אירוע addLike
+      console.log("Received addLike event:", likeData);
       handleEventWithErrorLogging(() => {
         io.emit("likeAdded", likeData);
       }, "Error adding like");
     });
 
-    // טיפול באירוע של הוספת תגובה
+    socket.on("addFavorite", ({ userId, tripId }) => {
+      console.log(`User ${userId} added trip ${tripId} to favorites.`);
+      handleEventWithErrorLogging(() => {
+        io.to(userId).emit("favoriteUpdated", { tripId, isFavorite: true });
+      }, "Error adding favorite");
+    });
+
+    socket.on("removeFavorite", ({ userId, tripId }) => {
+      console.log(`User ${userId} removed trip ${tripId} from favorites.`);
+      handleEventWithErrorLogging(() => {
+        io.to(userId).emit("favoriteUpdated", { tripId, isFavorite: false });
+      }, "Error removing favorite");
+    });
+
     socket.on("addComment", (commentData) => {
-      console.log("Received addComment event:", commentData); // לוג בעת קבלת אירוע addComment
+      console.log("Received addComment event:", commentData);
       handleEventWithErrorLogging(() => {
         io.emit("commentAdded", commentData);
       }, "Error adding comment");
     });
 
-    // הצטרפות לחדר על פי מזהה המשתמש
     socket.on("join", ({ userId }) => {
       socket.join(userId);
-      console.log(`Socket ${socket.id} הצטרף לחדר ${userId}`);
+      console.log(`Socket ${socket.id} joined room ${userId}`);
     });
 
     // טיפול באירוע של מחיקת משתמש
     socket.on("deleteUser", ({ userId }) => {
       console.log(`User ${userId} requested account deletion.`);
-      // שליחת אירוע לניתוק כל המכשירים של המשתמש
       io.to(userId).emit("disconnectUser");
     });
 
-    // טיפול בניתוק חיבור
     socket.on("disconnect", () => {
       console.log("Client disconnected:", socket.id);
     });

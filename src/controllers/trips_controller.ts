@@ -224,7 +224,7 @@ class TripController extends BaseController<ITrips> {
     try {
       const tripId = req.params.tripId;
 
-      // שליפת כל הלייקים עם פרטי המשתמשים
+   
       const tripWithLikes = await this.entity
         .createQueryBuilder("trip")
         .leftJoinAndSelect("trip.likes", "like")
@@ -232,7 +232,7 @@ class TripController extends BaseController<ITrips> {
           "like.ownerDetails",
           User,
           "user",
-          "CAST(user._id AS TEXT) = like.owner" // המרה ל-text עם CAST
+          "CAST(user._id AS TEXT) = like.owner" 
         )
         .where("trip._id = :tripId", { tripId })
         .getOne();
