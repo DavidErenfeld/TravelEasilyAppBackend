@@ -14,6 +14,38 @@ class TripController extends BaseController<ITrips> {
     super(entity);
   }
 
+  async get(req: AuthRequest, res: Response) {
+    try {
+      const trips = await this.entity.find({
+        relations: ["owner", "likes", "comments"],
+      });
+
+      if (req.user) {
+        const userId = req.user._id;
+        const userRepository = connectDB.getRepository(User);
+        const user = await userRepository.findOne({ where: { _id: userId } });
+
+        const favoriteTrips = user.favoriteTrips || [];
+
+        const tripsWithUserData = trips.map((trip) => {
+          const isLikedByCurrentUser = trip.likes.some(
+            (like) => like.owner === userId
+          );
+          const isFavoritedByCurrentUser = favoriteTrips.includes(trip._id);
+
+          return { ...trip, isLikedByCurrentUser, isFavoritedByCurrentUser };
+        });
+
+        res.status(200).json(tripsWithUserData);
+      } else {
+        res.status(200).json(trips);
+      }
+    } catch (err) {
+      console.error("Failed to retrieve data:", err);
+      res.status(500).send({ message: "Error retrieving data", error: err });
+    }
+  }
+
   async post(req: AuthRequest, res: Response): Promise<void> {
     req.body.owner = req.user._id;
     try {
@@ -224,7 +256,6 @@ class TripController extends BaseController<ITrips> {
     try {
       const tripId = req.params.tripId;
 
-   
       const tripWithLikes = await this.entity
         .createQueryBuilder("trip")
         .leftJoinAndSelect("trip.likes", "like")
@@ -232,7 +263,7 @@ class TripController extends BaseController<ITrips> {
           "like.ownerDetails",
           User,
           "user",
-          "CAST(user._id AS TEXT) = like.owner" 
+          "CAST(user._id AS TEXT) = like.owner"
         )
         .where("trip._id = :tripId", { tripId })
         .getOne();

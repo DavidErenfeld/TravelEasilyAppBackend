@@ -1,6 +1,8 @@
 import express from "express";
 const router = express.Router();
-import authMiddleware from "../common/auth_middleware";
+import authMiddleware, {
+  optionalAuthMiddleware,
+} from "../common/auth_middleware";
 import TripController from "../controllers/trips_controller";
 
 /**
@@ -13,7 +15,11 @@ import TripController from "../controllers/trips_controller";
  *       200:
  *         description: List of all trips
  */
-router.get("/", TripController.get.bind(TripController));
+router.get(
+  "/",
+  optionalAuthMiddleware,
+  TripController.get.bind(TripController)
+);
 
 /**
  * @swagger

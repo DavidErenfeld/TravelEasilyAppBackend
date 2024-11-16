@@ -23,6 +23,8 @@ export interface ITrips {
   tripPhotos?: string[];
   comments?: IComment[];
   likes?: ILike[];
+  isLikedByCurrentUser?: boolean;
+  isFavoritedByCurrentUser?: boolean;
 }
 
 @Entity()

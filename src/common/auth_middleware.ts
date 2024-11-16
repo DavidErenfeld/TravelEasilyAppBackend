@@ -20,4 +20,27 @@ const authMiddleware = (
   });
 };
 
+export const optionalAuthMiddleware = (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1]; // Bearer <token>
+
+  if (token == null) {
+    req.user = null;
+    next();
+  } else {
+    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+      if (err) {
+        req.user = null;
+      } else {
+        req.user = user as { _id: string; userName?: string };
+      }
+      next();
+    });
+  }
+};
+
 export default authMiddleware;
