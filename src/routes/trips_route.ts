@@ -18,7 +18,7 @@ import TripController from "../controllers/trips_controller";
 router.get(
   "/",
   optionalAuthMiddleware,
-  TripController.get.bind(TripController)
+  TripController.getAllTrips.bind(TripController)
 );
 
 /**

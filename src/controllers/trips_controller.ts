@@ -14,7 +14,7 @@ class TripController extends BaseController<ITrips> {
     super(entity);
   }
 
-  async get(req: AuthRequest, res: Response) {
+  async getAllTrips(req: AuthRequest, res: Response) {
     try {
       const trips = await this.entity.find({
         relations: ["owner", "likes", "comments"],
@@ -35,7 +35,7 @@ class TripController extends BaseController<ITrips> {
 
           return { ...trip, isLikedByCurrentUser, isFavoritedByCurrentUser };
         });
-
+        console.log(tripsWithUserData);
         res.status(200).json(tripsWithUserData);
       } else {
         res.status(200).json(trips);
