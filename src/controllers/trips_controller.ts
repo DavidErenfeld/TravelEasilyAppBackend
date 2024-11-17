@@ -22,9 +22,9 @@ class TripController extends BaseController<ITrips> {
     const favoriteTrips = user?.favoriteTrips || [];
 
     return trips.map((trip) => {
-      const isLikedByCurrentUser = trip.likes.some(
-        (like) => like.owner === userId
-      );
+      const isLikedByCurrentUser = trip.likes
+        ? trip.likes.some((like) => like.owner === userId)
+        : false;
       const isFavoritedByCurrentUser = favoriteTrips.includes(trip._id);
 
       return { ...trip, isLikedByCurrentUser, isFavoritedByCurrentUser };
@@ -166,7 +166,7 @@ class TripController extends BaseController<ITrips> {
     }
   }
 
-  async deleteTrip(req: AuthRequest, res: Response) {
+  async deleteTrip(req: Request, res: Response) {
     try {
       const tripId = req.params.id;
       const tripToDelete = await this.entity.findOne({
@@ -210,18 +210,8 @@ class TripController extends BaseController<ITrips> {
       trip.numOfComments = trip.comments.length;
       await this.entity.save(trip);
 
-      // הוספת השדות isLikedByCurrentUser ו-isFavoritedByCurrentUser
-      if (req.user) {
-        const enrichedTrip = await this.enrichTripsWithUserData(
-          [trip],
-          req.user._id
-        );
-        io.emit("commentAdded", { tripId, newComment });
-        res.status(200).send(enrichedTrip[0].comments);
-      } else {
-        io.emit("commentAdded", { tripId, newComment });
-        res.status(200).send(trip.comments);
-      }
+      io.emit("commentAdded", { tripId, newComment });
+      res.status(200).send(trip.comments);
     } catch (error) {
       console.error("Error in addComment:", error.message);
       res.status(500).send(error.message);
@@ -247,23 +237,13 @@ class TripController extends BaseController<ITrips> {
         trip.numOfLikes++;
         await this.entity.save(trip);
         io.emit("likeAdded", { tripId, userId });
-      } else {
-        trip.likes = trip.likes.filter((user) => user.owner !== userId);
-        trip.numOfLikes--;
-        await this.entity.save(trip);
-        io.emit("likeRemoved", { tripId, userId });
+        return res.status(200).send(trip);
       }
-
-      // הוספת השדות isLikedByCurrentUser ו-isFavoritedByCurrentUser
-      if (req.user) {
-        const tripsWithUserData = await this.enrichTripsWithUserData(
-          [trip],
-          userId
-        );
-        res.status(200).send(tripsWithUserData[0]);
-      } else {
-        res.status(200).send(trip);
-      }
+      trip.likes = trip.likes.filter((user) => user.owner !== userId);
+      trip.numOfLikes--;
+      await this.entity.save(trip);
+      io.emit("likeRemoved", { tripId, userId });
+      res.status(200).send(trip);
     } catch (error) {
       console.error("Error in addLike:", error.message);
       res.status(500).send(error.message);
@@ -311,17 +291,7 @@ class TripController extends BaseController<ITrips> {
       await this.entity.save(trip);
 
       io.emit("commentDeleted", { tripId, commentId });
-
-      // הוספת השדות isLikedByCurrentUser ו-isFavoritedByCurrentUser
-      if (req.user) {
-        const enrichedTrip = await this.enrichTripsWithUserData(
-          [trip],
-          req.user._id
-        );
-        res.status(200).send(enrichedTrip[0].comments);
-      } else {
-        res.status(200).send(trip.comments);
-      }
+      res.status(200).send(trip.comments);
     } catch (error) {
       console.error("Error in deleteComment:", error.message);
       res.status(500).send(error.message);
