@@ -14,6 +14,23 @@ class TripController extends BaseController<ITrips> {
     super(entity);
   }
 
+  // פונקציית עזר להוספת שדות isLikedByCurrentUser ו-isFavoritedByCurrentUser
+  private async enrichTripsWithUserData(trips: ITrips[], userId: string) {
+    const userRepository = connectDB.getRepository(User);
+    const user = await userRepository.findOne({ where: { _id: userId } });
+
+    const favoriteTrips = user?.favoriteTrips || [];
+
+    return trips.map((trip) => {
+      const isLikedByCurrentUser = trip.likes.some(
+        (like) => like.owner === userId
+      );
+      const isFavoritedByCurrentUser = favoriteTrips.includes(trip._id);
+
+      return { ...trip, isLikedByCurrentUser, isFavoritedByCurrentUser };
+    });
+  }
+
   async getAllTrips(req: AuthRequest, res: Response) {
     try {
       const trips = await this.entity.find({
@@ -22,20 +39,10 @@ class TripController extends BaseController<ITrips> {
 
       if (req.user) {
         const userId = req.user._id;
-        const userRepository = connectDB.getRepository(User);
-        const user = await userRepository.findOne({ where: { _id: userId } });
-
-        const favoriteTrips = user.favoriteTrips || [];
-
-        const tripsWithUserData = trips.map((trip) => {
-          const isLikedByCurrentUser = trip.likes.some(
-            (like) => like.owner === userId
-          );
-          const isFavoritedByCurrentUser = favoriteTrips.includes(trip._id);
-
-          return { ...trip, isLikedByCurrentUser, isFavoritedByCurrentUser };
-        });
-        console.log(tripsWithUserData);
+        const tripsWithUserData = await this.enrichTripsWithUserData(
+          trips,
+          userId
+        );
         res.status(200).json(tripsWithUserData);
       } else {
         res.status(200).json(trips);
@@ -56,7 +63,7 @@ class TripController extends BaseController<ITrips> {
     }
   }
 
-  async getByOwnerId(req: Request, res: Response) {
+  async getByOwnerId(req: AuthRequest, res: Response) {
     try {
       const ownerId = req.params.id;
       const trips = await this.entity
@@ -66,14 +73,24 @@ class TripController extends BaseController<ITrips> {
         .leftJoinAndSelect("trip.comments", "comments")
         .where("owner._id = :ownerId", { ownerId })
         .getMany();
-      res.status(trips.length > 0 ? 200 : 404).json(trips);
+
+      if (req.user) {
+        const userId = req.user._id;
+        const tripsWithUserData = await this.enrichTripsWithUserData(
+          trips,
+          userId
+        );
+        res.status(trips.length > 0 ? 200 : 404).json(tripsWithUserData);
+      } else {
+        res.status(trips.length > 0 ? 200 : 404).json(trips);
+      }
     } catch (err) {
       console.error("Error fetching trips by owner ID:", err);
       res.status(500).json({ message: err.message });
     }
   }
 
-  async getByParamId(req: Request, res: Response) {
+  async getByParamId(req: AuthRequest, res: Response) {
     try {
       const queryParams: ParsedQs = req.query;
       const whereCondition: Record<string, string | number | boolean> = {};
@@ -102,7 +119,19 @@ class TripController extends BaseController<ITrips> {
       }
 
       const trips = await query.getMany();
-      res.status(trips.length > 0 ? 200 : 404).json({ data: trips });
+
+      if (req.user) {
+        const userId = req.user._id;
+        const tripsWithUserData = await this.enrichTripsWithUserData(
+          trips,
+          userId
+        );
+        res
+          .status(trips.length > 0 ? 200 : 404)
+          .json({ data: tripsWithUserData });
+      } else {
+        res.status(trips.length > 0 ? 200 : 404).json({ data: trips });
+      }
     } catch (err) {
       console.error("Error fetching trips:", err);
       res.status(500).json({ message: "Internal server error" });
@@ -111,7 +140,7 @@ class TripController extends BaseController<ITrips> {
 
   async getFavoriteTrips(req: AuthRequest, res: Response) {
     try {
-      const userId = req.params.userId;
+      const userId = req.user?._id || req.params.userId;
       const userRepository = connectDB.getRepository(User);
       const user = await userRepository.findOne({ where: { _id: userId } });
 
@@ -121,14 +150,23 @@ class TripController extends BaseController<ITrips> {
         where: { _id: In(user.favoriteTrips) },
         relations: ["owner", "likes", "comments"],
       });
-      res.status(200).json(trips);
+
+      if (req.user) {
+        const tripsWithUserData = await this.enrichTripsWithUserData(
+          trips,
+          userId
+        );
+        res.status(200).json(tripsWithUserData);
+      } else {
+        res.status(200).json(trips);
+      }
     } catch (err) {
       console.error("Error fetching favorite trips:", err);
       res.status(500).json({ message: err.message });
     }
   }
 
-  async deleteTrip(req: Request, res: Response) {
+  async deleteTrip(req: AuthRequest, res: Response) {
     try {
       const tripId = req.params.id;
       const tripToDelete = await this.entity.findOne({
@@ -172,8 +210,18 @@ class TripController extends BaseController<ITrips> {
       trip.numOfComments = trip.comments.length;
       await this.entity.save(trip);
 
-      io.emit("commentAdded", { tripId, newComment });
-      res.status(200).send(trip.comments);
+      // הוספת השדות isLikedByCurrentUser ו-isFavoritedByCurrentUser
+      if (req.user) {
+        const enrichedTrip = await this.enrichTripsWithUserData(
+          [trip],
+          req.user._id
+        );
+        io.emit("commentAdded", { tripId, newComment });
+        res.status(200).send(enrichedTrip[0].comments);
+      } else {
+        io.emit("commentAdded", { tripId, newComment });
+        res.status(200).send(trip.comments);
+      }
     } catch (error) {
       console.error("Error in addComment:", error.message);
       res.status(500).send(error.message);
@@ -199,27 +247,46 @@ class TripController extends BaseController<ITrips> {
         trip.numOfLikes++;
         await this.entity.save(trip);
         io.emit("likeAdded", { tripId, userId });
-        return res.status(200).send(trip);
+      } else {
+        trip.likes = trip.likes.filter((user) => user.owner !== userId);
+        trip.numOfLikes--;
+        await this.entity.save(trip);
+        io.emit("likeRemoved", { tripId, userId });
       }
-      trip.likes = trip.likes.filter((user) => user.owner !== userId);
-      trip.numOfLikes--;
-      await this.entity.save(trip);
-      io.emit("likeRemoved", { tripId, userId });
-      res.status(200).send(trip);
+
+      // הוספת השדות isLikedByCurrentUser ו-isFavoritedByCurrentUser
+      if (req.user) {
+        const tripsWithUserData = await this.enrichTripsWithUserData(
+          [trip],
+          userId
+        );
+        res.status(200).send(tripsWithUserData[0]);
+      } else {
+        res.status(200).send(trip);
+      }
     } catch (error) {
       console.error("Error in addLike:", error.message);
       res.status(500).send(error.message);
     }
   }
 
-  async getWithComments(req: Request, res: Response) {
+  async getWithComments(req: AuthRequest, res: Response) {
     try {
       const tripId = req.params.id;
       const trip = await this.entity.findOne({
         where: { _id: tripId },
         relations: ["comments", "likes", "owner"],
       });
-      res.status(trip ? 200 : 404).json(trip);
+
+      if (req.user && trip) {
+        const enrichedTrip = await this.enrichTripsWithUserData(
+          [trip],
+          req.user._id
+        );
+        res.status(200).json(enrichedTrip[0]);
+      } else {
+        res.status(trip ? 200 : 404).json(trip);
+      }
     } catch (err) {
       console.error("Error fetching trip with comments:", err);
       res.status(500).json({ message: err.message });
@@ -241,18 +308,27 @@ class TripController extends BaseController<ITrips> {
         (comment) => comment._id.toString() !== commentId
       );
       trip.numOfComments = trip.comments.length;
-      trip.numOfComments = trip.comments.length;
       await this.entity.save(trip);
 
       io.emit("commentDeleted", { tripId, commentId });
-      res.status(200).send(trip.comments);
+
+      // הוספת השדות isLikedByCurrentUser ו-isFavoritedByCurrentUser
+      if (req.user) {
+        const enrichedTrip = await this.enrichTripsWithUserData(
+          [trip],
+          req.user._id
+        );
+        res.status(200).send(enrichedTrip[0].comments);
+      } else {
+        res.status(200).send(trip.comments);
+      }
     } catch (error) {
       console.error("Error in deleteComment:", error.message);
       res.status(500).send(error.message);
     }
   }
 
-  async getLikesWithUserDetails(req: Request, res: Response) {
+  async getLikesWithUserDetails(req: AuthRequest, res: Response) {
     try {
       const tripId = req.params.tripId;
 
