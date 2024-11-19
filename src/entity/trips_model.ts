@@ -62,13 +62,12 @@ export class Trip {
   @Column({ type: "int", default: 0 })
   numOfComments: number;
 
-  @OneToMany(() => Like, (like) => like.trip, { cascade: true })
-  likes: Like[];
-
   @Column({ type: "int", default: 0 })
   numOfLikes: number;
 
-  // Get numOfDays dynamically based on the length of tripDescription
+  @OneToMany(() => Like, (like) => like.trip, { cascade: true })
+  likes: Like[];
+
   get numOfDays(): number {
     return this.tripDescription.length;
   }

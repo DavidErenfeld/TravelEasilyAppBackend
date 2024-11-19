@@ -204,6 +204,7 @@ class UserController extends BaseController<IUser> {
       const commentRepository = queryRunner.manager.getRepository(Comment);
       const tripRepository = queryRunner.manager.getRepository(Trip);
 
+      // Find the user to delete
       const user = await userRepository.findOne({
         where: { _id: req.params.id },
       });
@@ -212,35 +213,72 @@ class UserController extends BaseController<IUser> {
         return res.status(404).json({ message: "User not found" });
       }
 
-      // מחיקת התגובות של המשתמש
+      // Fetch all comments by the user and their IDs
       const commentsToDelete = await commentRepository.find({
         where: { ownerId: req.params.id },
       });
       const deletedCommentIds = commentsToDelete.map((comment) => comment._id);
+
+      // Calculate number of comments to subtract per trip
+      const tripCommentCounts: Record<string, number> = {};
+      commentsToDelete.forEach((comment) => {
+        tripCommentCounts[comment.trip._id] =
+          (tripCommentCounts[comment.trip._id] || 0) + 1;
+      });
+
+      // Update numOfComments for affected trips
+      for (const [tripId, count] of Object.entries(tripCommentCounts)) {
+        await tripRepository
+          .createQueryBuilder()
+          .update(Trip)
+          .set({
+            numOfComments: () => `"numOfComments" - ${count}`,
+          })
+          .where("_id = :tripId", { tripId })
+          .execute();
+      }
+
+      // Delete the user's comments
       await commentRepository.delete({ ownerId: req.params.id });
 
-      // מחיקת הלייקים של המשתמש
+      // Fetch all likes by the user and their IDs
       const likesToDelete = await likeRepository.find({
         where: { owner: req.params.id },
       });
       const deletedLikeIds = likesToDelete.map((like) => like._id);
+
+      // Update numOfLikes for affected trips
+      likesToDelete.forEach(async (like) => {
+        await tripRepository
+          .createQueryBuilder()
+          .update(Trip)
+          .set({
+            numOfLikes: () => `"numOfLikes" - 1`,
+          })
+          .where("_id = :tripId", { tripId: like.trip._id })
+          .execute();
+      });
+
+      // Delete the user's likes
       await likeRepository.delete({ owner: req.params.id });
 
-      // מחיקת הטיולים של המשתמש
+      // Fetch all trips owned by the user and their IDs
       const tripsToDelete = await tripRepository.find({
         where: { owner: user },
       });
       const deletedTripIds = tripsToDelete.map((trip) => trip._id);
+
+      // Delete trips owned by the user
       await tripRepository.delete({ owner: user });
 
-      // מחיקת המשתמש עצמו
+      // Delete the user
       await userRepository.delete(req.params.id);
 
-      // ביצוע commit לטרנזקציה
+      // Commit the transaction
       await queryRunner.commitTransaction();
       console.log("User and related data deleted successfully:", req.params.id);
 
-      // שליחת אירוע לכל הלקוחות
+      // Emit event to notify all clients about the deletion
       io.emit("userDeleted", {
         userId: req.params.id,
         deletedTripIds,
@@ -248,15 +286,19 @@ class UserController extends BaseController<IUser> {
         deletedLikeIds,
       });
 
-      // ניתוק המשתמש המחובר
+      // Disconnect the user
       io.to(req.params.id).emit("disconnectUser");
 
       res.status(200).json({ message: "User deleted successfully" });
     } catch (error) {
       console.error("Error deleting user and related data:", error);
+
+      // Rollback the transaction in case of error
       await queryRunner.rollbackTransaction();
+
       res.status(500).json({ message: "Internal server error", error });
     } finally {
+      // Release the query runner
       await queryRunner.release();
     }
   }
