@@ -10,7 +10,6 @@ import fileRoute from "./routes/file_route";
 import userRoute from "./routes/user_route";
 import placesRoute from "./routes/places_route";
 
-//import CommentsRoute from "./routes/comments_route";
 import connectDB from "./data-source";
 const InitApp = () => {
   return new Promise<Express>((reslove, reject) => {

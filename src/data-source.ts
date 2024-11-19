@@ -9,7 +9,7 @@ const isProduction = process.env.NODE_ENV === "production";
 
 const connectDB = new DataSource({
   type: "postgres",
-  url: process.env.DATABASE_URL, // השתמש תמיד ב-DATABASE_URL בהרוקו
+  url: process.env.DATABASE_URL,
   host: isProduction ? undefined : process.env.DB_HOST,
   port: isProduction ? undefined : Number(process.env.DB_PORT),
   username: isProduction ? undefined : process.env.DB_USER_NAME,
@@ -19,9 +19,7 @@ const connectDB = new DataSource({
   synchronize: true,
   entities: [User, Trip, Like, Comment],
   extra: {
-    ssl: isProduction
-      ? { rejectUnauthorized: false } // השאר SSL פשוט ב-production
-      : false, // השבת SSL בסביבה מקומית
+    ssl: isProduction ? { rejectUnauthorized: false } : false,
   },
 });
 

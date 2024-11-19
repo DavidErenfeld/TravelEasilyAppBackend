@@ -108,7 +108,7 @@ describe("Auth tests", () => {
     expect(response.statusCode).toBe(401);
   });
 
-  jest.setTimeout(35000); // 35 seconds
+  jest.setTimeout(35000);
 
   test("Test refresh token", async () => {
     const response = await request(app)

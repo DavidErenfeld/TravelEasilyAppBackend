@@ -25,9 +25,6 @@ export class Comment {
   @Column({ type: "text" })
   comment: string;
 
-  // @Column({ type: "text" })
-  // imgUrl: string;
-
   @Column({ type: "date" })
   date: Date;
 

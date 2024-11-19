@@ -30,7 +30,7 @@ InitApp().then((app) => {
   const port = process.env.PORT || 3000;
 
   const server = http.createServer(app);
-  initializeSocket(server); // הפעלת Socket.IO על השרת
+  initializeSocket(server);
 
   server.listen(port, () => {
     console.log(`Server listening on port ${port}`);
