@@ -213,17 +213,20 @@ class UserController extends BaseController<IUser> {
         return res.status(404).json({ message: "User not found" });
       }
 
-      // Fetch all comments by the user and their IDs
+      // Fetch all comments by the user and their IDs, including the trip relation
       const commentsToDelete = await commentRepository.find({
         where: { ownerId: req.params.id },
+        relations: ["trip"], // Ensure trip relation is loaded
       });
       const deletedCommentIds = commentsToDelete.map((comment) => comment._id);
 
       // Calculate number of comments to subtract per trip
       const tripCommentCounts: Record<string, number> = {};
       commentsToDelete.forEach((comment) => {
-        tripCommentCounts[comment.trip._id] =
-          (tripCommentCounts[comment.trip._id] || 0) + 1;
+        const tripId = comment.trip?._id;
+        if (tripId) {
+          tripCommentCounts[tripId] = (tripCommentCounts[tripId] || 0) + 1;
+        }
       });
 
       // Update numOfComments for affected trips
@@ -241,23 +244,33 @@ class UserController extends BaseController<IUser> {
       // Delete the user's comments
       await commentRepository.delete({ ownerId: req.params.id });
 
-      // Fetch all likes by the user and their IDs
+      // Fetch all likes by the user and their IDs, including the trip relation
       const likesToDelete = await likeRepository.find({
         where: { owner: req.params.id },
+        relations: ["trip"], // Ensure trip relation is loaded
       });
       const deletedLikeIds = likesToDelete.map((like) => like._id);
 
+      // Calculate number of likes to subtract per trip
+      const tripLikeCounts: Record<string, number> = {};
+      likesToDelete.forEach((like) => {
+        const tripId = like.trip?._id;
+        if (tripId) {
+          tripLikeCounts[tripId] = (tripLikeCounts[tripId] || 0) + 1;
+        }
+      });
+
       // Update numOfLikes for affected trips
-      likesToDelete.forEach(async (like) => {
+      for (const [tripId, count] of Object.entries(tripLikeCounts)) {
         await tripRepository
           .createQueryBuilder()
           .update(Trip)
           .set({
-            numOfLikes: () => `"numOfLikes" - 1`,
+            numOfLikes: () => `"numOfLikes" - ${count}`,
           })
-          .where("_id = :tripId", { tripId: like.trip._id })
+          .where("_id = :tripId", { tripId })
           .execute();
-      });
+      }
 
       // Delete the user's likes
       await likeRepository.delete({ owner: req.params.id });
@@ -269,7 +282,9 @@ class UserController extends BaseController<IUser> {
       const deletedTripIds = tripsToDelete.map((trip) => trip._id);
 
       // Delete trips owned by the user
-      await tripRepository.delete({ owner: user });
+      if (tripsToDelete.length > 0) {
+        await tripRepository.delete({ owner: user });
+      }
 
       // Delete the user
       await userRepository.delete(req.params.id);
