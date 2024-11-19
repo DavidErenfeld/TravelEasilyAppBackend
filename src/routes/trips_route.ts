@@ -178,7 +178,7 @@ router.get(
  */
 router.get(
   "/FullTrip/:id",
-  authMiddleware,
+  optionalAuthMiddleware,
   TripController.getWithComments.bind(TripController)
 );
 
@@ -306,7 +306,7 @@ router.post(
  */
 router.get(
   "/search/parameters",
-  authMiddleware,
+  optionalAuthMiddleware,
   TripController.getByParamId.bind(TripController)
 );
 

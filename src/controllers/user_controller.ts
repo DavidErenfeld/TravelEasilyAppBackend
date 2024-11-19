@@ -10,6 +10,8 @@ import connectDB from "../data-source";
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 import { io } from "../services/socket";
+import { Like } from "../entity/like_model";
+import { Comment } from "../entity/comment_model";
 dotenv.config();
 
 // Nodemailer configuration with Gmail account
@@ -192,21 +194,40 @@ class UserController extends BaseController<IUser> {
 
   async deleteUser(req: AuthRequest, res: Response) {
     console.log("Attempting to delete user:", req.params.id);
+    const queryRunner = connectDB.createQueryRunner();
+    await queryRunner.startTransaction();
+
     try {
-      const result = await this.entity.delete(req.params.id);
-      if (result.affected === 0) {
+      const userRepository = queryRunner.manager.getRepository(User);
+      const likeRepository = queryRunner.manager.getRepository(Like);
+      const commentRepository = queryRunner.manager.getRepository(Comment);
+
+      const user = await userRepository.findOne({
+        where: { _id: req.params.id },
+      });
+      if (!user) {
         console.log("User not found:", req.params.id);
         return res.status(404).json({ message: "User not found" });
       }
 
-      // Sending Socket event to disconnect all user connections
+      await commentRepository.delete({ ownerId: req.params.id });
+
+      await likeRepository.delete({ owner: req.params.id });
+
+      await userRepository.delete(req.params.id);
+
+      await queryRunner.commitTransaction();
+      console.log("User and related data deleted successfully:", req.params.id);
+
       io.to(req.params.id).emit("disconnectUser");
-      console.log(`Sent disconnectUser event to user ID: ${req.params.id}`);
-      console.log("User deleted successfully:", req.params.id);
+
       res.status(200).json({ message: "User deleted successfully" });
     } catch (error) {
-      console.error("Error deleting user:", error);
+      console.error("Error deleting user and related data:", error);
+      await queryRunner.rollbackTransaction();
       res.status(500).json({ message: "Internal server error", error });
+    } finally {
+      await queryRunner.release();
     }
   }
 }

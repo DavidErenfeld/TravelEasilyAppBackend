@@ -14,6 +14,8 @@ import {
   OneToMany,
 } from "typeorm";
 import { Trip } from "./trips_model";
+import { Like } from "./like_model";
+import { Comment } from "./comment_model";
 
 @Entity()
 export class User extends BaseEntity {
@@ -37,6 +39,12 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Trip, (trip) => trip.owner, { cascade: true })
   trips: Trip[];
+
+  @OneToMany(() => Like, (like) => like.user, { cascade: true })
+  likes: Like[];
+
+  @OneToMany(() => Comment, (comment) => comment.user, { cascade: true })
+  comments: Comment[];
 
   @Column("uuid", { array: true, default: [] })
   favoriteTrips: string[];
