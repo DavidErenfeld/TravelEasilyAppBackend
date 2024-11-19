@@ -12,6 +12,7 @@ import dotenv from "dotenv";
 import { io } from "../services/socket";
 import { Like } from "../entity/like_model";
 import { Comment } from "../entity/comment_model";
+import { Trip } from "../entity/trips_model";
 dotenv.config();
 
 // Nodemailer configuration with Gmail account
@@ -201,6 +202,7 @@ class UserController extends BaseController<IUser> {
       const userRepository = queryRunner.manager.getRepository(User);
       const likeRepository = queryRunner.manager.getRepository(Like);
       const commentRepository = queryRunner.manager.getRepository(Comment);
+      const tripRepository = queryRunner.manager.getRepository(Trip);
 
       const user = await userRepository.findOne({
         where: { _id: req.params.id },
@@ -210,15 +212,43 @@ class UserController extends BaseController<IUser> {
         return res.status(404).json({ message: "User not found" });
       }
 
+      // מחיקת התגובות של המשתמש
+      const commentsToDelete = await commentRepository.find({
+        where: { ownerId: req.params.id },
+      });
+      const deletedCommentIds = commentsToDelete.map((comment) => comment._id);
       await commentRepository.delete({ ownerId: req.params.id });
 
+      // מחיקת הלייקים של המשתמש
+      const likesToDelete = await likeRepository.find({
+        where: { owner: req.params.id },
+      });
+      const deletedLikeIds = likesToDelete.map((like) => like._id);
       await likeRepository.delete({ owner: req.params.id });
 
+      // מחיקת הטיולים של המשתמש
+      const tripsToDelete = await tripRepository.find({
+        where: { owner: user },
+      });
+      const deletedTripIds = tripsToDelete.map((trip) => trip._id);
+      await tripRepository.delete({ owner: user });
+
+      // מחיקת המשתמש עצמו
       await userRepository.delete(req.params.id);
 
+      // ביצוע commit לטרנזקציה
       await queryRunner.commitTransaction();
       console.log("User and related data deleted successfully:", req.params.id);
 
+      // שליחת אירוע לכל הלקוחות
+      io.emit("userDeleted", {
+        userId: req.params.id,
+        deletedTripIds,
+        deletedCommentIds,
+        deletedLikeIds,
+      });
+
+      // ניתוק המשתמש המחובר
       io.to(req.params.id).emit("disconnectUser");
 
       res.status(200).json({ message: "User deleted successfully" });

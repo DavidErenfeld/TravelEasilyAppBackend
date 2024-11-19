@@ -7,17 +7,17 @@ export default function initializeSocket(server: http.Server) {
   console.log("Initializing Socket.io server...");
 
   const allowedOrigins = [
-    "https://travel-easily-app.netlify.app", // prodaction
-    "http://localhost:5173", // dev
+    "https://travel-easily-app.netlify.app",
+    "http://localhost:5173",
   ];
 
   io = new SocketIOServer(server, {
     cors: {
       origin: (origin, callback) => {
         if (!origin || allowedOrigins.includes(origin)) {
-          callback(null, true); // מאפשר חיבור אם ה-origin ברשימה
+          callback(null, true);
         } else {
-          callback(new Error("Not allowed by CORS")); // שגיאה אם ה-origin לא ברשימה
+          callback(new Error("Not allowed by CORS"));
         }
       },
       methods: ["GET", "POST"],
@@ -39,17 +39,15 @@ export default function initializeSocket(server: http.Server) {
   io.on("connection", (socket: Socket) => {
     console.log("Client connected:", socket.id);
 
-    // טיפול באירוע של הוספת טיול חדש
     socket.on("newTrip", (newTripData) => {
-      console.log("Received newTrip event:", newTripData); // לוג בעת קבלת אירוע newTrip
+      console.log("Received newTrip event:", newTripData);
       handleEventWithErrorLogging(() => {
-        io.emit("tripPosted", newTripData); // שולח לכל המשתמשים
+        io.emit("tripPosted", newTripData);
       }, "Error posting new trip");
     });
 
-    // טיפול באירוע של עדכון טיול
     socket.on("updateTrip", (tripData) => {
-      console.log("Received updateTrip event:", tripData); // לוג בעת קבלת אירוע updateTrip
+      console.log("Received updateTrip event:", tripData);
       handleEventWithErrorLogging(() => {
         io.emit("tripUpdated", tripData);
       }, "Error updating trip");
@@ -90,10 +88,26 @@ export default function initializeSocket(server: http.Server) {
       console.log(`Socket ${socket.id} joined room ${userId}`);
     });
 
-    // טיפול באירוע של מחיקת משתמש
-    socket.on("deleteUser", ({ userId }) => {
+    socket.on("deleteUser", async ({ userId }) => {
       console.log(`User ${userId} requested account deletion.`);
-      io.to(userId).emit("disconnectUser");
+
+      try {
+        const deletedTripIds = [];
+        const deletedCommentIds = [];
+        const deletedLikeIds = [];
+
+        io.emit("userDeleted", {
+          userId,
+          deletedTripIds,
+          deletedCommentIds,
+          deletedLikeIds,
+        });
+
+        io.to(userId).emit("disconnectUser");
+        console.log(`Sent userDeleted event for userId: ${userId}`);
+      } catch (error) {
+        console.error("Error handling deleteUser event:", error);
+      }
     });
 
     socket.on("disconnect", () => {
