@@ -44,6 +44,6 @@ const router = Router();
  *       500:
  *         description: Internal server error.
  */
-router.get("/", getPlaces);
+router.get("/places", getPlaces);
 
 export default router;
