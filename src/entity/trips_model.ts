@@ -11,7 +11,7 @@ import { User } from "./users_model";
 
 export interface ITrips {
   _id?: string;
-  owner?: string;
+  owner?: User;
   userName?: string;
   imgUrl?: string;
   typeTraveler: string;

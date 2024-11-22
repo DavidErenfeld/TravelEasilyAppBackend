@@ -65,17 +65,19 @@ class TripController extends BaseController<ITrips> {
   async updateTrip(req: AuthRequest, res: Response) {
     console.log("Updating trip:", req.params.id);
     try {
-      const trip = await this.entity.findOne({
-        where: { owner: req.user._id },
-        relations: ["owner"],
-      });
+      // טעינת הטיול עם קשרים
+      const trip = await this.entity
+        .createQueryBuilder("trip")
+        .leftJoinAndSelect("trip.owner", "owner")
+        .where("trip._id = :id", { id: req.params.id })
+        .getOne();
 
       if (!trip) {
         return res.status(404).json({ message: "Trip not found" });
       }
 
       // בדיקה אם המשתמש הוא הבעלים של הטיול
-      if (trip.owner !== req.user?._id) {
+      if (trip.owner._id !== req.user?._id) {
         return res
           .status(403)
           .json({ message: "You are not authorized to update this trip" });
@@ -87,7 +89,7 @@ class TripController extends BaseController<ITrips> {
         country: req.body.country,
         typeTrip: req.body.typeTrip,
         tripDescription: req.body.tripDescription,
-        tripPhotos: req.body.tripDescription,
+        tripPhotos: req.body.tripPhotos, // שימוש בערך הנכון
       };
 
       // עדכון השדות המותרים
@@ -102,6 +104,7 @@ class TripController extends BaseController<ITrips> {
         country: updatedTrip.country,
         typeTrip: updatedTrip.typeTrip,
         tripDescription: updatedTrip.tripDescription,
+        tripPhotos: updatedTrip.tripPhotos,
       });
     } catch (err) {
       console.error("Failed to update trip:", err);
