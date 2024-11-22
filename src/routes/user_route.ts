@@ -25,7 +25,7 @@ import UserController from "../controllers/user_controller";
  *       401:
  *         description: Unauthorized
  */
-router.get("/:id", authMiddleware, UserController.get.bind(UserController));
+// router.get("/:id", authMiddleware, UserController.get.bind(UserController));
 
 /**
  * @swagger
