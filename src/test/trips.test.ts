@@ -45,7 +45,7 @@ describe("--Trips Tests--", () => {
   };
 
   const trip2: ITrips = {
-    owner: "moshe",
+    // owner: "moshe",
     userName: "aa",
     typeTraveler: "type Traveler 2",
     country: "Country 2",
