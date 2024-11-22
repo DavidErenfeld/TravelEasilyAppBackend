@@ -14,7 +14,6 @@ class TripController extends BaseController<ITrips> {
     super(entity);
   }
 
-  // פונקציית עזר להוספת שדות isLikedByCurrentUser ו-isFavoritedByCurrentUser
   private async enrichTripsWithUserData(trips: ITrips[], userId: string) {
     const userRepository = connectDB.getRepository(User);
     const user = await userRepository.findOne({ where: { _id: userId } });
@@ -60,6 +59,52 @@ class TripController extends BaseController<ITrips> {
     } catch (err) {
       console.error("Error in posting trip:", err);
       res.status(500).send("Error occurred while processing the request");
+    }
+  }
+
+  async updateTrip(req: AuthRequest, res: Response) {
+    console.log("Updating trip:", req.params.id);
+    try {
+      const trip = await this.entity.findOne({
+        where: { _id: req.params.id },
+        relations: ["owner"],
+      });
+
+      if (!trip) {
+        return res.status(404).json({ message: "Trip not found" });
+      }
+
+      // בדיקה אם המשתמש הוא הבעלים של הטיול
+      if (trip.owner !== req.user?._id) {
+        return res
+          .status(403)
+          .json({ message: "You are not authorized to update this trip" });
+      }
+
+      // שדות מותרים לעדכון
+      const allowedUpdates: Partial<ITrips> = {
+        typeTraveler: req.body.typeTraveler,
+        country: req.body.country,
+        typeTrip: req.body.typeTrip,
+        tripDescription: req.body.tripDescription,
+      };
+
+      // עדכון השדות המותרים
+      Object.assign(trip, allowedUpdates);
+
+      const updatedTrip = await this.entity.save(trip);
+
+      // שליחת תגובה עם נתונים רלוונטיים
+      res.status(200).send({
+        _id: updatedTrip._id,
+        typeTraveler: updatedTrip.typeTraveler,
+        country: updatedTrip.country,
+        typeTrip: updatedTrip.typeTrip,
+        tripDescription: updatedTrip.tripDescription,
+      });
+    } catch (err) {
+      console.error("Failed to update trip:", err);
+      res.status(500).json({ message: "Error updating trip", error: err });
     }
   }
 

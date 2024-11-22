@@ -9,7 +9,11 @@ export class BaseController<Entity extends { _id?: string }> {
     this.entity = connectDB.getRepository(entity);
   }
 
-  async post(req: Request, res: Response) {
+  /**
+   * This method should not be used directly. It is designed to be extended
+   * in specific controllers with proper data filtering for security.
+   */
+  protected async post(req: Request, res: Response) {
     console.log("Attempting to save object:", req.body);
     try {
       const response = await this.entity.save(req.body);
@@ -21,7 +25,11 @@ export class BaseController<Entity extends { _id?: string }> {
     }
   }
 
-  async get(req: Request, res: Response) {
+  /**
+   * This method should not be used directly. It is designed to be extended
+   * in specific controllers with proper data filtering for security.
+   */
+  protected async get(req: Request, res: Response) {
     try {
       if (req.params.id) {
         const object = await this.entity.findOneBy({
@@ -45,7 +53,7 @@ export class BaseController<Entity extends { _id?: string }> {
     }
   }
 
-  async put(req: Request, res: Response) {
+  protected async put(req: Request, res: Response) {
     console.log("Attempting to update object, id:", req.params.id);
     try {
       const objectToUpdate = await this.entity.findOneBy({
@@ -67,7 +75,7 @@ export class BaseController<Entity extends { _id?: string }> {
     }
   }
 
-  async delete(req: Request, res: Response) {
+  protected async delete(req: Request, res: Response) {
     console.log("Attempting to delete object, id:", req.params.id);
     try {
       const result = await this.entity.delete(req.params.id);

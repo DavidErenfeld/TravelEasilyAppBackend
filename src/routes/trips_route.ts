@@ -23,27 +23,6 @@ router.get(
 
 /**
  * @swagger
- * /trips/{id}:
- *   get:
- *     summary: Get trip by ID
- *     tags: [Trips]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         description: ID of the trip to retrieve
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Trip details
- *       404:
- *         description: Trip not found
- */
-router.get("/:id", authMiddleware, TripController.get.bind(TripController));
-
-/**
- * @swagger
  * /trips:
  *   post:
  *     summary: Create a new trip
@@ -87,7 +66,11 @@ router.post("/", authMiddleware, TripController.post.bind(TripController));
  *       404:
  *         description: Trip not found
  */
-router.put("/:id", authMiddleware, TripController.put.bind(TripController));
+router.put(
+  "/:id",
+  authMiddleware,
+  TripController.updateTrip.bind(TripController)
+);
 
 /**
  * @swagger
