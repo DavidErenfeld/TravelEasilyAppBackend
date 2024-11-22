@@ -66,7 +66,7 @@ class TripController extends BaseController<ITrips> {
     console.log("Updating trip:", req.params.id);
     try {
       const trip = await this.entity.findOne({
-        where: { _id: req.params.id },
+        where: { owner: req.user._id },
         relations: ["owner"],
       });
 
@@ -87,6 +87,7 @@ class TripController extends BaseController<ITrips> {
         country: req.body.country,
         typeTrip: req.body.typeTrip,
         tripDescription: req.body.tripDescription,
+        tripPhotos: req.body.tripDescription,
       };
 
       // עדכון השדות המותרים
