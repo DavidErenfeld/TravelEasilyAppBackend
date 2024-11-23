@@ -32,33 +32,68 @@ class TripController extends BaseController<ITrips> {
 
   async getAllTrips(req: AuthRequest, res: Response) {
     try {
-      const trips = await this.entity.find({
-        relations: ["owner", "likes", "comments"],
+      const userId = req.user?._id;
+
+      // בניית השאילתה
+      const query = this.entity
+        .createQueryBuilder("trip")
+        .leftJoin("trip.owner", "owner")
+        .select([
+          "trip._id",
+          "trip.typeTraveler",
+          "trip.country",
+          "trip.typeTrip",
+          "trip.tripDescription",
+          "trip.numOfComments",
+          "trip.numOfLikes",
+          "trip.tripPhotos",
+          "owner.userName",
+          "owner.imgUrl",
+        ]);
+
+      if (userId) {
+        // בדיקת לייקים של המשתמש הנוכחי
+        query
+          .leftJoin("trip.likes", "like", "like.owner = :userId", { userId })
+          .addSelect(
+            "CASE WHEN like.owner IS NOT NULL THEN true ELSE false END",
+            "isLikedByCurrentUser"
+          );
+
+        // בדיקת מועדפים של המשתמש הנוכחי
+        query
+          .leftJoin(
+            User,
+            "user",
+            "user._id = :userId AND :tripId = ANY(user.favoriteTrips)",
+            { userId, tripId: () => "trip._id" }
+          )
+          .addSelect(
+            "CASE WHEN user._id IS NOT NULL THEN true ELSE false END",
+            "isFavoritedByCurrentUser"
+          );
+      }
+
+      const trips = await query.getRawAndEntities();
+
+      // שילוב הנתונים הגולמיים עם הישויות
+      const tripsWithUserData = trips.entities.map((trip, index) => {
+        const raw = trips.raw[index];
+        return {
+          ...trip,
+          owner: {
+            userName: trip.owner.userName,
+            imgUrl: trip.owner.imgUrl,
+          },
+          isLikedByCurrentUser: raw.isLikedByCurrentUser,
+          isFavoritedByCurrentUser: raw.isFavoritedByCurrentUser,
+        };
       });
 
-      if (req.user) {
-        const userId = req.user._id;
-        const tripsWithUserData = await this.enrichTripsWithUserData(
-          trips,
-          userId
-        );
-        res.status(200).json(tripsWithUserData);
-      } else {
-        res.status(200).json(trips);
-      }
+      res.status(200).json(tripsWithUserData);
     } catch (err) {
       console.error("Failed to retrieve data:", err);
       res.status(500).send({ message: "Error retrieving data", error: err });
-    }
-  }
-
-  async post(req: AuthRequest, res: Response): Promise<void> {
-    req.body.owner = req.user._id;
-    try {
-      await super.post(req, res);
-    } catch (err) {
-      console.error("Error in posting trip:", err);
-      res.status(500).send("Error occurred while processing the request");
     }
   }
 
