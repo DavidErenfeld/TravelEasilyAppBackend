@@ -39,7 +39,7 @@ router.get(
  *       500:
  *         description: Server error
  */
-router.post("/", authMiddleware, TripController.post.bind(TripController));
+// router.post("/", authMiddleware, TripController.post.bind(TripController));
 
 /**
  * @swagger
