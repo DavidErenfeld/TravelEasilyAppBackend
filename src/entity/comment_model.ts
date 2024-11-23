@@ -6,7 +6,7 @@ export interface IComment {
   _id?: string;
   ownerId: string;
   owner: string;
-  imgUrl?: string;
+  // imgUrl?: string;
   comment: string;
   date: Date;
 }
@@ -31,6 +31,6 @@ export class Comment {
   @ManyToOne(() => Trip, (trip) => trip.comments, { onDelete: "CASCADE" })
   trip: Trip;
 
-  @ManyToOne(() => User, (user) => user.comments, { onDelete: "CASCADE" })
+  @ManyToOne(() => User, (user) => user.comments, { onDelete: "CASCADE" }) // קשר למשתמש
   user: User;
 }

@@ -8,7 +8,6 @@ import { User } from "../entity/users_model";
 import { io } from "../services/socket";
 import { In } from "typeorm";
 import connectDB from "../data-source";
-import { Like } from "../entity/like_model";
 
 class TripController extends BaseController<ITrips> {
   constructor(entity: EntityTarget<ITrips>) {
@@ -16,93 +15,39 @@ class TripController extends BaseController<ITrips> {
   }
 
   private async enrichTripsWithUserData(trips: ITrips[], userId: string) {
-    try {
-      console.log(
-        `[enrichTripsWithUserData] Enriching trips for user ID: ${userId}`
-      );
+    const userRepository = connectDB.getRepository(User);
+    const user = await userRepository.findOne({ where: { _id: userId } });
 
-      const userRepository = connectDB.getRepository(User);
-      const user = await userRepository.findOne({ where: { _id: userId } });
+    const favoriteTrips = user?.favoriteTrips || [];
 
-      console.log(
-        `[enrichTripsWithUserData] User details fetched: ${JSON.stringify(
-          user
-        )}`
-      );
+    return trips.map((trip) => {
+      const isLikedByCurrentUser = trip.likes
+        ? trip.likes.some((like) => like.owner === userId)
+        : false;
+      const isFavoritedByCurrentUser = favoriteTrips.includes(trip._id);
 
-      const favoriteTrips = user?.favoriteTrips || [];
-      console.log(
-        `[enrichTripsWithUserData] Favorite trips: ${JSON.stringify(
-          favoriteTrips
-        )}`
-      );
-
-      const enrichedTrips = trips.map((trip) => {
-        const isLikedByCurrentUser = trip.likes
-          ? trip.likes.some((like) => like.user?._id === userId)
-          : false;
-
-        const isFavoritedByCurrentUser = favoriteTrips.includes(trip._id || "");
-
-        console.log(
-          `[enrichTripsWithUserData] Trip ID: ${trip._id}, isLikedByCurrentUser: ${isLikedByCurrentUser}, isFavoritedByCurrentUser: ${isFavoritedByCurrentUser}`
-        );
-
-        return { ...trip, isLikedByCurrentUser, isFavoritedByCurrentUser };
-      });
-
-      console.log(`[enrichTripsWithUserData] Enriched trips completed.`);
-      return enrichedTrips;
-    } catch (error) {
-      console.error(`[enrichTripsWithUserData] Error: ${error.message}`);
-      throw error;
-    }
+      return { ...trip, isLikedByCurrentUser, isFavoritedByCurrentUser };
+    });
   }
 
   async getAllTrips(req: AuthRequest, res: Response) {
     try {
-      console.log(
-        `[getAllTrips] Request received. User ID: ${
-          req.user?._id || "Unauthenticated user"
-        }`
-      );
-
       const trips = await this.entity.find({
-        relations: ["owner", "likes", "likes.user"], // טוען את הקשרים הנדרשים
+        relations: ["owner", "likes", "comments"],
       });
-
-      console.log(`[getAllTrips] Trips fetched: ${trips.length} trips found.`);
-
-      const filteredTrips = trips.map(({ comments, likes, ...trip }) => ({
-        ...trip,
-        owner: trip.owner
-          ? {
-              userName: trip.owner.userName,
-              imgUrl: trip.owner.imgUrl,
-            }
-          : null,
-      }));
-
-      console.log(
-        `[getAllTrips] Filtered trips: ${JSON.stringify(filteredTrips)}`
-      );
 
       if (req.user) {
         const userId = req.user._id;
-        console.log(`[getAllTrips] Enriching trips for user ID: ${userId}`);
         const tripsWithUserData = await this.enrichTripsWithUserData(
-          filteredTrips as ITrips[],
+          trips,
           userId
         );
-        console.log(
-          `[getAllTrips] Enriched trips: ${JSON.stringify(tripsWithUserData)}`
-        );
-        return res.status(200).json(tripsWithUserData);
+        res.status(200).json(tripsWithUserData);
+      } else {
+        res.status(200).json(trips);
       }
-
-      res.status(200).json(filteredTrips);
     } catch (err) {
-      console.error(`[getAllTrips] Error: ${err.message}`);
+      console.error("Failed to retrieve data:", err);
       res.status(500).send({ message: "Error retrieving data", error: err });
     }
   }
@@ -326,63 +271,30 @@ class TripController extends BaseController<ITrips> {
     try {
       const tripId = req.params.tripId;
       const userId = req.user._id;
-
-      console.log(`[addLike] User ID: ${userId}`);
-      console.log(`[addLike] Trip ID: ${tripId}`);
+      req.body.owner = userId;
 
       const trip = await this.entity.findOne({
         where: { _id: tripId },
-        relations: ["likes", "likes.user"], // טוען את המשתמשים בלייקים
+        relations: ["likes"],
       });
-
       if (!trip) {
-        console.log(`[addLike] Trip not found for ID: ${tripId}`);
         return res.status(404).send("Trip not found");
       }
 
-      console.log(`[addLike] Existing likes: ${JSON.stringify(trip.likes)}`);
-
-      const likeRepository = connectDB.getRepository(Like);
-      const existingLike = trip.likes.find((like) => like.user?._id === userId);
-
-      console.log(
-        `[addLike] Existing like for user: ${
-          existingLike ? JSON.stringify(existingLike) : "None"
-        }`
-      );
-
-      if (!existingLike) {
-        console.log(`[addLike] Adding like for user: ${userId}`);
-        const newLike = likeRepository.create({
-          owner: userId,
-          user: { _id: userId },
-          trip: { _id: tripId },
-        });
-        await likeRepository.save(newLike);
-
+      if (!trip.likes.some((like) => like.owner === userId)) {
+        trip.likes.push({ owner: userId });
         trip.numOfLikes++;
         await this.entity.save(trip);
-
-        console.log(
-          `[addLike] Like added successfully. Total likes: ${trip.numOfLikes}`
-        );
         io.emit("likeAdded", { tripId, userId });
-        return res.status(200).send({ message: "Like added", trip });
+        return res.status(200).send(trip);
       }
-
-      console.log(`[addLike] Removing like for user: ${userId}`);
-      await likeRepository.delete(existingLike._id);
-
+      trip.likes = trip.likes.filter((user) => user.owner !== userId);
       trip.numOfLikes--;
       await this.entity.save(trip);
-
-      console.log(
-        `[addLike] Like removed successfully. Total likes: ${trip.numOfLikes}`
-      );
       io.emit("likeRemoved", { tripId, userId });
-      res.status(200).send({ message: "Like removed", trip });
+      res.status(200).send(trip);
     } catch (error) {
-      console.error(`[addLike] Error: ${error.message}`);
+      console.error("Error in addLike:", error.message);
       res.status(500).send(error.message);
     }
   }
@@ -439,28 +351,23 @@ class TripController extends BaseController<ITrips> {
     try {
       const tripId = req.params.tripId;
 
-      console.log(
-        `[getLikesWithUserDetails] Fetching likes for trip ID: ${tripId}`
-      );
-
       const tripWithLikes = await this.entity
         .createQueryBuilder("trip")
         .leftJoinAndSelect("trip.likes", "like")
-        .leftJoinAndSelect("like.user", "user") // טוען את המידע על המשתמש
+        .leftJoinAndMapOne(
+          "like.ownerDetails",
+          User,
+          "user",
+          "CAST(user._id AS TEXT) = like.owner"
+        )
         .where("trip._id = :tripId", { tripId })
         .getOne();
 
       if (!tripWithLikes) {
-        console.log(
-          `[getLikesWithUserDetails] Trip not found for ID: ${tripId}`
-        );
         return res.status(404).send("Trip not found");
       }
 
       if (!tripWithLikes.likes || tripWithLikes.likes.length === 0) {
-        console.log(
-          `[getLikesWithUserDetails] No likes found for trip ID: ${tripId}`
-        );
         return res.status(200).json({
           message: "No likes found for this trip.",
           totalLikes: 0,
@@ -468,27 +375,17 @@ class TripController extends BaseController<ITrips> {
         });
       }
 
-      console.log(
-        `[getLikesWithUserDetails] Likes found: ${tripWithLikes.likes.length}`
-      );
-
       const likesDetails = tripWithLikes.likes.map((like) => ({
-        userName: like.user?.userName || "Unknown User",
-        imgUrl: like.user?.imgUrl || "",
+        userName: (like as any).ownerDetails?.userName || "Unknown User",
+        imgUrl: (like as any).ownerDetails?.imgUrl || "",
       }));
-
-      console.log(
-        `[getLikesWithUserDetails] Likes details: ${JSON.stringify(
-          likesDetails
-        )}`
-      );
 
       res.status(200).json({
         totalLikes: likesDetails.length,
         likesDetails,
       });
     } catch (error) {
-      console.error(`[getLikesWithUserDetails] Error: ${error.message}`);
+      console.error("Error fetching likes with user details:", error.message);
       res.status(500).json({ message: "Internal server error" });
     }
   }

@@ -3,11 +3,8 @@ import { Trip } from "./trips_model";
 import { User } from "./users_model";
 
 export interface ILike {
-  _id: string;
   owner: string;
-  user?: User;
 }
-
 @Entity()
 export class Like {
   @PrimaryGeneratedColumn("uuid")
