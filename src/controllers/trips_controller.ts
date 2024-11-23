@@ -36,16 +36,26 @@ class TripController extends BaseController<ITrips> {
         relations: ["owner", "likes", "comments"],
       });
 
+      const filteredTrips = trips.map((trip) => ({
+        ...trip,
+        owner: trip.owner
+          ? {
+              userName: trip.owner.userName,
+              imgUrl: trip.owner.imgUrl,
+            }
+          : null,
+      }));
+
       if (req.user) {
         const userId = req.user._id;
         const tripsWithUserData = await this.enrichTripsWithUserData(
-          trips,
+          filteredTrips as ITrips[],
           userId
         );
-        res.status(200).json(tripsWithUserData);
-      } else {
-        res.status(200).json(trips);
+        return res.status(200).json(tripsWithUserData);
       }
+
+      res.status(200).json(filteredTrips);
     } catch (err) {
       console.error("Failed to retrieve data:", err);
       res.status(500).send({ message: "Error retrieving data", error: err });
