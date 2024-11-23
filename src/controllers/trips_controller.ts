@@ -65,8 +65,8 @@ class TripController extends BaseController<ITrips> {
           .leftJoin(
             User,
             "user",
-            "user._id = :userId AND :tripId = ANY(user.favoriteTrips)",
-            { userId, tripId: () => "trip._id" }
+            "user._id = :userId AND trip._id = ANY(user.favoriteTrips)",
+            { userId }
           )
           .addSelect(
             "CASE WHEN user._id IS NOT NULL THEN true ELSE false END",
@@ -85,15 +85,17 @@ class TripController extends BaseController<ITrips> {
             userName: trip.owner.userName,
             imgUrl: trip.owner.imgUrl,
           },
-          isLikedByCurrentUser: raw.isLikedByCurrentUser,
-          isFavoritedByCurrentUser: raw.isFavoritedByCurrentUser,
+          isLikedByCurrentUser: raw.islikedbycurrentuser, // שים לב לשינוי השם ל-lowercase
+          isFavoritedByCurrentUser: raw.isfavoritedbycurrentuser, // שים לב לשינוי השם ל-lowercase
         };
       });
 
       res.status(200).json(tripsWithUserData);
     } catch (err) {
       console.error("Failed to retrieve data:", err);
-      res.status(500).send({ message: "Error retrieving data", error: err });
+      res
+        .status(500)
+        .send({ message: "Error retrieving data", error: err.message });
     }
   }
 
