@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { EntityTarget, Like } from "typeorm";
+import { EntityTarget } from "typeorm";
 import { ParsedQs } from "qs";
 import { BaseController } from "./base_controller";
 import { AuthRequest } from "../common/auth_middleware";
@@ -8,6 +8,7 @@ import { User } from "../entity/users_model";
 import { io } from "../services/socket";
 import { In } from "typeorm";
 import connectDB from "../data-source";
+import { Like } from "../entity/like_model";
 
 class TripController extends BaseController<ITrips> {
   constructor(entity: EntityTarget<ITrips>) {
@@ -22,9 +23,10 @@ class TripController extends BaseController<ITrips> {
 
     return trips.map((trip) => {
       const isLikedByCurrentUser = trip.likes
-        ? trip.likes.some((like) => like.owner === userId)
+        ? trip.likes.some((like) => like.user?._id === userId)
         : false;
-      const isFavoritedByCurrentUser = favoriteTrips.includes(trip._id);
+
+      const isFavoritedByCurrentUser = favoriteTrips.includes(trip._id || "");
 
       return { ...trip, isLikedByCurrentUser, isFavoritedByCurrentUser };
     });
