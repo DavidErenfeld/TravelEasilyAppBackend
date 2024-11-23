@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { EntityTarget } from "typeorm";
+import { EntityTarget, Like } from "typeorm";
 import { ParsedQs } from "qs";
 import { BaseController } from "./base_controller";
 import { AuthRequest } from "../common/auth_middleware";
@@ -33,7 +33,7 @@ class TripController extends BaseController<ITrips> {
   async getAllTrips(req: AuthRequest, res: Response) {
     try {
       const trips = await this.entity.find({
-        relations: ["owner"], // טוענים רק את הקשר של owner
+        relations: ["owner"],
       });
 
       const filteredTrips = trips.map(({ comments, likes, ...trip }) => ({
@@ -281,26 +281,40 @@ class TripController extends BaseController<ITrips> {
     try {
       const tripId = req.params.tripId;
       const userId = req.user._id;
-      req.body.owner = userId;
 
       const trip = await this.entity.findOne({
         where: { _id: tripId },
-        relations: ["likes"],
+        relations: ["likes", "likes.user"],
       });
+
       if (!trip) {
         return res.status(404).send("Trip not found");
       }
 
-      if (!trip.likes.some((like) => like.owner === userId)) {
-        trip.likes.push({ owner: userId });
+      const existingLike = trip.likes.find((like) => like.user?._id === userId);
+
+      if (!existingLike) {
+        const likeRepository = connectDB.getRepository(Like);
+        const newLike = likeRepository.create({
+          owner: userId,
+          user: { _id: userId },
+          trip: { _id: tripId },
+        });
+        await likeRepository.save(newLike);
+
         trip.numOfLikes++;
         await this.entity.save(trip);
+
         io.emit("likeAdded", { tripId, userId });
         return res.status(200).send(trip);
       }
-      trip.likes = trip.likes.filter((user) => user.owner !== userId);
+
+      const likeRepository = connectDB.getRepository(Like);
+      await likeRepository.delete(existingLike._id);
+
       trip.numOfLikes--;
       await this.entity.save(trip);
+
       io.emit("likeRemoved", { tripId, userId });
       res.status(200).send(trip);
     } catch (error) {
