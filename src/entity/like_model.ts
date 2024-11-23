@@ -4,6 +4,7 @@ import { User } from "./users_model";
 
 export interface ILike {
   owner: string;
+  user?: User;
 }
 @Entity()
 export class Like {
