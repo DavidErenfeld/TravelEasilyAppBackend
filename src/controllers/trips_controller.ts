@@ -9,34 +9,6 @@ import { io } from "../services/socket";
 import { In } from "typeorm";
 import connectDB from "../data-source";
 
-export interface ITripOwner {
-  userName: string;
-  imgUrl?: string;
-}
-
-export interface ITripsProcessed {
-  _id?: string;
-  owner?: ITripOwner;
-  typeTraveler: string;
-  country: string;
-  typeTrip: string;
-  tripDescription: string[];
-  numOfComments: number;
-  numOfLikes: number;
-  tripPhotos?: string[];
-  comments?: {
-    userName: string;
-    imgUrl?: string;
-    content: string;
-  }[];
-  likes?: {
-    userName: string;
-    imgUrl?: string;
-  }[];
-  isLikedByCurrentUser?: boolean;
-  isFavoritedByCurrentUser?: boolean;
-}
-
 class TripController extends BaseController<ITrips> {
   constructor(entity: EntityTarget<ITrips>) {
     super(entity);
@@ -68,29 +40,16 @@ class TripController extends BaseController<ITrips> {
         ...trip,
         owner: trip.owner
           ? {
-              userName: trip.owner.userName || "Unknown",
-              imgUrl: trip.owner.imgUrl || null,
+              userName: trip.owner.userName,
+              imgUrl: trip.owner.imgUrl,
             }
           : null,
-        likes: Array.isArray(trip.likes)
-          ? trip.likes.map((like) => ({
-              userName: like.user?.userName || "Unknown",
-              imgUrl: like.user?.imgUrl || null,
-            }))
-          : [],
-        comments: Array.isArray(trip.comments)
-          ? trip.comments.map((comment) => ({
-              userName: comment.user?.userName || "Unknown",
-              imgUrl: comment.user?.imgUrl || null,
-              content: comment.comment || "",
-            }))
-          : [],
       }));
 
       if (req.user) {
         const userId = req.user._id;
         const tripsWithUserData = await this.enrichTripsWithUserData(
-          filteredTrips as unknown as ITrips[],
+          filteredTrips as ITrips[],
           userId
         );
         return res.status(200).json(tripsWithUserData);

@@ -9,7 +9,6 @@ export interface IComment {
   imgUrl?: string;
   comment: string;
   date: Date;
-  user?: User;
 }
 
 @Entity()
