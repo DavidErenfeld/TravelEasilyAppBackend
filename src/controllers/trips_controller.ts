@@ -33,32 +33,52 @@ class TripController extends BaseController<ITrips> {
   async getAllTrips(req: AuthRequest, res: Response) {
     try {
       const trips = await this.entity.find({
-        relations: ["owner", "likes", "comments"],
+        relations: ["owner", "likes"],
       });
 
-      if (req.user) {
-        const userId = req.user._id;
-        const tripsWithUserData = await this.enrichTripsWithUserData(
-          trips,
-          userId
-        );
-        res.status(200).json(tripsWithUserData);
-      } else {
-        res.status(200).json(trips);
+      let favoriteTripsIds: string[] = [];
+      const userId = req.user ? req.user._id : null;
+
+      if (userId) {
+        const userRepository = connectDB.getRepository(User);
+        const currentUser = await userRepository.findOne({
+          where: { _id: userId },
+          select: ["favoriteTrips"],
+        });
+        favoriteTripsIds = currentUser?.favoriteTrips || [];
       }
+
+      const sanitizedTrips = trips.map((trip) => {
+        const isLikedByCurrentUser = userId
+          ? trip.likes.some((like) => like.owner === userId)
+          : false;
+
+        const isFavoritedByCurrentUser = userId
+          ? favoriteTripsIds.includes(trip._id)
+          : false;
+
+        return {
+          _id: trip._id,
+          typeTraveler: trip.typeTraveler,
+          country: trip.country,
+          typeTrip: trip.typeTrip,
+          tripDescription: trip.tripDescription,
+          numOfComments: trip.numOfComments,
+          numOfLikes: trip.numOfLikes,
+          tripPhotos: trip.tripPhotos,
+          owner: {
+            userName: trip.owner.userName,
+            imgUrl: trip.owner.imgUrl,
+          },
+          isLikedByCurrentUser,
+          isFavoritedByCurrentUser,
+        };
+      });
+
+      res.status(200).json(sanitizedTrips);
     } catch (err) {
       console.error("Failed to retrieve data:", err);
       res.status(500).send({ message: "Error retrieving data", error: err });
-    }
-  }
-
-  async post(req: AuthRequest, res: Response): Promise<void> {
-    req.body.owner = req.user._id;
-    try {
-      await super.post(req, res);
-    } catch (err) {
-      console.error("Error in posting trip:", err);
-      res.status(500).send("Error occurred while processing the request");
     }
   }
 
