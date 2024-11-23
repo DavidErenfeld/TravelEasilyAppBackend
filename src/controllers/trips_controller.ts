@@ -33,10 +33,10 @@ class TripController extends BaseController<ITrips> {
   async getAllTrips(req: AuthRequest, res: Response) {
     try {
       const trips = await this.entity.find({
-        relations: ["owner", "likes", "comments"],
+        relations: ["owner"], // טוענים רק את הקשר של owner
       });
 
-      const filteredTrips = trips.map((trip) => ({
+      const filteredTrips = trips.map(({ comments, likes, ...trip }) => ({
         ...trip,
         owner: trip.owner
           ? {
