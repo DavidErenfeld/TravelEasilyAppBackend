@@ -70,6 +70,15 @@ class TripController extends BaseController<ITrips> {
             userName: trip.owner.userName,
             imgUrl: trip.owner.imgUrl,
           },
+          likes: trip.likes.map((like) => ({
+            owner: like.owner,
+          })),
+          comments: trip.comments.map((comment) => ({
+            _id: comment._id,
+            owner: comment.owner,
+            comment: comment.comment,
+            date: comment.date,
+          })),
           isLikedByCurrentUser,
           isFavoritedByCurrentUser,
         };
