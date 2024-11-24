@@ -328,20 +328,67 @@ class TripController extends BaseController<ITrips> {
   async getWithComments(req: AuthRequest, res: Response) {
     try {
       const tripId = req.params.id;
+
+      // שליפת הטיול עם הקשרים הדרושים
       const trip = await this.entity.findOne({
         where: { _id: tripId },
         relations: ["comments", "likes", "owner"],
       });
 
-      if (req.user && trip) {
-        const enrichedTrip = await this.enrichTripsWithUserData(
-          [trip],
-          req.user._id
-        );
-        res.status(200).json(enrichedTrip[0]);
-      } else {
-        res.status(trip ? 200 : 404).json(trip);
+      if (!trip) {
+        return res.status(404).json({ message: "Trip not found" });
       }
+
+      // קבלת מזהה המשתמש המחובר
+      const userId = req.user ? req.user._id : null;
+
+      // בדיקת אם המשתמש הנוכחי סימן לייק או הוסיף למועדפים
+      const isLikedByCurrentUser = userId
+        ? trip.likes.some((like) => like.owner === userId)
+        : false;
+
+      const favoriteTripsIds: string[] = userId
+        ? (
+            await connectDB.getRepository(User).findOne({
+              where: { _id: userId },
+              select: ["favoriteTrips"],
+            })
+          )?.favoriteTrips || []
+        : [];
+
+      const isFavoritedByCurrentUser = userId
+        ? favoriteTripsIds.includes(trip._id)
+        : false;
+
+      // קביעת השדות של בעל הטיול
+      const ownerData = {
+        userName: trip.owner.userName,
+        imgUrl: trip.owner.imgUrl,
+        ...(userId === trip.owner._id && { _id: trip.owner._id }), // הוספת _id אם המשתמש הנוכחי הוא בעל הטיול
+      };
+
+      // בניית האובייקט המוחזר
+      const sanitizedTrip = {
+        _id: trip._id,
+        typeTraveler: trip.typeTraveler,
+        country: trip.country,
+        typeTrip: trip.typeTrip,
+        tripDescription: trip.tripDescription,
+        numOfComments: trip.numOfComments,
+        numOfLikes: trip.numOfLikes,
+        tripPhotos: trip.tripPhotos,
+        owner: ownerData,
+        comments: trip.comments.map((comment) => ({
+          _id: comment._id,
+          owner: comment.owner,
+          comment: comment.comment,
+          date: comment.date,
+        })),
+        isLikedByCurrentUser,
+        isFavoritedByCurrentUser,
+      };
+
+      res.status(200).json(sanitizedTrip);
     } catch (err) {
       console.error("Error fetching trip with comments:", err);
       res.status(500).json({ message: err.message });
