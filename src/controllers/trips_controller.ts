@@ -71,7 +71,7 @@ class TripController extends BaseController<ITrips> {
             imgUrl: trip.owner.imgUrl,
           },
           likes: trip.likes.map((like) => ({
-            owner: like.owner,
+            userName: like.userName || "user",
           })),
           comments: trip.comments.map((comment) => ({
             _id: comment._id,
@@ -300,6 +300,7 @@ class TripController extends BaseController<ITrips> {
     try {
       const tripId = req.params.tripId;
       const userId = req.user._id;
+      const userName = req.user.userName;
       req.body.owner = userId;
 
       const trip = await this.entity.findOne({
@@ -311,7 +312,7 @@ class TripController extends BaseController<ITrips> {
       }
 
       if (!trip.likes.some((like) => like.owner === userId)) {
-        trip.likes.push({ owner: userId });
+        trip.likes.push({ owner: userId, userName: userName });
         trip.numOfLikes++;
         await this.entity.save(trip);
         io.emit("likeAdded", { tripId, userId });
