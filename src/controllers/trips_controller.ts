@@ -91,7 +91,6 @@ class TripController extends BaseController<ITrips> {
   async updateTrip(req: AuthRequest, res: Response) {
     console.log("Updating trip:", req.params.id);
     try {
-      // טעינת הטיול עם קשרים
       const trip = await this.entity
         .createQueryBuilder("trip")
         .leftJoinAndSelect("trip.owner", "owner")
