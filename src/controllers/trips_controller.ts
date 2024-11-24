@@ -88,55 +88,6 @@ class TripController extends BaseController<ITrips> {
     }
   }
 
-  async updateTrip(req: AuthRequest, res: Response) {
-    console.log("Updating trip:", req.params.id);
-    try {
-      const trip = await this.entity
-        .createQueryBuilder("trip")
-        .leftJoinAndSelect("trip.owner", "owner")
-        .where("trip._id = :id", { id: req.params.id })
-        .getOne();
-
-      if (!trip) {
-        return res.status(404).json({ message: "Trip not found" });
-      }
-
-      // בדיקה אם המשתמש הוא הבעלים של הטיול
-      if (trip.owner._id !== req.user?._id) {
-        return res
-          .status(403)
-          .json({ message: "You are not authorized to update this trip" });
-      }
-
-      // שדות מותרים לעדכון
-      const allowedUpdates: Partial<ITrips> = {
-        typeTraveler: req.body.typeTraveler,
-        country: req.body.country,
-        typeTrip: req.body.typeTrip,
-        tripDescription: req.body.tripDescription,
-        tripPhotos: req.body.tripPhotos, // שימוש בערך הנכון
-      };
-
-      // עדכון השדות המותרים
-      Object.assign(trip, allowedUpdates);
-
-      const updatedTrip = await this.entity.save(trip);
-
-      // שליחת תגובה עם נתונים רלוונטיים
-      res.status(200).send({
-        _id: updatedTrip._id,
-        typeTraveler: updatedTrip.typeTraveler,
-        country: updatedTrip.country,
-        typeTrip: updatedTrip.typeTrip,
-        tripDescription: updatedTrip.tripDescription,
-        tripPhotos: updatedTrip.tripPhotos,
-      });
-    } catch (err) {
-      console.error("Failed to update trip:", err);
-      res.status(500).json({ message: "Error updating trip", error: err });
-    }
-  }
-
   async getByOwnerId(req: AuthRequest, res: Response) {
     try {
       const ownerId = req.params.id;
@@ -164,12 +115,78 @@ class TripController extends BaseController<ITrips> {
     }
   }
 
+  async getFullTrip(req: AuthRequest, res: Response) {
+    try {
+      const tripId = req.params.id;
+
+      const trip = await this.entity.findOne({
+        where: { _id: tripId },
+        relations: ["comments", "likes", "owner"],
+      });
+
+      if (!trip) {
+        return res.status(404).json({ message: "Trip not found" });
+      }
+
+      const userId = req.user ? req.user._id : null;
+
+      const isLikedByCurrentUser = userId
+        ? trip.likes.some((like) => like.owner === userId)
+        : false;
+
+      const favoriteTripsIds: string[] = userId
+        ? (
+            await connectDB.getRepository(User).findOne({
+              where: { _id: userId },
+              select: ["favoriteTrips"],
+            })
+          )?.favoriteTrips || []
+        : [];
+
+      const isFavoritedByCurrentUser = userId
+        ? favoriteTripsIds.includes(trip._id)
+        : false;
+
+      const ownerData = {
+        userName: trip.owner.userName,
+        imgUrl: trip.owner.imgUrl,
+        ...(userId === trip.owner._id && { _id: trip.owner._id }), // הוספת _id אם המשתמש הנוכחי הוא בעל הטיול
+      };
+
+      const sanitizedTrip = {
+        _id: trip._id,
+        typeTraveler: trip.typeTraveler,
+        country: trip.country,
+        typeTrip: trip.typeTrip,
+        tripDescription: trip.tripDescription,
+        numOfComments: trip.numOfComments,
+        numOfLikes: trip.numOfLikes,
+        tripPhotos: trip.tripPhotos,
+        owner: ownerData,
+        comments: trip.comments.map((comment) => ({
+          _id: comment._id,
+          owner: comment.owner,
+          comment: comment.comment,
+          date: comment.date,
+        })),
+        isLikedByCurrentUser,
+        isFavoritedByCurrentUser,
+      };
+
+      res.status(200).json(sanitizedTrip);
+    } catch (err) {
+      console.error("Error fetching trip with comments:", err);
+      res.status(500).json({ message: err.message });
+    }
+  }
+
   async getByParamId(req: AuthRequest, res: Response) {
     try {
       const queryParams: ParsedQs = req.query;
       const whereCondition: Record<string, string | number | boolean> = {};
       let numOfDaysCondition: number | null = null;
 
+      // בניית התנאים לשליפה
       Object.entries(queryParams).forEach(([key, value]) => {
         if (key === "numOfDays" && typeof value === "string") {
           numOfDaysCondition = parseInt(value, 10);
@@ -194,18 +211,53 @@ class TripController extends BaseController<ITrips> {
 
       const trips = await query.getMany();
 
-      if (req.user) {
-        const userId = req.user._id;
-        const tripsWithUserData = await this.enrichTripsWithUserData(
-          trips,
-          userId
-        );
-        res
-          .status(trips.length > 0 ? 200 : 404)
-          .json({ data: tripsWithUserData });
-      } else {
-        res.status(trips.length > 0 ? 200 : 404).json({ data: trips });
-      }
+      const userId = req.user ? req.user._id : null;
+      const favoriteTripsIds: string[] = userId
+        ? (
+            await connectDB.getRepository(User).findOne({
+              where: { _id: userId },
+              select: ["favoriteTrips"],
+            })
+          )?.favoriteTrips || []
+        : [];
+
+      const sanitizedTrips = trips.map((trip) => {
+        const isLikedByCurrentUser = userId
+          ? trip.likes.some((like) => like.owner === userId)
+          : false;
+
+        const isFavoritedByCurrentUser = userId
+          ? favoriteTripsIds.includes(trip._id)
+          : false;
+
+        const ownerData = {
+          userName: trip.owner.userName,
+          imgUrl: trip.owner.imgUrl,
+          ...(userId === trip.owner._id && { _id: trip.owner._id }), // הוספת _id רק אם המשתמש המחובר הוא הבעלים
+        };
+
+        return {
+          _id: trip._id,
+          typeTraveler: trip.typeTraveler,
+          country: trip.country,
+          typeTrip: trip.typeTrip,
+          tripDescription: trip.tripDescription,
+          numOfComments: trip.numOfComments,
+          numOfLikes: trip.numOfLikes,
+          tripPhotos: trip.tripPhotos,
+          owner: ownerData,
+          comments: trip.comments.map((comment) => ({
+            _id: comment._id,
+            owner: comment.owner,
+            comment: comment.comment,
+            date: comment.date,
+          })),
+          isLikedByCurrentUser,
+          isFavoritedByCurrentUser,
+        };
+      });
+
+      res.status(trips.length > 0 ? 200 : 404).json({ data: sanitizedTrips });
     } catch (err) {
       console.error("Error fetching trips:", err);
       res.status(500).json({ message: "Internal server error" });
@@ -237,185 +289,6 @@ class TripController extends BaseController<ITrips> {
     } catch (err) {
       console.error("Error fetching favorite trips:", err);
       res.status(500).json({ message: err.message });
-    }
-  }
-
-  async deleteTrip(req: Request, res: Response) {
-    try {
-      const tripId = req.params.id;
-      const tripToDelete = await this.entity.findOne({
-        where: { _id: tripId },
-      });
-      if (!tripToDelete) return res.status(404).send("Trip not found");
-
-      const userRepository = connectDB.getRepository(User);
-      const usersWithFavoriteTrip = await userRepository
-        .createQueryBuilder("user")
-        .where(":tripId = ANY(user.favoriteTrips)", { tripId })
-        .getMany();
-
-      for (const user of usersWithFavoriteTrip) {
-        user.favoriteTrips = user.favoriteTrips.filter((id) => id !== tripId);
-        await userRepository.save(user);
-      }
-
-      const deleteResult = await this.entity.delete(tripId);
-      if (deleteResult.affected === 0)
-        return res.status(500).send("Failed to delete trip");
-
-      res.send("Trip deleted successfully");
-    } catch (err) {
-      console.error("Error deleting trip:", err);
-      res.status(500).send("Error occurred while deleting the trip");
-    }
-  }
-
-  async addComment(req: AuthRequest, res: Response) {
-    try {
-      const tripId = req.params.tripId;
-      const trip = await this.entity.findOne({
-        where: { _id: tripId },
-        relations: ["comments"],
-      });
-      if (!trip) return res.status(404).send("Trip not found");
-
-      const newComment = { ownerId: req.user._id, ...req.body.comment };
-      trip.comments.push(newComment);
-      trip.numOfComments = trip.comments.length;
-      await this.entity.save(trip);
-
-      io.emit("commentAdded", { tripId, newComment });
-      res.status(200).send(trip.comments);
-    } catch (error) {
-      console.error("Error in addComment:", error.message);
-      res.status(500).send(error.message);
-    }
-  }
-
-  async addLike(req: AuthRequest, res: Response) {
-    try {
-      const tripId = req.params.tripId;
-      const userId = req.user._id;
-      req.body.owner = userId;
-
-      const trip = await this.entity.findOne({
-        where: { _id: tripId },
-        relations: ["likes"],
-      });
-      if (!trip) {
-        return res.status(404).send("Trip not found");
-      }
-
-      if (!trip.likes.some((like) => like.owner === userId)) {
-        trip.likes.push({ owner: userId });
-        trip.numOfLikes++;
-        await this.entity.save(trip);
-        io.emit("likeAdded", { tripId, userId });
-        return res.status(200).send(trip);
-      }
-      trip.likes = trip.likes.filter((user) => user.owner !== userId);
-      trip.numOfLikes--;
-      await this.entity.save(trip);
-      io.emit("likeRemoved", { tripId, userId });
-      res.status(200).send(trip);
-    } catch (error) {
-      console.error("Error in addLike:", error.message);
-      res.status(500).send(error.message);
-    }
-  }
-
-  async getWithComments(req: AuthRequest, res: Response) {
-    try {
-      const tripId = req.params.id;
-
-      // שליפת הטיול עם הקשרים הדרושים
-      const trip = await this.entity.findOne({
-        where: { _id: tripId },
-        relations: ["comments", "likes", "owner"],
-      });
-
-      if (!trip) {
-        return res.status(404).json({ message: "Trip not found" });
-      }
-
-      // קבלת מזהה המשתמש המחובר
-      const userId = req.user ? req.user._id : null;
-
-      // בדיקת אם המשתמש הנוכחי סימן לייק או הוסיף למועדפים
-      const isLikedByCurrentUser = userId
-        ? trip.likes.some((like) => like.owner === userId)
-        : false;
-
-      const favoriteTripsIds: string[] = userId
-        ? (
-            await connectDB.getRepository(User).findOne({
-              where: { _id: userId },
-              select: ["favoriteTrips"],
-            })
-          )?.favoriteTrips || []
-        : [];
-
-      const isFavoritedByCurrentUser = userId
-        ? favoriteTripsIds.includes(trip._id)
-        : false;
-
-      // קביעת השדות של בעל הטיול
-      const ownerData = {
-        userName: trip.owner.userName,
-        imgUrl: trip.owner.imgUrl,
-        ...(userId === trip.owner._id && { _id: trip.owner._id }), // הוספת _id אם המשתמש הנוכחי הוא בעל הטיול
-      };
-
-      // בניית האובייקט המוחזר
-      const sanitizedTrip = {
-        _id: trip._id,
-        typeTraveler: trip.typeTraveler,
-        country: trip.country,
-        typeTrip: trip.typeTrip,
-        tripDescription: trip.tripDescription,
-        numOfComments: trip.numOfComments,
-        numOfLikes: trip.numOfLikes,
-        tripPhotos: trip.tripPhotos,
-        owner: ownerData,
-        comments: trip.comments.map((comment) => ({
-          _id: comment._id,
-          owner: comment.owner,
-          comment: comment.comment,
-          date: comment.date,
-        })),
-        isLikedByCurrentUser,
-        isFavoritedByCurrentUser,
-      };
-
-      res.status(200).json(sanitizedTrip);
-    } catch (err) {
-      console.error("Error fetching trip with comments:", err);
-      res.status(500).json({ message: err.message });
-    }
-  }
-
-  async deleteComment(req: AuthRequest, res: Response) {
-    try {
-      const tripId = req.params.tripId;
-      const commentId = req.params.commentId;
-
-      const trip = await this.entity.findOne({
-        where: { _id: tripId },
-        relations: ["comments"],
-      });
-      if (!trip) return res.status(404).send("Trip not found");
-
-      trip.comments = trip.comments.filter(
-        (comment) => comment._id.toString() !== commentId
-      );
-      trip.numOfComments = trip.comments.length;
-      await this.entity.save(trip);
-
-      io.emit("commentDeleted", { tripId, commentId });
-      res.status(200).send(trip.comments);
-    } catch (error) {
-      console.error("Error in deleteComment:", error.message);
-      res.status(500).send(error.message);
     }
   }
 
@@ -459,6 +332,214 @@ class TripController extends BaseController<ITrips> {
     } catch (error) {
       console.error("Error fetching likes with user details:", error.message);
       res.status(500).json({ message: "Internal server error" });
+    }
+  }
+
+  async addTrip(req: AuthRequest, res: Response) {
+    try {
+      const userId = req.user?._id;
+      if (!userId) {
+        return res
+          .status(401)
+          .json({ message: "Unauthorized: User not authenticated" });
+      }
+
+      const userRepository = connectDB.getRepository(User);
+      const owner = await userRepository.findOne({ where: { _id: userId } });
+      if (!owner) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const newTrip: ITrips = {
+        owner,
+        userName: owner.userName,
+        imgUrl: owner.imgUrl || null,
+        typeTraveler: req.body.typeTraveler,
+        country: req.body.country,
+        typeTrip: req.body.typeTrip,
+        tripDescription: req.body.tripDescription,
+        tripPhotos: req.body.tripPhotos || [],
+        numOfComments: 0,
+        numOfLikes: 0,
+        comments: [],
+        likes: [],
+      };
+
+      const createdTrip = await this.entity.save(newTrip);
+
+      res.status(201).json({
+        _id: createdTrip._id,
+        typeTraveler: createdTrip.typeTraveler,
+        country: createdTrip.country,
+        typeTrip: createdTrip.typeTrip,
+        tripDescription: createdTrip.tripDescription,
+        tripPhotos: createdTrip.tripPhotos,
+        numOfComments: createdTrip.numOfComments,
+        numOfLikes: createdTrip.numOfLikes,
+        owner: {
+          userName: createdTrip.userName,
+          imgUrl: createdTrip.imgUrl,
+        },
+      });
+    } catch (error) {
+      console.error("Error creating trip:", error.message);
+      res
+        .status(500)
+        .json({ message: "Internal server error", error: error.message });
+    }
+  }
+
+  async addComment(req: AuthRequest, res: Response) {
+    try {
+      const tripId = req.params.tripId;
+      const trip = await this.entity.findOne({
+        where: { _id: tripId },
+        relations: ["comments"],
+      });
+      if (!trip) return res.status(404).send("Trip not found");
+
+      const newComment = { ownerId: req.user._id, ...req.body.comment };
+      trip.comments.push(newComment);
+      trip.numOfComments = trip.comments.length;
+      await this.entity.save(trip);
+
+      io.emit("commentAdded", { tripId, newComment });
+      res.status(200).send(trip.comments);
+    } catch (error) {
+      console.error("Error in addComment:", error.message);
+      res.status(500).send(error.message);
+    }
+  }
+
+  async handleLike(req: AuthRequest, res: Response) {
+    try {
+      const tripId = req.params.tripId;
+      const userId = req.user._id;
+      req.body.owner = userId;
+
+      const trip = await this.entity.findOne({
+        where: { _id: tripId },
+        relations: ["likes"],
+      });
+      if (!trip) {
+        return res.status(404).send("Trip not found");
+      }
+
+      if (!trip.likes.some((like) => like.owner === userId)) {
+        trip.likes.push({ owner: userId });
+        trip.numOfLikes++;
+        await this.entity.save(trip);
+        io.emit("likeAdded", { tripId, userId });
+        return res.status(200).send(trip);
+      }
+      trip.likes = trip.likes.filter((user) => user.owner !== userId);
+      trip.numOfLikes--;
+      await this.entity.save(trip);
+      io.emit("likeRemoved", { tripId, userId });
+      res.status(200).send(trip);
+    } catch (error) {
+      console.error("Error in addLike:", error.message);
+      res.status(500).send(error.message);
+    }
+  }
+
+  async updateTrip(req: AuthRequest, res: Response) {
+    console.log("Updating trip:", req.params.id);
+    try {
+      const trip = await this.entity
+        .createQueryBuilder("trip")
+        .leftJoinAndSelect("trip.owner", "owner")
+        .where("trip._id = :id", { id: req.params.id })
+        .getOne();
+
+      if (!trip) {
+        return res.status(404).json({ message: "Trip not found" });
+      }
+
+      if (trip.owner._id !== req.user?._id) {
+        return res
+          .status(403)
+          .json({ message: "You are not authorized to update this trip" });
+      }
+
+      const allowedUpdates: Partial<ITrips> = {
+        typeTraveler: req.body.typeTraveler,
+        country: req.body.country,
+        typeTrip: req.body.typeTrip,
+        tripDescription: req.body.tripDescription,
+        tripPhotos: req.body.tripPhotos,
+      };
+
+      Object.assign(trip, allowedUpdates);
+
+      const updatedTrip = await this.entity.save(trip);
+
+      res.status(200).send({
+        _id: updatedTrip._id,
+        typeTraveler: updatedTrip.typeTraveler,
+        country: updatedTrip.country,
+        typeTrip: updatedTrip.typeTrip,
+        tripDescription: updatedTrip.tripDescription,
+        tripPhotos: updatedTrip.tripPhotos,
+      });
+    } catch (err) {
+      console.error("Failed to update trip:", err);
+      res.status(500).json({ message: "Error updating trip", error: err });
+    }
+  }
+
+  async deleteTrip(req: Request, res: Response) {
+    try {
+      const tripId = req.params.id;
+      const tripToDelete = await this.entity.findOne({
+        where: { _id: tripId },
+      });
+      if (!tripToDelete) return res.status(404).send("Trip not found");
+
+      const userRepository = connectDB.getRepository(User);
+      const usersWithFavoriteTrip = await userRepository
+        .createQueryBuilder("user")
+        .where(":tripId = ANY(user.favoriteTrips)", { tripId })
+        .getMany();
+
+      for (const user of usersWithFavoriteTrip) {
+        user.favoriteTrips = user.favoriteTrips.filter((id) => id !== tripId);
+        await userRepository.save(user);
+      }
+
+      const deleteResult = await this.entity.delete(tripId);
+      if (deleteResult.affected === 0)
+        return res.status(500).send("Failed to delete trip");
+
+      res.send("Trip deleted successfully");
+    } catch (err) {
+      console.error("Error deleting trip:", err);
+      res.status(500).send("Error occurred while deleting the trip");
+    }
+  }
+
+  async deleteComment(req: AuthRequest, res: Response) {
+    try {
+      const tripId = req.params.tripId;
+      const commentId = req.params.commentId;
+
+      const trip = await this.entity.findOne({
+        where: { _id: tripId },
+        relations: ["comments"],
+      });
+      if (!trip) return res.status(404).send("Trip not found");
+
+      trip.comments = trip.comments.filter(
+        (comment) => comment._id.toString() !== commentId
+      );
+      trip.numOfComments = trip.comments.length;
+      await this.entity.save(trip);
+
+      io.emit("commentDeleted", { tripId, commentId });
+      res.status(200).send(trip.comments);
+    } catch (error) {
+      console.error("Error in deleteComment:", error.message);
+      res.status(500).send(error.message);
     }
   }
 }
