@@ -54,7 +54,6 @@ class UserController extends BaseController<IUser> {
           await userRepository.save(user);
           console.log("Trip added to favorites successfully");
 
-          // שליחת אירוע למכשירים של המשתמש
           io.emit("addFavorite", { userId, tripId });
 
           return res.status(200).json({
@@ -89,7 +88,6 @@ class UserController extends BaseController<IUser> {
         await userRepository.save(user);
         console.log("Trip removed from favorites successfully");
 
-        // שליחת אירוע למכשירים של המשתמש
         io.emit("removeFavorite", { userId, tripId });
 
         return res.status(200).json({
