@@ -33,7 +33,7 @@ class TripController extends BaseController<ITrips> {
   async getAllTrips(req: AuthRequest, res: Response) {
     try {
       const trips = await this.entity.find({
-        relations: ["owner", "likes"],
+        relations: ["owner", "likes", "comments"],
       });
 
       let favoriteTripsIds: string[] = [];
