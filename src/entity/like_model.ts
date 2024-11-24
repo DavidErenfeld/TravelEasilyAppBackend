@@ -14,9 +14,6 @@ export class Like {
   @Column({ type: "varchar", length: 255 })
   owner: string;
 
-  @Column({ type: "varchar", length: 255 })
-  userName: string;
-
   @ManyToOne(() => Trip, (trip) => trip.likes, { onDelete: "CASCADE" })
   trip: Trip;
 
