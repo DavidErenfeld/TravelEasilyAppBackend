@@ -510,7 +510,7 @@ class TripController extends BaseController<ITrips> {
       const deleteResult = await this.entity.delete(tripId);
       if (deleteResult.affected === 0)
         return res.status(500).send("Failed to delete trip");
-
+      io.emit("tripDeleted", { tripId });
       res.send("Trip deleted successfully");
     } catch (err) {
       console.error("Error deleting trip:", err);

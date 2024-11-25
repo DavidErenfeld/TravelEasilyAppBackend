@@ -46,6 +46,14 @@ export default function initializeSocket(server: http.Server) {
       }, "Error posting new trip");
     });
 
+    socket.on("deleteTrip", ({ tripId }) => {
+      console.log(`Received deleteTrip event for tripId: ${tripId}`);
+      handleEventWithErrorLogging(() => {
+        io.emit("tripDeleted", { tripId });
+        console.log(`Event emitted: tripDeleted for tripId: ${tripId}`);
+      }, "Error emitting tripDeleted event");
+    });
+
     socket.on("updateTrip", (tripData) => {
       console.log("Received updateTrip event:", tripData);
       handleEventWithErrorLogging(() => {
@@ -116,13 +124,12 @@ export default function initializeSocket(server: http.Server) {
   });
 }
 
-// פונקציה כללית לניהול אירועים עם טיפול בשגיאות
 function handleEventWithErrorLogging(eventFn: Function, errorMsg: string) {
-  console.log("Handling event with error logging..."); // לוג לפני הפעלת הפונקציה
+  console.log("Handling event with error logging...");
   try {
     eventFn();
-    console.log("Event handled successfully"); // לוג הצלחה
+    console.log("Event handled successfully");
   } catch (error) {
-    console.error(errorMsg, error); // לוג שגיאה
+    console.error(errorMsg, error);
   }
 }

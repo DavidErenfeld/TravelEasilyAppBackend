@@ -20,7 +20,7 @@ InitApp().then((app) => {
 
   if (process.env.NODE_ENV === "production") {
     options.definition.servers = [
-      { url: `https://${process.env.HEROKU_APP_NAME}.herokuapp.com` },
+      { url: `https://evening-bayou-77034-176dc93fb1e1.herokuapp.com` },
     ];
   }
 

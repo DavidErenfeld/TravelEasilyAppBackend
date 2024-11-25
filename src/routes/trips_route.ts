@@ -11,7 +11,7 @@ import TripController from "../controllers/trips_controller";
  *   get:
  *     summary: Get all trips
  *     description: Retrieves a list of all trips, including their details, likes, and comments. If a user is authenticated, it also returns whether the user liked or favorited each trip.
- *     tags: [Trips]
+ *     tags: [trips]
  *     security:
  *       - bearerAuth: []
  *     responses:
