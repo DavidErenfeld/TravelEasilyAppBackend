@@ -14,10 +14,8 @@ export class BaseController<Entity extends { _id?: string }> {
    * in specific controllers with proper data filtering for security.
    */
   protected async post(req: Request, res: Response) {
-    console.log("Attempting to save object:", req.body);
     try {
       const response = await this.entity.save(req.body);
-      console.log("Object saved successfully:", response);
       res.status(200).send(response);
     } catch (err) {
       console.error("Failed to save object:", err);
@@ -36,15 +34,13 @@ export class BaseController<Entity extends { _id?: string }> {
           _id: req.params.id,
         } as FindOptionsWhere<Entity>);
         if (object) {
-          console.log("Object found:", object);
           res.send(object);
         } else {
-          console.log("Object not found, id:", req.params.id);
           res.status(404).send({ message: "Object not found" });
         }
       } else {
         const objects = await this.entity.find({ relations: ["owner"] });
-        console.log("Objects retrieved:", objects);
+
         res.send(objects);
       }
     } catch (err) {
@@ -54,7 +50,6 @@ export class BaseController<Entity extends { _id?: string }> {
   }
 
   protected async put(req: Request, res: Response) {
-    console.log("Attempting to update object, id:", req.params.id);
     try {
       const objectToUpdate = await this.entity.findOneBy({
         _id: req.params.id,
@@ -63,10 +58,8 @@ export class BaseController<Entity extends { _id?: string }> {
       if (objectToUpdate) {
         Object.assign(objectToUpdate, req.body);
         const updatedObject = await this.entity.save(objectToUpdate);
-        console.log("Object updated successfully:", updatedObject);
         res.status(200).send(updatedObject);
       } else {
-        console.log("Object not found, id:", req.params.id);
         res.status(404).json({ message: "Object not found" });
       }
     } catch (err) {
@@ -76,14 +69,11 @@ export class BaseController<Entity extends { _id?: string }> {
   }
 
   protected async delete(req: Request, res: Response) {
-    console.log("Attempting to delete object, id:", req.params.id);
     try {
       const result = await this.entity.delete(req.params.id);
       if (result.affected === 0) {
-        console.log("No object found to delete, id:", req.params.id);
         res.status(404).send({ message: "Object not found" });
       } else {
-        console.log("Object deleted successfully");
         res.send({ message: "Object deleted successfully" });
       }
     } catch (err) {

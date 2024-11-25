@@ -150,7 +150,7 @@ class TripController extends BaseController<ITrips> {
       const ownerData = {
         userName: trip.owner.userName,
         imgUrl: trip.owner.imgUrl,
-        ...(userId === trip.owner._id && { _id: trip.owner._id }), // הוספת _id אם המשתמש הנוכחי הוא בעל הטיול
+        ...(userId === trip.owner._id && { _id: trip.owner._id }),
       };
 
       const sanitizedTrip = {
@@ -233,7 +233,7 @@ class TripController extends BaseController<ITrips> {
         const ownerData = {
           userName: trip.owner.userName,
           imgUrl: trip.owner.imgUrl,
-          ...(userId === trip.owner._id && { _id: trip.owner._id }), // הוספת _id רק אם המשתמש המחובר הוא הבעלים
+          ...(userId === trip.owner._id && { _id: trip.owner._id }), 
         };
 
         return {
@@ -444,7 +444,6 @@ class TripController extends BaseController<ITrips> {
   }
 
   async updateTrip(req: AuthRequest, res: Response) {
-    console.log("Updating trip:", req.params.id);
     try {
       const trip = await this.entity
         .createQueryBuilder("trip")

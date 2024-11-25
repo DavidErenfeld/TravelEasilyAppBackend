@@ -15,7 +15,7 @@ interface Place {
   business_status?: string;
 }
 
-const CACHE_EXPIRATION = 300; // Cache lifetime in seconds
+const CACHE_EXPIRATION = 3600;
 
 export async function fetchPlaces(
   location: string,
@@ -45,11 +45,11 @@ export async function fetchPlaces(
       }
     );
 
-    console.log("Google API response received:", response.data);
+    // console.log("Google API response received:", response.data);
 
     const places = await Promise.all(
       response.data.results.slice(0, 10).map(async (place: any) => {
-        console.log(`Fetching details for place_id: ${place.place_id}`);
+        // console.log(`Fetching details for place_id: ${place.place_id}`);
 
         const detailsResponse = await axios.get(
           `https://maps.googleapis.com/maps/api/place/details/json`,
@@ -60,11 +60,6 @@ export async function fetchPlaces(
               key: process.env.GOOGLE_MAPS_API_KEY,
             },
           }
-        );
-
-        console.log(
-          `Details for place_id ${place.place_id}:`,
-          detailsResponse.data
         );
 
         return {
@@ -85,7 +80,6 @@ export async function fetchPlaces(
       })
     );
 
-    console.log("Caching fetched places data with key:", cacheKey);
     await redisClient.set(cacheKey, JSON.stringify(places), {
       EX: CACHE_EXPIRATION,
     });

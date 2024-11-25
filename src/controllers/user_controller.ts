@@ -30,7 +30,6 @@ class UserController extends BaseController<IUser> {
   }
 
   async put(req: AuthRequest, res: Response) {
-    console.log("User update attempt:", req.params.id);
     if (req.body.password) {
       const salt = await bcrypt.genSalt(10);
       const encryptedPassword = await bcrypt.hash(req.body.password, salt);
@@ -40,7 +39,6 @@ class UserController extends BaseController<IUser> {
   }
 
   async addFavoriteTrip(req: AuthRequest, res: Response) {
-    console.log("Adding favorite trip:", req.params.tripId);
     try {
       const userId = req.user._id;
       const tripId = req.params.tripId;
@@ -66,7 +64,6 @@ class UserController extends BaseController<IUser> {
           .status(409)
           .json({ message: "Trip is already in favorites" });
       } else {
-        console.log("User not found:", userId);
         return res.status(404).json({ message: "User not found" });
       }
     } catch (error) {
@@ -76,7 +73,6 @@ class UserController extends BaseController<IUser> {
   }
 
   async removeFavoriteTrip(req: AuthRequest, res: Response) {
-    console.log("Removing favorite trip:", req.params.tripId);
     try {
       const userId = req.user._id;
       const tripId = req.params.tripId;
@@ -95,7 +91,6 @@ class UserController extends BaseController<IUser> {
           favoriteTrips: user.favoriteTrips,
         });
       } else {
-        console.log("User not found:", userId);
         return res.status(404).json({ message: "User not found" });
       }
     } catch (error) {
@@ -105,19 +100,17 @@ class UserController extends BaseController<IUser> {
   }
 
   async getFavoriteTripIds(req: AuthRequest, res: Response) {
-    console.log(`Fetching favorite trip IDs for user: ${req.user._id}`);
     try {
       const userId = req.params.userId;
       const userRepository = connectDB.getRepository(User);
 
       const user = await userRepository.findOne({ where: { _id: userId } });
       if (!user) {
-        console.log(`User not found: ${userId}`);
+        console.log(`User not found`);
         return res.status(404).json({ message: "User not found" });
       }
 
       const favoriteTripIds = user.favoriteTrips || [];
-      console.log(`Favorite trip IDs for user ${userId}:`, favoriteTripIds);
 
       res.status(200).json(favoriteTripIds);
     } catch (err) {
@@ -128,12 +121,10 @@ class UserController extends BaseController<IUser> {
 
   async requestPasswordReset(req: Request, res: Response) {
     const { email } = req.body;
-    console.log("Requesting password reset for email:", email);
     try {
       const userRepository = connectDB.getRepository(User);
       const user = await userRepository.findOne({ where: { email } });
       if (!user) {
-        console.log("User not found for email:", email);
         return res.status(404).json({ message: "User not found" });
       }
 
@@ -149,7 +140,6 @@ class UserController extends BaseController<IUser> {
       };
 
       await transporter.sendMail(mailOptions);
-      console.log("Password reset email sent successfully to:", email);
       return res.status(200).json({ message: "Password reset email sent" });
     } catch (error) {
       console.error("Error requesting password reset:", error);
@@ -159,7 +149,6 @@ class UserController extends BaseController<IUser> {
 
   async resetPassword(req: Request, res: Response) {
     const { token, newPassword } = req.body;
-    console.log("Attempting to reset password for token:", token);
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET) as {
         _id: string;
@@ -170,7 +159,6 @@ class UserController extends BaseController<IUser> {
       });
 
       if (!user) {
-        console.log("User not found for token:", token);
         return res.status(404).json({ message: "User not found" });
       }
 
@@ -178,7 +166,6 @@ class UserController extends BaseController<IUser> {
       user.password = await bcrypt.hash(newPassword, salt);
       await userRepository.save(user);
 
-      console.log("Password reset successfully for user:", user._id);
       return res
         .status(200)
         .json({ message: "Password has been reset successfully" });
@@ -192,7 +179,6 @@ class UserController extends BaseController<IUser> {
   }
 
   async deleteUser(req: AuthRequest, res: Response) {
-    console.log("Attempting to delete user:", req.params.id);
     const queryRunner = connectDB.createQueryRunner();
     await queryRunner.startTransaction();
 
@@ -207,7 +193,6 @@ class UserController extends BaseController<IUser> {
         where: { _id: req.params.id },
       });
       if (!user) {
-        console.log("User not found:", req.params.id);
         return res.status(404).json({ message: "User not found" });
       }
 
@@ -289,7 +274,6 @@ class UserController extends BaseController<IUser> {
 
       // Commit the transaction
       await queryRunner.commitTransaction();
-      console.log("User and related data deleted successfully:", req.params.id);
 
       // Emit event to notify all clients about the deletion
       io.emit("userDeleted", {

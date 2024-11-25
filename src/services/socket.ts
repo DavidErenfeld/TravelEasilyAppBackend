@@ -28,7 +28,6 @@ export default function initializeSocket(server: http.Server) {
   io.use((socket, next) => {
     console.log("Running middleware authentication check...");
     if (socket.handshake.auth.token) {
-      console.log("Authentication successful for socket:", socket.id);
       next();
     } else {
       console.error("Authentication error - no token provided");
@@ -37,55 +36,44 @@ export default function initializeSocket(server: http.Server) {
   });
 
   io.on("connection", (socket: Socket) => {
-    console.log("Client connected:", socket.id);
-
     socket.on("newTrip", (newTripData) => {
-      console.log("Received newTrip event:", newTripData);
       handleEventWithErrorLogging(() => {
         io.emit("tripPosted", newTripData);
       }, "Error posting new trip");
     });
 
     socket.on("deleteTrip", ({ tripId }) => {
-      console.log(`Received deleteTrip event for tripId: ${tripId}`);
       handleEventWithErrorLogging(() => {
         io.emit("tripDeleted", { tripId });
-        console.log(`Event emitted: tripDeleted for tripId: ${tripId}`);
       }, "Error emitting tripDeleted event");
     });
 
     socket.on("updateTrip", (tripData) => {
-      console.log("Received updateTrip event:", tripData);
       handleEventWithErrorLogging(() => {
         io.emit("tripUpdated", tripData);
       }, "Error updating trip");
     });
 
     socket.on("addLike", (likeData) => {
-      console.log("Received addLike event:", likeData);
+      console.log("Received addLike event:");
       handleEventWithErrorLogging(() => {
         io.emit("likeAdded", likeData);
       }, "Error adding like");
     });
 
     socket.on("addFavorite", ({ userId, tripId }) => {
-      console.log(`User ${userId} added trip ${tripId} to favorites.`);
       handleEventWithErrorLogging(() => {
         io.to(userId).emit("favoriteUpdated", { tripId, isFavorite: true });
-        console.log(`Event emitted: favoriteTripAdded to userId: ${userId}`);
       }, "Error adding favorite");
     });
 
     socket.on("removeFavorite", ({ userId, tripId }) => {
-      console.log(`User ${userId} removed trip ${tripId} from favorites.`);
       handleEventWithErrorLogging(() => {
         io.to(userId).emit("favoriteUpdated", { tripId, isFavorite: false });
-        console.log(`Event emitted: favoriteTripRemoved to userId: ${userId}`);
       }, "Error removing favorite");
     });
 
     socket.on("addComment", (commentData) => {
-      console.log("Received addComment event:", commentData);
       handleEventWithErrorLogging(() => {
         io.emit("commentAdded", commentData);
       }, "Error adding comment");
@@ -93,12 +81,9 @@ export default function initializeSocket(server: http.Server) {
 
     socket.on("join", ({ userId }) => {
       socket.join(userId);
-      console.log(`Socket ${socket.id} joined room ${userId}`);
     });
 
     socket.on("deleteUser", async ({ userId }) => {
-      console.log(`User ${userId} requested account deletion.`);
-
       try {
         const deletedTripIds = [];
         const deletedCommentIds = [];
@@ -112,23 +97,18 @@ export default function initializeSocket(server: http.Server) {
         });
 
         io.to(userId).emit("disconnectUser");
-        console.log(`Sent userDeleted event for userId: ${userId}`);
       } catch (error) {
         console.error("Error handling deleteUser event:", error);
       }
     });
 
-    socket.on("disconnect", () => {
-      console.log("Client disconnected:", socket.id);
-    });
+    socket.on("disconnect", () => {});
   });
 }
 
 function handleEventWithErrorLogging(eventFn: Function, errorMsg: string) {
-  console.log("Handling event with error logging...");
   try {
     eventFn();
-    console.log("Event handled successfully");
   } catch (error) {
     console.error(errorMsg, error);
   }

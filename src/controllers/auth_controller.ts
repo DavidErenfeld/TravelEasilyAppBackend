@@ -9,7 +9,7 @@ const client = new OAuth2Client();
 const UserRepository = connectDB.getRepository(User);
 
 const googleSignin = async (req: Request, res: Response) => {
-  console.log(req.body);
+  console.log("googleSignin");
   try {
     const ticket = await client.verifyIdToken({
       idToken: req.body.credential,
@@ -57,13 +57,6 @@ const register = async (req: Request, res: Response) => {
   const imgUrl = req.body.imgUrl;
   const userName = req.body.userName;
 
-  console.log("Register request received:", {
-    email,
-    password,
-    imgUrl,
-    userName,
-  });
-
   if (!email || !password) {
     console.log("Missing email or password");
     return res.status(400).send("missing email or password");
@@ -72,11 +65,11 @@ const register = async (req: Request, res: Response) => {
   try {
     const rs = await UserRepository.findOneBy({ email: email });
     if (rs != null) {
-      console.log("Email already exists:", email);
+      console.log("Email already exists:");
       return res.status(406).send("email already exists");
     }
 
-    console.log("Creating new user:", { email, imgUrl, userName });
+    console.log("Creating new user:");
     const salt = await bcrypt.genSalt(10);
     const encryptedPassword = await bcrypt.hash(password, salt);
     const newUser = UserRepository.create({
@@ -86,16 +79,10 @@ const register = async (req: Request, res: Response) => {
       userName: userName,
     });
 
-    console.log("Saving new user to database");
     await UserRepository.save(newUser);
 
-    console.log("Generating tokens for new user");
     const tokens = await generateTokens(newUser);
 
-    console.log("User registered successfully:", {
-      userName: newUser.userName,
-      email: newUser.email,
-    });
     res.status(201).send({
       userName: newUser.userName,
       email: newUser.email,
@@ -110,9 +97,9 @@ const register = async (req: Request, res: Response) => {
 };
 
 const generateTokens = async (user: IUser) => {
-  const jwtExpiration = process.env.JWT_EXPIRATION || "2m"; // ערך ברירת מחדל במקרה שאין משתנה סביבה מוגדר
+  const jwtExpiration = process.env.JWT_EXPIRATION || "2h";
   const accessToken = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
-    expiresIn: "1h", // להשתמש בערך מוגדר או ברירת מחדל
+    expiresIn: "1h",
   });
 
   const refreshToken = jwt.sign(
@@ -135,23 +122,19 @@ const generateTokens = async (user: IUser) => {
 };
 
 const verifyPassword = async (req: Request, res: Response) => {
-  const { id } = req.params; // Using "id" because that's what you're passing in the request
+  const { id } = req.params;
   if (Object.keys(req.body).length === 0) {
     return res.status(400).json({ error: "Missing Parameters" });
   }
   const { currentPassword } = req.body;
   try {
-    // Fetch the user from the database by their email address
-    const user = await UserRepository.findOneBy({ _id: id }); // Using "id" as the email since it's passed in as the parameter
+    const user = await UserRepository.findOneBy({ _id: id });
 
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
-
-    // Compare the provided current password with the hashed password stored in the database
     const passwordMatch = await bcrypt.compare(currentPassword, user.password);
 
-    // Respond with whether the password is valid or not
     res.json({ isValid: passwordMatch });
   } catch (error) {
     console.error("Error verifying password:", error);
@@ -160,7 +143,7 @@ const verifyPassword = async (req: Request, res: Response) => {
 };
 
 const login = async (req: Request, res: Response) => {
-  console.log("Login request received:", req.body.email, req.body.password);
+  console.log("Login request received:");
 
   const password = req.body.password;
   const email = req.body.email;
@@ -174,20 +157,17 @@ const login = async (req: Request, res: Response) => {
     const user = await UserRepository.findOneBy({ email: email });
 
     if (user == null) {
-      console.log("User not found:", email);
+      console.log("User not found:");
       return res.status(401).send("Email or password incorrect");
     }
 
     const match = await bcrypt.compare(password, user.password);
-    console.log("Password match result:", match);
 
     if (!match) {
-      console.log("Password mismatch:", password);
       return res.status(401).send("Email or password incorrect");
     }
 
     const tokens = await generateTokens(user);
-    console.log("Login successful, generating tokens for:", user.email);
 
     return res.status(200).send({
       userName: user.userName,
@@ -205,7 +185,7 @@ const login = async (req: Request, res: Response) => {
 
 const logout = async (req: Request, res: Response) => {
   const authHeader = req.headers["authorization"];
-  const refreshToken = authHeader && authHeader.split(" ")[1]; // Bearer <token>
+  const refreshToken = authHeader && authHeader.split(" ")[1];
 
   if (!refreshToken) {
     console.log("Missing refresh token");
@@ -237,18 +217,16 @@ const logout = async (req: Request, res: Response) => {
             !userDb.refreshTokens.includes(refreshToken)
           ) {
             console.log("Token not found for user, clearing all tokens");
-            userDb.refreshTokens = []; // מחיקת כל ה-tokens במקרה של חוסר התאמה
+            userDb.refreshTokens = [];
             await UserRepository.save(userDb);
             return res.status(401).send("Token not found");
           }
 
-          // סינון ה-refresh token הנוכחי מהרשימה של המשתמש
           userDb.refreshTokens = userDb.refreshTokens.filter(
             (t) => t !== refreshToken
           );
 
           await UserRepository.save(userDb);
-          console.log("Token removed successfully for user:", userDb._id);
           return res.sendStatus(200);
         } catch (err) {
           console.error("Error finding or updating user:", err.message);
@@ -264,14 +242,12 @@ const logout = async (req: Request, res: Response) => {
 
 const refresh = async (req: Request, res: Response) => {
   const authHeader = req.headers["authorization"];
-  const refreshToken = authHeader && authHeader.split(" ")[1]; // Bearer <token>
+  const refreshToken = authHeader && authHeader.split(" ")[1];
 
   if (!refreshToken) {
     console.log("Missing refresh token");
     return res.sendStatus(401);
   }
-
-  console.log("Received refresh token:", refreshToken);
 
   try {
     jwt.verify(
@@ -289,48 +265,36 @@ const refresh = async (req: Request, res: Response) => {
           });
 
           if (!userDb) {
-            console.log("User not found for refresh token:", decodedUser._id);
             return res.status(404).send("User not found");
           }
 
-          // בדיקה אם ה-refresh token קיים אצל המשתמש
           if (
             !userDb.refreshTokens ||
             !userDb.refreshTokens.includes(refreshToken)
           ) {
-            console.log("Refresh token not found for user:", decodedUser._id);
-            userDb.refreshTokens = []; // ניקוי כל ה-tokens במקרה של חוסר התאמה
+            userDb.refreshTokens = [];
             await UserRepository.save(userDb);
             return res.status(403).send("Invalid refresh token");
           }
 
-          // יצירת access token חדש
           const accessToken = jwt.sign(
             { _id: userDb._id },
             process.env.JWT_SECRET,
             { expiresIn: process.env.JWT_EXPIRATION || "1h" }
           );
 
-          // יצירת refresh token חדש
           const newRefreshToken = jwt.sign(
             { _id: userDb._id },
             process.env.JWT_REFRESH_SECRET
           );
 
-          // מחיקת ה-refresh token הישן והוספת החדש
           userDb.refreshTokens = userDb.refreshTokens.filter(
             (t) => t !== refreshToken
           );
           userDb.refreshTokens.push(newRefreshToken);
 
-          console.log(
-            "Generated new access and refresh tokens for user:",
-            userDb._id
-          );
-
           await UserRepository.save(userDb);
 
-          // שליחת ה-access וה-refresh החדשים למשתמש
           return res.status(200).send({
             accessToken: accessToken,
             refreshToken: newRefreshToken,
