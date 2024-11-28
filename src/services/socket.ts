@@ -36,6 +36,25 @@ export default function initializeSocket(server: http.Server) {
   });
 
   io.on("connection", (socket: Socket) => {
+    console.log(`Client connected: ${socket.id}`);
+
+    // Timeout mechanism to disconnect inactive sockets
+    // מנגנון Timeout לניתוק סוקט שלא פעיל לאורך זמן
+    let timeout: NodeJS.Timeout;
+
+    const resetTimeout = () => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        console.log(`Disconnecting socket: ${socket.id} due to inactivity`);
+        socket.disconnect(); // נתק את החיבור אם אין פעילות
+      }, 300000); // 5 דקות של חוסר פעילות
+    };
+
+    // הפעל את מנגנון ה-Timeout בכל התחברות ובכל פעולה
+    resetTimeout();
+    socket.onAny(() => resetTimeout()); // איפוס Timeout בכל אירוע
+
+    // Event listeners remain unchanged
     socket.on("newTrip", (newTripData) => {
       handleEventWithErrorLogging(() => {
         io.emit("tripPosted", newTripData);
@@ -102,10 +121,16 @@ export default function initializeSocket(server: http.Server) {
       }
     });
 
-    socket.on("disconnect", () => {});
+    // Handle disconnection with cleanup
+    // טיפול באירוע disconnect
+    socket.on("disconnect", () => {
+      clearTimeout(timeout); // נקה את ה-Timeout כדי למנוע זליגת זיכרון
+      console.log(`Client disconnected: ${socket.id}`);
+    });
   });
 }
 
+// Utility function for error handling in events
 function handleEventWithErrorLogging(eventFn: Function, errorMsg: string) {
   try {
     eventFn();

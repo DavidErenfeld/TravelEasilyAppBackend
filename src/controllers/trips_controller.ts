@@ -186,7 +186,6 @@ class TripController extends BaseController<ITrips> {
       const whereCondition: Record<string, string | number | boolean> = {};
       let numOfDaysCondition: number | null = null;
 
-      // בניית התנאים לשליפה
       Object.entries(queryParams).forEach(([key, value]) => {
         if (key === "numOfDays" && typeof value === "string") {
           numOfDaysCondition = parseInt(value, 10);
@@ -233,7 +232,7 @@ class TripController extends BaseController<ITrips> {
         const ownerData = {
           userName: trip.owner.userName,
           imgUrl: trip.owner.imgUrl,
-          ...(userId === trip.owner._id && { _id: trip.owner._id }), 
+          ...(userId === trip.owner._id && { _id: trip.owner._id }),
         };
 
         return {
