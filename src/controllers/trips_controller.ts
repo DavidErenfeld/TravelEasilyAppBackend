@@ -7,6 +7,8 @@ import { ITrips, Trip } from "../entity/trips_model";
 import { User } from "../entity/users_model";
 import { io } from "../services/socket";
 import { In } from "typeorm";
+import { renderSingleTripAsHtml, renderTripsAsHtml } from "../utils/renderHtml";
+import { isBotRequest } from "../utils/botDetection";
 import connectDB from "../data-source";
 
 class TripController extends BaseController<ITrips> {
@@ -35,7 +37,14 @@ class TripController extends BaseController<ITrips> {
       const trips = await this.entity.find({
         relations: ["owner", "likes", "comments"],
       });
+      const userAgent = req.headers["user-agent"] || "";
+      const isBot = isBotRequest(userAgent);
 
+      if (isBot) {
+        // 3) בוט: נחזיר HTML במקום JSON
+        const html = renderTripsAsHtml(trips);
+        return res.send(html);
+      }
       let favoriteTripsIds: string[] = [];
       const userId = req.user ? req.user._id : null;
 
@@ -117,6 +126,8 @@ class TripController extends BaseController<ITrips> {
 
   async getFullTrip(req: AuthRequest, res: Response) {
     try {
+      const userAgent = req.headers["user-agent"] || "";
+      const isBot = isBotRequest(userAgent);
       const tripId = req.params.id;
 
       const trip = await this.entity.findOne({
@@ -127,7 +138,10 @@ class TripController extends BaseController<ITrips> {
       if (!trip) {
         return res.status(404).json({ message: "Trip not found" });
       }
-
+      if (isBot) {
+        const html = renderSingleTripAsHtml(trip);
+        return res.send(html);
+      }
       const userId = req.user ? req.user._id : null;
 
       const isLikedByCurrentUser = userId

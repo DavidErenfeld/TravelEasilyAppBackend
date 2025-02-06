@@ -271,7 +271,7 @@ class UserController extends BaseController<IUser> {
 
       // Delete the user
       await userRepository.delete(req.params.id);
-
+      
       // Commit the transaction
       await queryRunner.commitTransaction();
 

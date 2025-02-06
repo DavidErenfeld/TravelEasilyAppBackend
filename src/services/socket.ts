@@ -39,20 +39,19 @@ export default function initializeSocket(server: http.Server) {
     console.log(`Client connected: ${socket.id}`);
 
     // Timeout mechanism to disconnect inactive sockets
-    // מנגנון Timeout לניתוק סוקט שלא פעיל לאורך זמן
+
     let timeout: NodeJS.Timeout;
 
     const resetTimeout = () => {
       clearTimeout(timeout);
       timeout = setTimeout(() => {
         console.log(`Disconnecting socket: ${socket.id} due to inactivity`);
-        socket.disconnect(); // נתק את החיבור אם אין פעילות
-      }, 300000); // 5 דקות של חוסר פעילות
+        socket.disconnect();
+      }, 300000);
     };
 
-    // הפעל את מנגנון ה-Timeout בכל התחברות ובכל פעולה
     resetTimeout();
-    socket.onAny(() => resetTimeout()); // איפוס Timeout בכל אירוע
+    socket.onAny(() => resetTimeout());
 
     // Event listeners remain unchanged
     socket.on("newTrip", (newTripData) => {
