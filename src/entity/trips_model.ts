@@ -4,7 +4,10 @@ import {
   Column,
   OneToMany,
   ManyToOne,
+  BeforeInsert,
+  BeforeUpdate,
 } from "typeorm";
+import slugify from "slugify";
 import { Comment, IComment } from "./comment_model";
 import { ILike, Like } from "./like_model";
 import { User } from "./users_model";
@@ -25,6 +28,7 @@ export interface ITrips {
   likes?: ILike[];
   isLikedByCurrentUser?: boolean;
   isFavoritedByCurrentUser?: boolean;
+  slug?: string; // ✅ הוספת שדה `slug`
 }
 
 @Entity()
@@ -68,7 +72,18 @@ export class Trip {
   @OneToMany(() => Like, (like) => like.trip, { cascade: true })
   likes: Like[];
 
+  @Column({ type: "varchar", unique: true, nullable: true })
+  slug: string;
+
   get numOfDays(): number {
     return this.tripDescription.length;
+  }
+
+  @BeforeInsert()
+  @BeforeUpdate()
+  generateSlug() {
+    if (!this.slug || this.slug.trim() === "") {
+      this.slug = slugify(`${this.country}-${this.typeTrip}`, { lower: true });
+    }
   }
 }

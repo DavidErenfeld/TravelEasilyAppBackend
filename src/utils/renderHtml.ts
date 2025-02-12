@@ -1,6 +1,6 @@
 import { ITrips } from "../entity/trips_model";
 
-export function renderTripsAsHtml(trips: ITrips[]): string {
+export const renderTripsAsHtml = (trips: ITrips[]): string => {
   const listItems = trips
     .map(
       (trip) => `
@@ -15,32 +15,31 @@ export function renderTripsAsHtml(trips: ITrips[]): string {
 
   return `
     <!DOCTYPE html>
-    <html lang="he">
+    <html lang="en">
       <head>
         <meta charset="utf-8" />
-        <meta name="description" content="רשימת כל הטיולים באתר Travel Easily" />
+        <meta name="description" content="List of all trips on Travel Easily" />
         <title>Travel Easily - All Trips</title>
       </head>
       <body>
-        <h1>רשימת טיולים</h1>
+        <h1>Trip List</h1>
         <ul>
           ${listItems}
         </ul>
       </body>
     </html>
   `;
-}
+};
 
-export function renderSingleTripAsHtml(trip: ITrips): string {
-  // כאן נוסיף OG tags (חשוב לשיתוף ברשתות חברתיות) + title + description
-  // שימוש בשדות trip.country, trip.typeTrip, tripPhotos[0], וכו'.
-  const title = `טיול ל${trip.country} - ${trip.typeTrip}`;
-  const description = trip.tripDescription?.[0] || "תיאור טיול נפלא!";
-  const imageUrl = trip.tripPhotos?.[0] || "/images/Logo.png"; // ברירת מחדל
+export const renderSingleTripAsHtml = (trip: ITrips): string => {
+  const title = `Trip to ${trip.country} - ${trip.typeTrip}`;
+  const description =
+    trip.tripDescription?.[0] || "A wonderful trip description!";
+  const imageUrl = trip.tripPhotos?.[0] || "/images/Logo.png";
 
   return `
     <!DOCTYPE html>
-    <html lang="he">
+    <html lang="en">
       <head>
         <meta charset="utf-8" />
         <meta property="og:title" content="${title}" />
@@ -51,11 +50,11 @@ export function renderSingleTripAsHtml(trip: ITrips): string {
       </head>
       <body>
         <h1>${title}</h1>
-        <img src="${imageUrl}" alt="trip photo" />
+        <img src="${imageUrl}" alt="Trip photo" />
         <p>Type of Traveler: ${trip.typeTraveler}</p>
         <p>Likes: ${trip.numOfLikes}</p>
         <p>${description}</p>
       </body>
     </html>
   `;
-}
+};

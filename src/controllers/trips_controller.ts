@@ -7,6 +7,7 @@ import { ITrips, Trip } from "../entity/trips_model";
 import { User } from "../entity/users_model";
 import { io } from "../services/socket";
 import { In } from "typeorm";
+import slugify from "slugify";
 import { renderSingleTripAsHtml, renderTripsAsHtml } from "../utils/renderHtml";
 import { isBotRequest } from "../utils/botDetection";
 import connectDB from "../data-source";
@@ -41,7 +42,6 @@ class TripController extends BaseController<ITrips> {
       const isBot = isBotRequest(userAgent);
 
       if (isBot) {
-        // 3) בוט: נחזיר HTML במקום JSON
         const html = renderTripsAsHtml(trips);
         return res.send(html);
       }
@@ -68,6 +68,7 @@ class TripController extends BaseController<ITrips> {
 
         return {
           _id: trip._id,
+          slug: trip.slug, // ✅ הוספת slug
           typeTraveler: trip.typeTraveler,
           country: trip.country,
           typeTrip: trip.typeTrip,
@@ -128,20 +129,22 @@ class TripController extends BaseController<ITrips> {
     try {
       const userAgent = req.headers["user-agent"] || "";
       const isBot = isBotRequest(userAgent);
-      const tripId = req.params.id;
+      const slug = req.params.slug; // שימוש ב-slug במקום id
 
       const trip = await this.entity.findOne({
-        where: { _id: tripId },
+        where: { slug },
         relations: ["comments", "likes", "owner"],
       });
 
       if (!trip) {
         return res.status(404).json({ message: "Trip not found" });
       }
+
       if (isBot) {
         const html = renderSingleTripAsHtml(trip);
         return res.send(html);
       }
+
       const userId = req.user ? req.user._id : null;
 
       const isLikedByCurrentUser = userId
@@ -169,6 +172,7 @@ class TripController extends BaseController<ITrips> {
 
       const sanitizedTrip = {
         _id: trip._id,
+        slug: trip.slug,
         typeTraveler: trip.typeTraveler,
         country: trip.country,
         typeTrip: trip.typeTrip,
@@ -189,7 +193,7 @@ class TripController extends BaseController<ITrips> {
 
       res.status(200).json(sanitizedTrip);
     } catch (err) {
-      console.error("Error fetching trip with comments:", err);
+      console.error("Error fetching trip with slug:", err);
       res.status(500).json({ message: err.message });
     }
   }
@@ -290,15 +294,29 @@ class TripController extends BaseController<ITrips> {
         relations: ["owner", "likes", "comments"],
       });
 
-      if (req.user) {
-        const tripsWithUserData = await this.enrichTripsWithUserData(
-          trips,
-          userId
-        );
-        res.status(200).json(tripsWithUserData);
-      } else {
-        res.status(200).json(trips);
-      }
+      const sanitizedTrips = trips.map((trip) => ({
+        _id: trip._id,
+        slug: trip.slug, // ✅ הוספת ה-slug כאן
+        typeTraveler: trip.typeTraveler,
+        country: trip.country,
+        typeTrip: trip.typeTrip,
+        tripDescription: trip.tripDescription,
+        numOfComments: trip.numOfComments,
+        numOfLikes: trip.numOfLikes,
+        tripPhotos: trip.tripPhotos,
+        owner: {
+          userName: trip.owner.userName,
+          imgUrl: trip.owner.imgUrl,
+        },
+        comments: trip.comments.map((comment) => ({
+          _id: comment._id,
+          owner: comment.owner,
+          comment: comment.comment,
+          date: comment.date,
+        })),
+      }));
+
+      res.status(200).json(sanitizedTrips);
     } catch (err) {
       console.error("Error fetching favorite trips:", err);
       res.status(500).json({ message: err.message });
@@ -363,6 +381,20 @@ class TripController extends BaseController<ITrips> {
         return res.status(404).json({ message: "User not found" });
       }
 
+      let slug = slugify(`${req.body.country}-${req.body.typeTrip}`, {
+        lower: true,
+      });
+
+      let existingTrip = await this.entity.findOne({ where: { slug } });
+      let counter = 1;
+      while (existingTrip) {
+        slug = slugify(`${req.body.country}-${req.body.typeTrip}-${counter}`, {
+          lower: true,
+        });
+        existingTrip = await this.entity.findOne({ where: { slug } });
+        counter++;
+      }
+
       const newTrip: ITrips = {
         owner,
         userName: owner.userName,
@@ -370,6 +402,7 @@ class TripController extends BaseController<ITrips> {
         typeTraveler: req.body.typeTraveler,
         country: req.body.country,
         typeTrip: req.body.typeTrip,
+        slug, // ✅ הוספת slug
         tripDescription: req.body.tripDescription,
         tripPhotos: req.body.tripPhotos || [],
         numOfComments: 0,
@@ -382,6 +415,7 @@ class TripController extends BaseController<ITrips> {
 
       res.status(201).json({
         _id: createdTrip._id,
+        slug: createdTrip.slug, // ✅ החזרת slug
         typeTraveler: createdTrip.typeTraveler,
         country: createdTrip.country,
         typeTrip: createdTrip.typeTrip,
@@ -458,11 +492,11 @@ class TripController extends BaseController<ITrips> {
 
   async updateTrip(req: AuthRequest, res: Response) {
     try {
-      const trip = await this.entity
-        .createQueryBuilder("trip")
-        .leftJoinAndSelect("trip.owner", "owner")
-        .where("trip._id = :id", { id: req.params.id })
-        .getOne();
+      const tripId = req.params.id; // קבלת ה-id מה-URL
+      const trip = await this.entity.findOne({
+        where: { _id: tripId },
+        relations: ["owner"],
+      });
 
       if (!trip) {
         return res.status(404).json({ message: "Trip not found" });
@@ -474,6 +508,11 @@ class TripController extends BaseController<ITrips> {
           .json({ message: "You are not authorized to update this trip" });
       }
 
+      // שמירה על הנתונים הישנים להשוואה
+      const oldCountry = trip.country;
+      const oldTypeTrip = trip.typeTrip;
+
+      // עדכון הנתונים המותרים בלבד
       const allowedUpdates: Partial<ITrips> = {
         typeTraveler: req.body.typeTraveler,
         country: req.body.country,
@@ -484,10 +523,28 @@ class TripController extends BaseController<ITrips> {
 
       Object.assign(trip, allowedUpdates);
 
+      // אם המדינה או סוג הטיול השתנו → עדכון ה-slug
+      if (trip.country !== oldCountry || trip.typeTrip !== oldTypeTrip) {
+        let slug = slugify(`${trip.country}-${trip.typeTrip}`, { lower: true });
+        let existingTrip = await this.entity.findOne({ where: { slug } });
+        let counter = 1;
+
+        while (existingTrip && existingTrip._id !== trip._id) {
+          slug = slugify(`${trip.country}-${trip.typeTrip}-${counter}`, {
+            lower: true,
+          });
+          existingTrip = await this.entity.findOne({ where: { slug } });
+          counter++;
+        }
+
+        trip.slug = slug;
+      }
+
       const updatedTrip = await this.entity.save(trip);
 
       res.status(200).send({
         _id: updatedTrip._id,
+        slug: updatedTrip.slug, // ✅ מחזיר slug מעודכן אם השתנה
         typeTraveler: updatedTrip.typeTraveler,
         country: updatedTrip.country,
         typeTrip: updatedTrip.typeTrip,
@@ -529,7 +586,6 @@ class TripController extends BaseController<ITrips> {
       res.status(500).send("Error occurred while deleting the trip");
     }
   }
-
   async deleteComment(req: AuthRequest, res: Response) {
     try {
       const tripId = req.params.tripId;

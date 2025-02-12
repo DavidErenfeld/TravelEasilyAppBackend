@@ -318,21 +318,21 @@ router.get(
 
 /**
  * @swagger
- * /trips/FullTrip/{id}:
+ * /trips/FullTrip/{slug}:
  *   get:
- *     summary: Get detailed information about a trip
- *     description: Retrieves full details of a specific trip by its ID, including the owner, comments, likes, and additional metadata such as whether the authenticated user liked or favorited the trip.
+ *     summary: Get detailed information about a trip by slug
+ *     description: Retrieves full details of a specific trip by its slug, including the owner, comments, likes, and metadata such as whether the authenticated user liked or favorited the trip.
  *     tags: [Trips]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: slug
  *         required: true
  *         schema:
  *           type: string
- *           example: "123e4567-e89b-12d3-a456-426614174001"
- *         description: The ID of the trip to retrieve
+ *           example: "norway-nature"
+ *         description: The slug of the trip to retrieve
  *     responses:
  *       200:
  *         description: Detailed information about the trip
@@ -420,7 +420,7 @@ router.get(
  *                   example: "Error fetching trip with comments"
  */
 router.get(
-  "/FullTrip/:id",
+  "/FullTrip/:slug",
   optionalAuthMiddleware,
   TripController.getFullTrip.bind(TripController)
 );
