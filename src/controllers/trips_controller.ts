@@ -287,7 +287,7 @@ class TripController extends BaseController<ITrips> {
         };
       });
 
-      res.status(trips.length > 0 ? 200 : 404).json({ data: sanitizedTrips });
+      res.status(200).json({ data: sanitizedTrips });
     } catch (err) {
       console.error("Error fetching trips:", err);
       res.status(500).json({ message: "Internal server error" });
