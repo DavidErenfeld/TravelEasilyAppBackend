@@ -142,7 +142,7 @@ class TripController extends BaseController<ITrips> {
     try {
       const userAgent = req.headers["user-agent"] || "";
       const isBot = isBotRequest(userAgent);
-      const slug = req.params.slug; // שימוש ב-slug במקום id
+      const slug = req.params.slug;
 
       const trip = await this.entity.findOne({
         where: { slug },
@@ -268,6 +268,7 @@ class TripController extends BaseController<ITrips> {
 
         return {
           _id: trip._id,
+          slug: trip.slug,
           typeTraveler: trip.typeTraveler,
           country: trip.country,
           typeTrip: trip.typeTrip,
