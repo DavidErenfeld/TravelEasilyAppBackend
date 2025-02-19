@@ -35,9 +35,16 @@ class TripController extends BaseController<ITrips> {
 
   async getAllTrips(req: AuthRequest, res: Response) {
     try {
-      const trips = await this.entity.find({
+      const page = parseInt(req.query.page as string, 10) || 1;
+      const limit = parseInt(req.query.limit as string, 10) || 10;
+      const skip = (page - 1) * limit;
+
+      const [trips, total] = await this.entity.findAndCount({
         relations: ["owner", "likes", "comments"],
+        skip,
+        take: limit,
       });
+
       const userAgent = req.headers["user-agent"] || "";
       const isBot = isBotRequest(userAgent);
 
@@ -45,6 +52,7 @@ class TripController extends BaseController<ITrips> {
         const html = renderTripsAsHtml(trips);
         return res.send(html);
       }
+
       let favoriteTripsIds: string[] = [];
       const userId = req.user ? req.user._id : null;
 
@@ -68,7 +76,7 @@ class TripController extends BaseController<ITrips> {
 
         return {
           _id: trip._id,
-          slug: trip.slug, // ✅ הוספת slug
+          slug: trip.slug,
           typeTraveler: trip.typeTraveler,
           country: trip.country,
           typeTrip: trip.typeTrip,
@@ -91,7 +99,12 @@ class TripController extends BaseController<ITrips> {
         };
       });
 
-      res.status(200).json(sanitizedTrips);
+      res.status(200).json({
+        data: sanitizedTrips,
+        total,
+        page,
+        limit,
+      });
     } catch (err) {
       console.error("Failed to retrieve data:", err);
       res.status(500).send({ message: "Error retrieving data", error: err });
