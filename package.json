@@ -4,6 +4,7 @@
   "description": "backend",
   "main": "dist/src/server.js",
   "scripts": {
+    "dev": "npm run devv",
     "devv": "nodemon --exec ts-node ./src/server.ts",
     "build": "tsc",
     "heroku-postbuild": "npm run build",
