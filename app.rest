@@ -44,7 +44,7 @@ Content-Type: application/json
 ###
 POST http://127.0.0.1:90/trips
 Content-Type: application/json
-Authorization: jwt eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiJlNjk0NDlmOS05NzAyLTQ1N2MtOTg3YS1kODAxYzE4YTE3N2EiLCJpYXQiOjE3MjU0Njk0OTgsImV4cCI6MTcyNTQ2OTc5OH0.ypJycAVr3QVfRmA6ExOec6nQFcCiVGcIdgbJY8dHUAM
+Authorization: jwt eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiJhZGY3NTI3MC0yNDBhLTQxMGMtODNjNS05MTQ1ODIyYjU2OGEiLCJpYXQiOjE3NDAwMDk0NTUsImV4cCI6MTc0MDAxMzA1NX0.ZMcDRhW7XUSUuJLxwQGBYMfVZJfwd0iUfHyQhdIiCiI
 
 {
  "userName": "test4",

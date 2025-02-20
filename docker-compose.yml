@@ -1,0 +1,55 @@
+version: "3.8"
+
+name: travel_easily_backend
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: my_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER_NAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_DATABASE}
+    ports:
+      - "${DB_PORT}:${DB_PORT}"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    container_name: my_redis
+    restart: always
+    ports:
+      - "6379:6379"
+
+  backend:
+    build: .
+    container_name: my_backend
+    restart: always
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      DB_USER_NAME: ${DB_USER_NAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_DATABASE: ${DB_DATABASE}
+      DB_PORT: ${DB_PORT}
+      DB_host: postgres
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      NODE_ENV: ${NODE_ENV}
+      JWT_EXPIRATION: ${JWT_EXPIRATION}
+      SSL_KEY_PATH: ${SSL_KEY_PATH}
+      SSL_CERT_PATH: ${SSL_CERT_PATH}
+      SSL_CERT_PATH_POSTGRES: ${SSL_CERT_PATH_POSTGRES}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+    ports:
+      - "${HTTPS_PORT}:${HTTPS_PORT}"
+    volumes:
+      - .:/app
+    command: npm run dev
+
+volumes:
+  postgres_data:

@@ -243,6 +243,8 @@ const logout = async (req: Request, res: Response) => {
 const refresh = async (req: Request, res: Response) => {
   const authHeader = req.headers["authorization"];
   const refreshToken = authHeader && authHeader.split(" ")[1];
+  const jwtExpiration =
+    Number(process.env.JWT_EXPIRATION?.replace("h", "")) * 60 * 60;
 
   if (!refreshToken) {
     console.log("Missing refresh token");
@@ -279,8 +281,8 @@ const refresh = async (req: Request, res: Response) => {
 
           const accessToken = jwt.sign(
             { _id: userDb._id },
-            process.env.JWT_SECRET,
-            { expiresIn: process.env.JWT_EXPIRATION || "1h" }
+            process.env.JWT_SECRET as string,
+            { expiresIn: jwtExpiration }
           );
 
           const newRefreshToken = jwt.sign(
