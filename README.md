@@ -1,20 +1,20 @@
-# Travel Easily - Share Your Journey
+# **Travel Easily - Backend**
 
 ---
 
-## **Purpose of the Application**
+## **Application Purpose**
 
-Travel Easily is designed to provide a community platform where travelers can share and discover travel itineraries in a simple, intuitive, and ad-free environment. The application allows users to upload detailed routes, share experiences, and help others plan their next trip based on recommendations and ratings.
+**Travel Easily** is a community platform for sharing travel itineraries, providing users with an intuitive and ad-free interface where they can share, discover, and recommend travel routes.
 
 ---
 
 ## **About the Project**
 
-Travel Easily is a web-based community travel-sharing application built as a final project during a computer science degree with two teammates:
+The application was built as a final project during a computer science degree with two teammates:
 
-- The backend was developed by two members of the team (including me).
-- The frontend was developed entirely by me.
-- The overall management and organization were handled by the third team member.
+- The backend was developed by two team members (including me).
+- The frontend was entirely developed by me.
+- The overall management and organization of the project were handled by the third team member.
 
 ---
 
@@ -22,30 +22,34 @@ Travel Easily is a web-based community travel-sharing application built as a fin
 
 ### **Users**
 
-- Register and log in using Google OAuth or email and password.
+- Register and log in using **Google OAuth** or email and password.
 - Upload and update profile pictures.
 - Reset passwords via email with a recovery link.
 - Delete accounts, including all associated data.
 
-### **Posts**
+### **Post Management**
 
-- Create posts with the ability to upload images.
+- Create posts with image upload support.
 - Preview images before uploading.
-- Edit posts: Add days, upload additional images, or delete existing ones.
-- Delete posts easily.
+- Edit posts (add days, upload additional images, or delete existing ones).
+- Easily delete posts.
 
 ### **Post Interaction**
 
 - Add comments to other users' posts.
-- Mark posts as favorites and view a list of favorites.
+- Mark posts as favorites.
 - Like and unlike posts.
 
-### **Sharing**
+### **Location Sharing and Attractions**
 
-- Share posts on social networks and via email (frontend feature only).
-- Share location and get attractions nearby using the Google Places API, with Redis used to reduce unnecessary API calls.
+- Search for nearby attractions using **Google Places API**.
+- Utilize **Redis** to minimize API calls and improve performance.
 
-### **Smart Filtering**
+### **Real-Time Updates**
+
+- Actions such as likes, comments, or post creation update in real-time using **Socket.IO**.
+
+### **Post Filtering**
 
 - Filter posts by:
   - Country name.
@@ -53,62 +57,98 @@ Travel Easily is a web-based community travel-sharing application built as a fin
   - Trip type.
   - Number of days.
 
-### **Real-Time Updates**
+---
 
-- Actions like likes, comments, or post creation update in real-time using Socket.IO.
+## **Technologies Used**
+
+- **Node.js & Express** – API development.
+- **TypeScript** – For improved code safety and clear management.
+- **Swagger** – API documentation.
+- **Socket.IO** – Real-time updates.
+- **JWT** – User authentication and security.
+- **Redis** – Data caching and performance optimization.
+- **Cloudinary** – Image storage.
+- **PostgreSQL** – Database for managing relationships between entities.
+- **Heroku** – Server deployment.
+- **Docker** – Containerizing the application.
+- **Docker Compose** – Managing a multi-container environment (backend, PostgreSQL, Redis).
 
 ---
 
-## **Technologies**
+## **Setup Instructions**
 
-### **Backend**
+### **Run Locally (Without Docker)**
 
-- **Node.js & Express**: API development.
-- **TypeScript**: For type safety and clear code management.
-- **Swagger**: For API documentation.
-- **Socket.IO**: For real-time communication.
-- **JWT**: For user authentication and security.
-- **Redis**: For temporary data storage to optimize performance and reduce Google API calls.
-- **Cloudinary**: For image storage.
-- **PostgreSQL**: Relational database for table synchronization.
-- **Heroku**: For server deployment.
+1. Install dependencies:
 
-### **Frontend**
+   ```sh
+   npm install
+   ```
 
-- **React** with **TypeScript**: Frontend development.
-- **Socket.IO**: Real-time updates on the client side.
-- **CSS**: Custom styling for the application.
-- **Google OAuth**: For user authentication.
-- **Netlify**: For application deployment.
+2. Create a `.env` file with the required environment variables.
+
+3. Start the server:
+   ```sh
+   npm run dev
+   ```
+
+### **Run with Docker**
+
+1. **Build and start the containers:**
+
+   ```sh
+   docker-compose up --build
+   ```
+
+2. **Stop the containers:**
+
+   ```sh
+   docker-compose down -v
+   ```
+
+3. **Rebuild and restart if needed:**
+   ```sh
+   docker-compose up --force-recreate --build
+   ```
 
 ---
 
 ## **Testing**
 
-- Unit tests were written using **Jest** to ensure stability and maintain code quality on the server side.
+- Run unit tests with Jest:
+
+  ```sh
+  npm run test
+  ```
+
+- Test user authentication:
+
+  ```sh
+  npm run testAuth
+  ```
+
+- Test trip routes:
+  ```sh
+  npm run testTrip
+  ```
 
 ---
 
 ## **Key Challenges**
 
-1. **Efficient Use of Google Places API**: Careful planning to manage API calls and maintain efficiency with Redis.
-2. **Database Selection**: PostgreSQL was chosen to support complex relationships between tables, such as relationships between users, likes, and comments.
-3. **Real-Time Updates**: Advanced logic was developed to handle smooth and fast updates using Socket.IO.
-4. **User Deletion**:
-   - Securely delete all user-related data, including:
-     - Likes and comments the user made on other posts.
-     - All posts and personal images.
-     - Images stored on Cloudinary.
+1. **Efficient Google Places API Usage** – Implementing Redis caching to minimize API calls and improve performance.
+2. **Real-Time Updates** – Developing advanced logic to handle fast and seamless updates with Socket.IO.
+3. **Secure User Deletion** – Ensuring complete removal of user-related data, including likes, comments, posts, and images.
+4. **Docker Integration** – Fully containerizing the server, database, and caching system with Docker and Docker Compose.
 
 ---
 
-## **Feedback and Future Improvements**
+## **Future Development Plans**
 
-- **Initial Feedback**: Users emphasized the importance of a simple interface and real-time updates.
-- **Future Development**:
-  - Adding an admin panel for managing users and content.
-  - Advanced filters for posts (e.g., by rating, country, trip duration).
-  - Attraction and trip ratings.
-  - Private group sharing for travel details.
+- Adding an **Admin Panel** for managing users and content.
+- Enhancing logging and monitoring within the Docker environment.
+- Expanding Redis functionality for further performance optimizations.
 
 ---
+
+🔥 **The project is continuously evolving!**
