@@ -8,28 +8,9 @@ import {
   BeforeUpdate,
 } from "typeorm";
 import slugify from "slugify";
-import { Comment, IComment } from "./comment_model";
-import { ILike, Like } from "./like_model";
+import { Comment } from "./comment_model";
+import { Like } from "./like_model";
 import { User } from "./users_model";
-
-export interface ITrips {
-  _id?: string;
-  owner?: User;
-  userName?: string;
-  imgUrl?: string;
-  typeTraveler: string;
-  country: string;
-  typeTrip: string;
-  tripDescription: string[];
-  numOfComments: number;
-  numOfLikes: number;
-  tripPhotos?: string[];
-  comments?: IComment[];
-  likes?: ILike[];
-  isLikedByCurrentUser?: boolean;
-  isFavoritedByCurrentUser?: boolean;
-  slug?: string; // ✅ הוספת שדה `slug`
-}
 
 @Entity()
 export class Trip {

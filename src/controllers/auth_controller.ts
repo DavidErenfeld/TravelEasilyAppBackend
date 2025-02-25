@@ -1,9 +1,10 @@
 import { Request, Response } from "express";
-import { IUser, User } from "../entity/users_model";
+import { User } from "../entity/users_model";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { OAuth2Client } from "google-auth-library";
 import connectDB from "../data-source";
+import { IUser } from "../types/userTypes";
 
 const client = new OAuth2Client();
 const UserRepository = connectDB.getRepository(User);

@@ -1,16 +1,17 @@
 import { Request, Response } from "express";
 import { EntityTarget } from "typeorm";
 import { ParsedQs } from "qs";
+import slugify from "slugify";
 import { BaseController } from "./base_controller";
 import { AuthRequest } from "../common/auth_middleware";
-import { ITrips, Trip } from "../entity/trips_model";
+import { Trip } from "../entity/trips_model";
 import { User } from "../entity/users_model";
 import { io } from "../services/socket";
 import { In } from "typeorm";
-import slugify from "slugify";
 import { renderSingleTripAsHtml, renderTripsAsHtml } from "../utils/renderHtml";
 import { isBotRequest } from "../utils/botDetection";
 import connectDB from "../data-source";
+import { ITrips } from "../types/tripsTypes";
 
 class TripController extends BaseController<ITrips> {
   constructor(entity: EntityTarget<ITrips>) {
@@ -146,7 +147,7 @@ class TripController extends BaseController<ITrips> {
 
       const trip = await this.entity.findOne({
         where: { slug },
-        relations: ["comments", "likes", "owner"],
+        relations: ["comments", "comments.user", "likes", "owner"],
       });
 
       if (!trip) {
@@ -197,6 +198,8 @@ class TripController extends BaseController<ITrips> {
         comments: trip.comments.map((comment) => ({
           _id: comment._id,
           owner: comment.owner,
+          ownerId: comment.ownerId,
+          imgUrl: comment.user ? comment.user.imgUrl : "",
           comment: comment.comment,
           date: comment.date,
         })),
@@ -310,7 +313,7 @@ class TripController extends BaseController<ITrips> {
 
       const sanitizedTrips = trips.map((trip) => ({
         _id: trip._id,
-        slug: trip.slug, // ✅ הוספת ה-slug כאן
+        slug: trip.slug,
         typeTraveler: trip.typeTraveler,
         country: trip.country,
         typeTrip: trip.typeTrip,
@@ -429,7 +432,7 @@ class TripController extends BaseController<ITrips> {
 
       res.status(201).json({
         _id: createdTrip._id,
-        slug: createdTrip.slug, // ✅ החזרת slug
+        slug: createdTrip.slug,
         typeTraveler: createdTrip.typeTraveler,
         country: createdTrip.country,
         typeTrip: createdTrip.typeTrip,
@@ -506,7 +509,7 @@ class TripController extends BaseController<ITrips> {
 
   async updateTrip(req: AuthRequest, res: Response) {
     try {
-      const tripId = req.params.id; // קבלת ה-id מה-URL
+      const tripId = req.params.id;
       const trip = await this.entity.findOne({
         where: { _id: tripId },
         relations: ["owner"],
@@ -522,11 +525,9 @@ class TripController extends BaseController<ITrips> {
           .json({ message: "You are not authorized to update this trip" });
       }
 
-      // שמירה על הנתונים הישנים להשוואה
       const oldCountry = trip.country;
       const oldTypeTrip = trip.typeTrip;
 
-      // עדכון הנתונים המותרים בלבד
       const allowedUpdates: Partial<ITrips> = {
         typeTraveler: req.body.typeTraveler,
         country: req.body.country,
@@ -537,7 +538,6 @@ class TripController extends BaseController<ITrips> {
 
       Object.assign(trip, allowedUpdates);
 
-      // אם המדינה או סוג הטיול השתנו → עדכון ה-slug
       if (trip.country !== oldCountry || trip.typeTrip !== oldTypeTrip) {
         let slug = slugify(`${trip.country}-${trip.typeTrip}`, { lower: true });
         let existingTrip = await this.entity.findOne({ where: { slug } });
@@ -558,7 +558,7 @@ class TripController extends BaseController<ITrips> {
 
       res.status(200).send({
         _id: updatedTrip._id,
-        slug: updatedTrip.slug, // ✅ מחזיר slug מעודכן אם השתנה
+        slug: updatedTrip.slug,
         typeTraveler: updatedTrip.typeTraveler,
         country: updatedTrip.country,
         typeTrip: updatedTrip.typeTrip,

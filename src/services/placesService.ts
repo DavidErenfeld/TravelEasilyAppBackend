@@ -1,19 +1,6 @@
 import axios from "axios";
 import redisClient from "./redisClient";
-
-interface Place {
-  id: string;
-  name: string;
-  address: string;
-  lat: number;
-  lon: number;
-  phone?: string;
-  website?: string;
-  rating?: number;
-  user_ratings_total?: number;
-  types?: string[];
-  business_status?: string;
-}
+import { Place } from "../types/placesTypes";
 
 const CACHE_EXPIRATION = 3600;
 
@@ -40,17 +27,12 @@ export async function fetchPlaces(
           location,
           radius,
           type,
-          key: process.env.GOOGLE_MAPS_API_KEY, // Make sure the environment variable is set
+          key: process.env.GOOGLE_MAPS_API_KEY,
         },
       }
     );
-
-    // console.log("Google API response received:", response.data);
-
     const places = await Promise.all(
       response.data.results.slice(0, 10).map(async (place: any) => {
-        // console.log(`Fetching details for place_id: ${place.place_id}`);
-
         const detailsResponse = await axios.get(
           `https://maps.googleapis.com/maps/api/place/details/json`,
           {

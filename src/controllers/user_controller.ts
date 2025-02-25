@@ -3,7 +3,6 @@ import { EntityTarget } from "typeorm";
 import { AuthRequest } from "../common/auth_middleware";
 import { User } from "../entity/users_model";
 import { BaseController } from "./base_controller";
-import { IUser } from "../entity/users_model";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import connectDB from "../data-source";
@@ -13,9 +12,9 @@ import { io } from "../services/socket";
 import { Like } from "../entity/like_model";
 import { Comment } from "../entity/comment_model";
 import { Trip } from "../entity/trips_model";
+import { IUser } from "../types/userTypes";
 dotenv.config();
 
-// Nodemailer configuration with Gmail account
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -188,7 +187,6 @@ class UserController extends BaseController<IUser> {
       const commentRepository = queryRunner.manager.getRepository(Comment);
       const tripRepository = queryRunner.manager.getRepository(Trip);
 
-      // Find the user to delete
       const user = await userRepository.findOne({
         where: { _id: req.params.id },
       });
@@ -196,14 +194,12 @@ class UserController extends BaseController<IUser> {
         return res.status(404).json({ message: "User not found" });
       }
 
-      // Fetch all comments by the user and their IDs, including the trip relation
       const commentsToDelete = await commentRepository.find({
         where: { ownerId: req.params.id },
-        relations: ["trip"], // Ensure trip relation is loaded
+        relations: ["trip"],
       });
       const deletedCommentIds = commentsToDelete.map((comment) => comment._id);
 
-      // Calculate number of comments to subtract per trip
       const tripCommentCounts: Record<string, number> = {};
       commentsToDelete.forEach((comment) => {
         const tripId = comment.trip?._id;
@@ -212,7 +208,6 @@ class UserController extends BaseController<IUser> {
         }
       });
 
-      // Update numOfComments for affected trips
       for (const [tripId, count] of Object.entries(tripCommentCounts)) {
         await tripRepository
           .createQueryBuilder()
@@ -224,17 +219,14 @@ class UserController extends BaseController<IUser> {
           .execute();
       }
 
-      // Delete the user's comments
       await commentRepository.delete({ ownerId: req.params.id });
 
-      // Fetch all likes by the user and their IDs, including the trip relation
       const likesToDelete = await likeRepository.find({
         where: { owner: req.params.id },
-        relations: ["trip"], // Ensure trip relation is loaded
+        relations: ["trip"],
       });
       const deletedLikeIds = likesToDelete.map((like) => like._id);
 
-      // Calculate number of likes to subtract per trip
       const tripLikeCounts: Record<string, number> = {};
       likesToDelete.forEach((like) => {
         const tripId = like.trip?._id;
@@ -243,7 +235,6 @@ class UserController extends BaseController<IUser> {
         }
       });
 
-      // Update numOfLikes for affected trips
       for (const [tripId, count] of Object.entries(tripLikeCounts)) {
         await tripRepository
           .createQueryBuilder()
@@ -255,27 +246,21 @@ class UserController extends BaseController<IUser> {
           .execute();
       }
 
-      // Delete the user's likes
       await likeRepository.delete({ owner: req.params.id });
 
-      // Fetch all trips owned by the user and their IDs
       const tripsToDelete = await tripRepository.find({
         where: { owner: user },
       });
       const deletedTripIds = tripsToDelete.map((trip) => trip._id);
 
-      // Delete trips owned by the user
       if (tripsToDelete.length > 0) {
         await tripRepository.delete({ owner: user });
       }
 
-      // Delete the user
       await userRepository.delete(req.params.id);
-      
-      // Commit the transaction
+
       await queryRunner.commitTransaction();
 
-      // Emit event to notify all clients about the deletion
       io.emit("userDeleted", {
         userId: req.params.id,
         deletedTripIds,
@@ -283,19 +268,16 @@ class UserController extends BaseController<IUser> {
         deletedLikeIds,
       });
 
-      // Disconnect the user
       io.to(req.params.id).emit("disconnectUser");
 
       res.status(200).json({ message: "User deleted successfully" });
     } catch (error) {
       console.error("Error deleting user and related data:", error);
 
-      // Rollback the transaction in case of error
       await queryRunner.rollbackTransaction();
 
       res.status(500).json({ message: "Internal server error", error });
     } finally {
-      // Release the query runner
       await queryRunner.release();
     }
   }

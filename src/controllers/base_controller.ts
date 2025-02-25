@@ -9,10 +9,6 @@ export class BaseController<Entity extends { _id?: string }> {
     this.entity = connectDB.getRepository(entity);
   }
 
-  /**
-   * This method should not be used directly. It is designed to be extended
-   * in specific controllers with proper data filtering for security.
-   */
   protected async post(req: Request, res: Response) {
     try {
       const response = await this.entity.save(req.body);

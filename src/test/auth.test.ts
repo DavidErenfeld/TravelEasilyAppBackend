@@ -1,8 +1,9 @@
 import request from "supertest";
 import initApp from "../app";
 import { Express } from "express";
-import { IUser, User } from "../entity/users_model";
+import { User } from "../entity/users_model";
 import connectDB from "../data-source";
+import { IUser } from "../types/userTypes";
 
 let app: Express;
 const user: IUser = {

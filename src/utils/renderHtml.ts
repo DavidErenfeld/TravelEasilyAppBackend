@@ -1,4 +1,4 @@
-import { ITrips } from "../entity/trips_model";
+import { ITrips } from "../types/tripsTypes";
 
 export const renderTripsAsHtml = (trips: ITrips[]): string => {
   const listItems = trips
