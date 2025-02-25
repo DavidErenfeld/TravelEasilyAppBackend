@@ -38,8 +38,6 @@ export default function initializeSocket(server: http.Server) {
   io.on("connection", (socket: Socket) => {
     console.log(`Client connected: ${socket.id}`);
 
-    // Timeout mechanism to disconnect inactive sockets
-
     let timeout: NodeJS.Timeout;
 
     const resetTimeout = () => {
@@ -53,7 +51,6 @@ export default function initializeSocket(server: http.Server) {
     resetTimeout();
     socket.onAny(() => resetTimeout());
 
-    // Event listeners remain unchanged
     socket.on("newTrip", (newTripData) => {
       handleEventWithErrorLogging(() => {
         io.emit("tripPosted", newTripData);
@@ -120,16 +117,13 @@ export default function initializeSocket(server: http.Server) {
       }
     });
 
-    // Handle disconnection with cleanup
-    // טיפול באירוע disconnect
     socket.on("disconnect", () => {
-      clearTimeout(timeout); // נקה את ה-Timeout כדי למנוע זליגת זיכרון
+      clearTimeout(timeout);
       console.log(`Client disconnected: ${socket.id}`);
     });
   });
 }
 
-// Utility function for error handling in events
 function handleEventWithErrorLogging(eventFn: Function, errorMsg: string) {
   try {
     eventFn();

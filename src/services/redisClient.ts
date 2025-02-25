@@ -19,9 +19,8 @@ async function initializeRedis() {
   }
 }
 
-// אתחול Redis רק פעם אחת במבנה זה
 initializeRedis().catch((error) => {
   console.error("Failed to initialize Redis:", error);
 });
 
-export default redisClient; // ייצוא הלקוח לשימוש מחוץ לפונקציה
+export default redisClient;

@@ -6,9 +6,9 @@ export interface IComment {
   _id?: string;
   ownerId: string;
   owner: string;
-  // imgUrl?: string;
   comment: string;
   date: Date;
+  user?: User;
 }
 
 @Entity()
