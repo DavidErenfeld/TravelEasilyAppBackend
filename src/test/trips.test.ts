@@ -1,10 +1,11 @@
 import request from "supertest";
 import { Express } from "express";
 import initApp from "../app";
-import { IUser, User } from "../entity/users_model";
+import { User } from "../entity/users_model";
 import connectDB from "../data-source";
-import { ITrips } from "../entity/trips_model";
 import { v4 as uuidv4 } from "uuid";
+import { IUser } from "../types/userTypes";
+import { ITrips } from "../types/tripsTypes";
 
 const user: IUser = {
   email: "test@trip.com",
@@ -25,7 +26,7 @@ beforeAll(async () => {
   // .where("email = :email", { email: user.email }) // Replace 123 with the actual user ID
   const response1 = await request(app).post("/auth/register").send(user);
   userId = response1.body._id;
-  userName = response1.body.userName; // שמירת ה-_id של המשתמש לשימוש בבדיקות
+  userName = response1.body.userName;
   const response2 = await request(app).post("/auth/login").send(user);
   accessToken = response2.body.accessToken;
 });
@@ -35,7 +36,6 @@ afterAll(async () => {
 describe("--Trips Tests--", () => {
   const trip1: ITrips = {
     userName: "aa",
-    // owner: "David",
     typeTraveler: "type Traveler",
     country: "Country",
     typeTrip: "type Trip",
@@ -45,7 +45,6 @@ describe("--Trips Tests--", () => {
   };
 
   const trip2: ITrips = {
-    // owner: "moshe",
     userName: "aa",
     typeTraveler: "type Traveler 2",
     country: "Country 2",

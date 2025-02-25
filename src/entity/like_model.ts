@@ -2,10 +2,6 @@ import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm";
 import { Trip } from "./trips_model";
 import { User } from "./users_model";
 
-export interface ILike {
-  owner: string;
-  userName?: string;
-}
 @Entity()
 export class Like {
   @PrimaryGeneratedColumn("uuid")

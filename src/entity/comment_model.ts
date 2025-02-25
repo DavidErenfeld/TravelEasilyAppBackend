@@ -2,15 +2,6 @@ import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm";
 import { Trip } from "./trips_model";
 import { User } from "./users_model";
 
-export interface IComment {
-  _id?: string;
-  ownerId: string;
-  owner: string;
-  comment: string;
-  date: Date;
-  user?: User;
-}
-
 @Entity()
 export class Comment {
   @PrimaryGeneratedColumn("uuid")

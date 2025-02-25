@@ -1,8 +1,9 @@
 import request from "supertest";
 import { Express } from "express";
 import initApp from "../app";
-import { IUser, User } from "../entity/users_model";
+import { User } from "../entity/users_model";
 import connectDB from "../data-source";
+import { IUser } from "../types/userTypes";
 
 const user: IUser = {
   email: "test@trip.com",

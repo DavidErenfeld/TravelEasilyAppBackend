@@ -1,16 +1,17 @@
 import { Request, Response } from "express";
 import { EntityTarget } from "typeorm";
 import { ParsedQs } from "qs";
+import slugify from "slugify";
 import { BaseController } from "./base_controller";
 import { AuthRequest } from "../common/auth_middleware";
-import { ITrips, Trip } from "../entity/trips_model";
+import { Trip } from "../entity/trips_model";
 import { User } from "../entity/users_model";
 import { io } from "../services/socket";
 import { In } from "typeorm";
-import slugify from "slugify";
 import { renderSingleTripAsHtml, renderTripsAsHtml } from "../utils/renderHtml";
 import { isBotRequest } from "../utils/botDetection";
 import connectDB from "../data-source";
+import { ITrips } from "../types/tripsTypes";
 
 class TripController extends BaseController<ITrips> {
   constructor(entity: EntityTarget<ITrips>) {
@@ -196,8 +197,8 @@ class TripController extends BaseController<ITrips> {
         owner: ownerData,
         comments: trip.comments.map((comment) => ({
           _id: comment._id,
-          owner: comment.owner, // או שאתה יכול ממש לקחת מ- comment.user.userName
-          ownerId: comment.ownerId, // אם תרצה, לצורך המחיקה
+          owner: comment.owner,
+          ownerId: comment.ownerId,
           imgUrl: comment.user ? comment.user.imgUrl : "",
           comment: comment.comment,
           date: comment.date,
