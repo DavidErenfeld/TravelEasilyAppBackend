@@ -553,7 +553,7 @@ router.get(
 router.get(
   "/search/parameters",
   optionalAuthMiddleware,
-  TripController.getByParamId.bind(TripController)
+  TripController.getTripsByParams.bind(TripController)
 );
 
 /**

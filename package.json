@@ -31,6 +31,7 @@
     "axios": "^1.7.7",
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.2",
+    "class-transformer": "^0.5.1",
     "cloudinary": "^1.41.3",
     "cors": "^2.8.5",
     "cross-env": "^7.0.3",

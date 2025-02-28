@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm";
 import { Trip } from "./trips_model";
 import { User } from "./users_model";
+import { Exclude } from "class-transformer";
 
 @Entity()
 export class Like {
@@ -11,6 +12,7 @@ export class Like {
   owner: string;
 
   @ManyToOne(() => Trip, (trip) => trip.likes, { onDelete: "CASCADE" })
+  @Exclude()
   trip: Trip;
 
   @ManyToOne(() => User, (user) => user.likes, { onDelete: "CASCADE" })
